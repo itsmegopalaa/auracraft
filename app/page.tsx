@@ -1,6 +1,5 @@
-import Image from "next/image";
 import Navbar from "./components/Navbar";
-
+import Hero from "./components/Hero";
 export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6">
@@ -8,8 +7,7 @@ export default function Home() {
       <Navbar />
 
       {/* Hero */}
-      <section className="min-h-[80vh] flex flex-col items-center justify-center text-center">
-        <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
+<Hero />        <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
           Create Your
           <span className="text-yellow-400"> AuraCraft 🚀📓</span>
         </h1>

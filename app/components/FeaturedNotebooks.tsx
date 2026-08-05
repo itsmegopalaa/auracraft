@@ -1,5 +1,4 @@
 import ProductCard from "./ProductCard";
-import Image from "next/image";
 
 const notebooks = [
   {

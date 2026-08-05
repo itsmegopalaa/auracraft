@@ -1,3 +1,4 @@
+import Link from "next/link";
 import FeaturedNotebooks from "./components/FeaturedNotebooks";
 import NewArrivals from "./components/NewArrivals";
 import Image from "next/image";
@@ -40,9 +41,12 @@ export default function Home() {
             Every page is designed to inspire your next big idea.
           </p>
 
-          <button className="mt-10 rounded-full bg-yellow-400 px-8 py-4 font-semibold text-black transition hover:scale-105">
-            Explore Collection →
-          </button>
+          <Link
+  href="/products"
+  className="mt-10 inline-block rounded-full bg-yellow-400 px-8 py-4 font-semibold text-black transition hover:scale-105"
+>
+  Explore Collection →
+</Link>
         </div>
 
         <div className="flex justify-center">

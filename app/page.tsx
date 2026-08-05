@@ -7,24 +7,32 @@ import Categories from "./components/Categories";
 import Audience from "./components/Audience";
 import WhyAuraCraft from "./components/WhyAuraCraft";
 import Footer from "./components/Footer";
+
 export default function Home() {
-  return (    <main className="min-h-screen bg-black text-white px-6">
+  return (
+    <main className="min-h-screen bg-black text-white px-6">
 
       {/* Navbar */}
       <Navbar />
 
       {/* Hero */}
       <Hero />
-<Categories />
+
+      {/* Categories */}
+      <Categories />
+
       {/* Audience */}
       <Audience />
 
       {/* Notebook Preview */}
       <section className="py-24 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+
         <div>
           <h2 className="text-5xl font-bold">
             Your Notebook.
-            <span className="text-yellow-400"> Your Identity.</span>
+            <span className="text-yellow-400">
+              Your Identity.
+            </span>
           </h2>
 
           <p className="mt-6 text-gray-400 text-lg">
@@ -37,6 +45,7 @@ export default function Home() {
           </button>
         </div>
 
+
         <div className="flex justify-center">
           <Image
             src="/images/notebook.png"
@@ -46,10 +55,25 @@ export default function Home() {
             className="rounded-3xl shadow-2xl hover:scale-105 transition duration-500"
           />
         </div>
+
       </section>
-<FeaturedNotebooks />
-<WhyAuraCraft />
-<Footer />
+
+
+      {/* Featured Products */}
+      <FeaturedNotebooks />
+
+
+      {/* New Arrivals */}
+      <NewArrivals />
+
+
+      {/* Why AuraCraft */}
+      <WhyAuraCraft />
+
+
+      {/* Footer */}
+      <Footer />
+
     </main>
   );
 }

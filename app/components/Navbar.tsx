@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 <div className="hidden md:flex items-center gap-8 text-gray-300">
 
   <Link

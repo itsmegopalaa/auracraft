@@ -12,15 +12,17 @@ export default function FeaturedNotebooks() {
       </p>
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-    {notebooks.map((book) => (
+{notebooks.map((book) => (
   <ProductCard
-    key={book.name}
+    key={book.id}
     name={book.name}
     image={book.image}
     price={book.price}
+    category={book.category}
+    rating={book.rating}
+    bestseller={book.bestseller}
   />
-))}
-      </div>
+))}      </div>
     </section>
   );
 }

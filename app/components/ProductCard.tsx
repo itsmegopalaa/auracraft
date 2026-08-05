@@ -4,33 +4,62 @@ type ProductCardProps = {
   name: string;
   image: string;
   price: string;
+  category: string;
+  rating: number;
+  bestseller: boolean;
 };
 
 export default function ProductCard({
   name,
   image,
   price,
+  category,
+  rating,
+  bestseller,
 }: ProductCardProps) {
   return (
-    <div className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-yellow-400 hover:-translate-y-2 transition-all duration-300">
+    <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 transition-all duration-300 hover:-translate-y-2 hover:border-yellow-400">
+
+      {bestseller && (
+        <span className="absolute left-4 top-4 z-10 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-black">
+          🔥 BEST SELLER
+        </span>
+      )}
+
+      <button className="absolute right-4 top-4 z-10 text-2xl">
+        🤍
+      </button>
+
       <Image
         src={image}
         alt={name}
         width={500}
         height={700}
-        className="w-full h-[360px] object-cover"
+        className="h-[360px] w-full object-cover transition-transform duration-500 hover:scale-105"
       />
 
       <div className="p-6">
-        <h3 className="text-xl font-bold">{name}</h3>
 
-        <p className="text-yellow-400 mt-2 text-lg font-semibold">
+        <div className="mb-3 inline-block rounded-full bg-zinc-800 px-3 py-1 text-sm text-yellow-400">
+          {category}
+        </div>
+
+        <h3 className="text-xl font-bold">
+          {name}
+        </h3>
+
+        <p className="mt-2 text-yellow-400">
+          ⭐ {rating}
+        </p>
+
+        <p className="mt-2 text-lg font-semibold text-white">
           {price}
         </p>
 
-        <button className="mt-5 w-full rounded-full bg-yellow-400 py-3 font-semibold text-black hover:scale-105 transition">
-          Customize
+        <button className="mt-5 w-full rounded-full bg-yellow-400 py-3 font-semibold text-black transition hover:scale-105">
+          Customize Now
         </button>
+
       </div>
     </div>
   );

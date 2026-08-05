@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import Audience from "./components/Audience";
 export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6">
@@ -29,7 +31,7 @@ export default function Home() {
       </section>
 
       {/* Product Showcase */}
-      <section className="py-20 max-w-6xl mx-auto">
+      <Audience />
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-yellow-400 transition">
             <h3 className="text-2xl font-bold text-yellow-400">Students</h3>

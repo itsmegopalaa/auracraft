@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Audience from "./components/Audience";
 import WhyAuraCraft from "./components/WhyAuraCraft";
-
+import Footer from "./components/Footer";
 export default function Home() {
   return (    <main className="min-h-screen bg-black text-white px-6">
 
@@ -47,6 +47,7 @@ export default function Home() {
       </section>
 <FeaturedNotebooks />
 <WhyAuraCraft />
+<Footer />
     </main>
   );
 }

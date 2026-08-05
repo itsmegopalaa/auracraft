@@ -1,6 +1,36 @@
 "use client";
 
-import Link from "next/link";
+<div className="hidden md:flex items-center gap-8 text-gray-300">
+
+  <Link
+    href="/"
+    className="hover:text-yellow-400 transition"
+  >
+    Home
+  </Link>
+
+  <Link
+    href="/products"
+    className="hover:text-yellow-400 transition"
+  >
+    Products
+  </Link>
+
+  <Link
+    href="/about"
+    className="hover:text-yellow-400 transition"
+  >
+    About
+  </Link>
+
+  <Link
+    href="/contact"
+    className="hover:text-yellow-400 transition"
+  >
+    Contact
+  </Link>
+
+</div>
 import { useCart } from "../context/CartContext";
 
 export default function Navbar() {

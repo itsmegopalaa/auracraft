@@ -57,7 +57,7 @@ export default function ProductCard({
         </p>
 
         <button className="mt-5 w-full rounded-full bg-yellow-400 py-3 font-semibold text-black transition hover:scale-105">
-          Customize Now
+         View Details →
         </button>
 
       </div>

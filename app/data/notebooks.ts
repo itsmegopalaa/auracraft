@@ -8,7 +8,7 @@ export const notebooks = [
     rating: 4.9,
    bestseller: true,
 featured: true,
-newArrival: true
+newArrival: true,
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ newArrival: true
     rating: 4.8,
     bestseller: false,
 featured: true,
-newArrival: true
+newArrival: true,
   },
   {
     id: 3,
@@ -30,16 +30,17 @@ newArrival: true
     rating: 5.0,
     bestseller: true,
 featured: true,
-newArrival: false
+newArrival: false,
   },
   {
-    id: 4,
-    name: "🏔️ Mountain",
-    image: "/images/notebooks/mountain.png",
-    price: "₹299",
-    category: "Nature",
-    rating: 4.7,
-    bestseller: false,
-featured: false,
-newArrival: false
+  id: 4,
+  name: "🏔️ Mountain",
+  image: "/images/notebooks/mountain.png",
+  price: "₹299",
+  category: "Nature",
+  rating: 4.7,
+  bestseller: false,
+  featured: false,
+  newArrival: false,
+  },
 ];

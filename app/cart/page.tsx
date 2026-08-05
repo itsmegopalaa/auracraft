@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useCart } from "../context/CartContext";
-
 export default function CartPage() {
 
   const {
@@ -123,16 +123,22 @@ export default function CartPage() {
 
 
 
-            <div className="border border-yellow-400 rounded-3xl p-6 mt-10">
+           <div className="border border-yellow-400 rounded-3xl p-6 mt-10">
 
-              <h2 className="text-3xl font-bold">
-                Total:
-                <span className="text-yellow-400">
-                  ₹{total}
-                </span>
-              </h2>
+  <h2 className="text-3xl font-bold">
+    Total:
+    <span className="text-yellow-400">
+      ₹{total}
+    </span>
+  </h2>
 
-            </div>
+  <Link href="/checkout">
+    <button className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black hover:scale-105 transition">
+      Proceed to Checkout →
+    </button>
+  </Link>
+
+</div>
 
 
           </div>

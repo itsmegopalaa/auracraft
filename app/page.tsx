@@ -1,11 +1,12 @@
+import FeaturedNotebooks from "./components/FeaturedNotebooks";
 import Image from "next/image";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Audience from "./components/Audience";
+import WhyAuraCraft from "./components/WhyAuraCraft";
 
 export default function Home() {
-  return (
-    <main className="min-h-screen bg-black text-white px-6">
+  return (    <main className="min-h-screen bg-black text-white px-6">
 
       {/* Navbar */}
       <Navbar />
@@ -44,7 +45,7 @@ export default function Home() {
           />
         </div>
       </section>
-
+<FeaturedNotebooks />
       {/* Why AuraCraft */}
       <section className="py-24 max-w-6xl mx-auto text-center">
         <h2 className="text-5xl font-bold">

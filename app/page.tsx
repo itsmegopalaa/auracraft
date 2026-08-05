@@ -2,59 +2,19 @@ import Image from "next/image";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Audience from "./components/Audience";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6">
+
       {/* Navbar */}
       <Navbar />
 
       {/* Hero */}
-<Hero />        <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
-          Create Your
-          <span className="text-yellow-400"> AuraCraft 🚀📓</span>
-        </h1>
+      <Hero />
 
-        <p className="mt-8 text-xl md:text-2xl text-gray-300 max-w-2xl">
-          Premium personalized notebooks crafted for students,
-          creators and dreamers.
-        </p>
-
-        <div className="mt-10 flex gap-5">
-          <button className="bg-yellow-400 text-black px-8 py-4 rounded-full font-semibold hover:scale-105 transition">
-            Explore AuraNotes
-          </button>
-
-          <button className="border border-gray-600 px-8 py-4 rounded-full hover:border-yellow-400 transition">
-            Our Story
-          </button>
-        </div>
-      </section>
-
-      {/* Product Showcase */}
+      {/* Audience */}
       <Audience />
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-yellow-400 transition">
-            <h3 className="text-2xl font-bold text-yellow-400">Students</h3>
-            <p className="mt-4 text-gray-400">
-              Personalized notebooks that make learning more creative and inspiring.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-yellow-400 transition">
-            <h3 className="text-2xl font-bold text-yellow-400">Creators</h3>
-            <p className="mt-4 text-gray-400">
-              Premium journals for ideas, visions and your next big creation.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-yellow-400 transition">
-            <h3 className="text-2xl font-bold text-yellow-400">Professionals</h3>
-            <p className="mt-4 text-gray-400">
-              Elegant notebooks designed for meetings, planning and success.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Notebook Preview */}
       <section className="py-24 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
@@ -98,6 +58,7 @@ export default function Home() {
         </p>
 
         <div className="grid md:grid-cols-3 gap-8 mt-16">
+
           <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
             <div className="text-5xl">✨</div>
             <h3 className="mt-5 text-2xl font-bold">Premium Design</h3>
@@ -121,8 +82,10 @@ export default function Home() {
               Every notebook is created to make ordinary moments unforgettable.
             </p>
           </div>
+
         </div>
       </section>
+
     </main>
   );
 }

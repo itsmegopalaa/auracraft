@@ -6,7 +6,9 @@ export const notebooks = [
     price: "₹299",
     category: "Anime",
     rating: 4.9,
-    bestseller: true,
+   bestseller: true,
+featured: true,
+newArrival: true
   },
   {
     id: 2,
@@ -16,6 +18,8 @@ export const notebooks = [
     category: "Fantasy",
     rating: 4.8,
     bestseller: false,
+featured: true,
+newArrival: true
   },
   {
     id: 3,
@@ -25,6 +29,8 @@ export const notebooks = [
     category: "Superhero",
     rating: 5.0,
     bestseller: true,
+featured: true,
+newArrival: false
   },
   {
     id: 4,
@@ -34,5 +40,6 @@ export const notebooks = [
     category: "Nature",
     rating: 4.7,
     bestseller: false,
-  },
+featured: false,
+newArrival: false
 ];

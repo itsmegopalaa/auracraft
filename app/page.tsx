@@ -1,7 +1,9 @@
 import FeaturedNotebooks from "./components/FeaturedNotebooks";
+import NewArrivals from "./components/NewArrivals";
 import Image from "next/image";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import Categories from "./components/Categories";
 import Audience from "./components/Audience";
 import WhyAuraCraft from "./components/WhyAuraCraft";
 import Footer from "./components/Footer";
@@ -13,7 +15,7 @@ export default function Home() {
 
       {/* Hero */}
       <Hero />
-
+<Categories />
       {/* Audience */}
       <Audience />
 

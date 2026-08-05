@@ -12,7 +12,9 @@ export default function FeaturedNotebooks() {
       </p>
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-{notebooks.map((book) => (
+{notebooks
+  .filter((book) => book.featured)
+  .map((book) => (
   <ProductCard
     key={book.id}
     name={book.name}

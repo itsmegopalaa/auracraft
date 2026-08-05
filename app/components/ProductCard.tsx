@@ -1,6 +1,8 @@
+import Link from "next/link";
 import Image from "next/image";
 
 type ProductCardProps = {
+    id: number;
   name: string;
   image: string;
   price: string;
@@ -10,6 +12,7 @@ type ProductCardProps = {
 };
 
 export default function ProductCard({
+    id,
   name,
   image,
   price,
@@ -56,9 +59,12 @@ export default function ProductCard({
           {price}
         </p>
 
-        <button className="mt-5 w-full rounded-full bg-yellow-400 py-3 font-semibold text-black transition hover:scale-105">
-         View Details →
-        </button>
+       <Link
+  href={`/products/${id}`}
+  className="mt-5 block w-full rounded-full bg-yellow-400 py-3 text-center font-semibold text-black transition hover:scale-105"
+>
+  View Details →
+</Link>
 
       </div>
     </div>

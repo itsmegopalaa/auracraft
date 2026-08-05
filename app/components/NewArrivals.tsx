@@ -21,6 +21,7 @@ export default function NewArrivals() {
           .map((book) => (
             <ProductCard
               key={book.id}
+              id={book.id}
               name={book.name}
               image={book.image}
               price={book.price}

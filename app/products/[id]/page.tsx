@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notebooks } from "../../data/notebooks";
-
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 export default async function ProductPage({
   params,
 }: {
@@ -21,6 +22,9 @@ export default async function ProductPage({
   }
 
   return (
+  <>
+    <Navbar />
+
     <main className="min-h-screen bg-black text-white px-6 py-24">
       <section className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
@@ -52,9 +56,14 @@ export default async function ProductPage({
           </p>
 
           <p className="mt-6 text-gray-400 text-lg">
-            Premium AuraNotes design created for your personality,
-            creativity and everyday inspiration.
-          </p>
+  {product.description}
+</p>
+
+<div className="mt-6 space-y-3 text-gray-300">
+  <p>📄 Pages: {product.pages}</p>
+  <p>📃 Paper: {product.paper}</p>
+  <p>📐 Size: {product.size}</p>
+</div>
 
           <button className="mt-8 rounded-full bg-yellow-400 px-10 py-4 font-bold text-black hover:scale-105 transition">
             Add to Cart
@@ -64,5 +73,7 @@ export default async function ProductPage({
 
       </section>
     </main>
-  );
-}
+
+    <Footer />
+  </>
+);

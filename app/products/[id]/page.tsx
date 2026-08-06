@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
 import RelatedProducts from "../../components/products/RelatedProducts";
+import ProductReviews from "../../components/products/ProductReviews";
 
 export default async function ProductPage({
   params,
@@ -183,7 +184,7 @@ export default async function ProductPage({
 
         </section>
 
-
+<ProductReviews />
         <RelatedProducts
           currentId={product.id}
           category={product.category}

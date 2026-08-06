@@ -17,8 +17,46 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AuraCraft",
-  description: "Premium personalized notebooks",
+  title: {
+    default: "AuraCraft | Premium Notebooks & Creative Designs",
+    template: "%s | AuraCraft",
+  },
+
+  description:
+    "AuraCraft creates premium notebooks with unique designs, quality paper, and creative styles made for students, creators, and dreamers.",
+
+  keywords: [
+    "AuraCraft",
+    "premium notebooks",
+    "designer notebooks",
+    "A4 notebooks",
+    "anime notebooks",
+    "creative stationery",
+    "custom notebooks",
+  ],
+
+  authors: [
+    {
+      name: "AuraCraft",
+    },
+  ],
+
+  creator: "AuraCraft",
+
+  openGraph: {
+    title: "AuraCraft | Premium Creative Notebooks",
+    description:
+      "Discover premium notebooks designed for creativity, learning, and imagination.",
+    type: "website",
+    siteName: "AuraCraft",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "AuraCraft | Premium Creative Notebooks",
+    description:
+      "Premium notebooks with unique designs and quality craftsmanship.",
+  },
 };
 
 export default function RootLayout({

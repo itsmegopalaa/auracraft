@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 export default function CartPage() {
@@ -34,12 +34,30 @@ item.quantity
 
         {cart.length === 0 ? (
 
-          <p className="text-gray-400 text-xl">
-            Your cart is empty 🛒
-          </p>
+  <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-12 text-center">
 
-        ) : (
+    <div className="text-6xl mb-6">
+      🛒
+    </div>
 
+    <h2 className="text-3xl font-bold">
+      Your cart is empty
+    </h2>
+
+    <p className="mt-4 text-gray-400">
+      Looks like you haven't added anything yet.
+    </p>
+
+    <Link
+      href="/products"
+      className="inline-block mt-8 rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105"
+    >
+      Explore Products →
+    </Link>
+
+  </div>
+
+) : (
           <div className="space-y-6">
 
 
@@ -47,17 +65,19 @@ item.quantity
 
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-3xl border border-zinc-800 bg-zinc-900 p-6"
+               className="flex items-center justify-between rounded-3xl border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400"
               >
 
 
                 <div className="flex items-center gap-6">
 
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-32 w-24 rounded-xl object-cover"
-                  />
+                  <Image
+  src={item.image}
+  alt={item.name}
+  width={120}
+  height={160}
+  className="h-32 w-24 rounded-xl object-cover"
+/>
 
 
                   <div>
@@ -111,7 +131,7 @@ item.quantity
                   onClick={() =>
                     removeFromCart(item.id)
                   }
-                  className="bg-red-500 px-5 py-3 rounded-full font-semibold"
+                  className="rounded-full border border-red-500 px-5 py-3 font-semibold text-red-400 transition hover:bg-red-500 hover:text-white"
                 >
                   Remove
                 </button>
@@ -123,17 +143,28 @@ item.quantity
 
 
 
-           <div className="border border-yellow-400 rounded-3xl p-6 mt-10">
+           <div className="mt-10 rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
 
   <h2 className="text-3xl font-bold">
-    Total:
+    Order Summary
+  </h2>
+
+  <div className="mt-6 flex justify-between text-gray-400">
+    <span>Subtotal</span>
+    <span>₹{total}</span>
+  </div>
+
+  <div className="my-6 border-t border-zinc-700"></div>
+
+  <div className="flex justify-between text-2xl font-bold">
+    <span>Total</span>
     <span className="text-yellow-400">
       ₹{total}
     </span>
-  </h2>
+  </div>
 
   <Link href="/checkout">
-    <button className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black hover:scale-105 transition">
+    <button className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-105">
       Proceed to Checkout →
     </button>
   </Link>

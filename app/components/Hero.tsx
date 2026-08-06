@@ -5,8 +5,8 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-black">
-<div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-yellow-500/10 blur-3xl" />
+   <section className="relative w-full overflow-hidden bg-black">
+<div className="absolute -right-32 bottom-0 h-[500px] w-[500px] rounded-full bg-yellow-500/10 blur-3xl" />
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#facc1530,transparent_60%)]" />
 

@@ -71,6 +71,9 @@ export default function SearchBox() {
       bg-zinc-950
       p-4
       shadow-2xl
+       transition-all
+duration-300
+ease-out
     "
   >
 

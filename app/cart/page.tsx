@@ -70,26 +70,46 @@ item.quantity
 
               <div
                 key={item.id}
-               className="flex items-center justify-between rounded-3xl border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400"
+              className="
+flex
+flex-col
+gap-6
+rounded-3xl
+border
+border-zinc-800
+bg-zinc-900
+p-6
+transition-all
+duration-300
+hover:-translate-y-1
+hover:border-yellow-400
+md:flex-row
+md:items-center
+md:justify-between
+"
               >
 
 
                 <div className="flex items-center gap-6">
 
-                  <Image
-  src={item.image}
-  alt={item.name}
-  width={120}
-  height={160}
-  className="h-32 w-24 rounded-xl object-cover"
-/>
+                 <Link href={`/products/${item.id}`}>
+  <Image
+    src={item.image}
+    alt={item.name}
+    width={120}
+    height={160}
+    className="h-32 w-24 rounded-xl object-cover transition hover:scale-105"
+  />
+</Link>
 
 
                   <div>
 
-                    <h2 className="text-2xl font-bold">
-                      {item.name}
-                    </h2>
+                   <Link href={`/products/${item.id}`}>
+  <h2 className="text-2xl font-bold transition hover:text-yellow-400">
+    {item.name}
+  </h2>
+</Link>
 
 
                     <p className="mt-2 text-yellow-400 text-xl">
@@ -97,31 +117,40 @@ item.quantity
                     </p>
 
 
-                    <div className="flex items-center gap-4 mt-4">
+                    <div className="mt-4 flex items-center gap-4">
 
-                      <button
-                        onClick={() =>
-                          decreaseQuantity(item.id)
-                        }
-                        className="bg-zinc-700 px-4 py-2 rounded-full"
-                      >
-                        -
-                      </button>
-
+                     <button
+  onClick={() =>
+    decreaseQuantity(item.id)
+  }
+  className="
+    h-10 w-10 rounded-full
+    bg-zinc-700
+    text-xl font-bold
+    transition hover:bg-zinc-600
+  "
+>
+  -
+</button>
 
                       <span className="text-xl font-bold">
                         {item.quantity}
                       </span>
 
 
-                      <button
-                        onClick={() =>
-                          increaseQuantity(item.id)
-                        }
-                        className="bg-yellow-400 text-black px-4 py-2 rounded-full"
-                      >
-                        +
-                      </button>
+                     <button
+  onClick={() =>
+    increaseQuantity(item.id)
+  }
+  className="
+    h-10 w-10 rounded-full
+    bg-yellow-400
+    text-xl font-bold text-black
+    transition hover:scale-110
+  "
+>
+  +
+</button>
 
 
                     </div>
@@ -136,7 +165,17 @@ item.quantity
                   onClick={() =>
                     removeFromCart(item.id)
                   }
-                  className="rounded-full border border-red-500 px-5 py-3 font-semibold text-red-400 transition hover:bg-red-500 hover:text-white"
+                 className="
+  rounded-full
+  border border-red-500
+  px-6 py-3
+  font-semibold
+  text-red-400
+  transition
+  hover:bg-red-500
+  hover:text-white
+  hover:scale-105
+"
                 >
                   Remove
                 </button>
@@ -168,11 +207,18 @@ item.quantity
     </span>
   </div>
 
-  <Link href="/checkout">
-    <button className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-105">
-      Proceed to Checkout →
-    </button>
-  </Link>
+ <Link href="/checkout">
+  <button className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-105">
+    Proceed to Checkout →
+  </button>
+</Link>
+
+<Link
+  href="/products"
+  className="mt-4 block w-full rounded-full border border-yellow-400 py-4 text-center font-bold text-yellow-400 transition hover:bg-yellow-400 hover:text-black"
+>
+  ← Continue Shopping
+</Link>
 
 </div>
 
@@ -188,5 +234,5 @@ item.quantity
 
     <Footer />
   </>
-);
+); 
 }

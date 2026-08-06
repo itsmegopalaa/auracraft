@@ -1,7 +1,7 @@
-import { notebooks } from "../data/notebooks";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProductsClient from "./ProductsClient";
+import { notebooks } from "../data/notebooks";
 
 export default function ProductsPage() {
   return (
@@ -9,11 +9,10 @@ export default function ProductsPage() {
       <Navbar />
 
       <main className="min-h-screen bg-black text-white">
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-zinc-800">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#facc1520,transparent_65%)]" />
 
-          <div className="relative mx-auto max-w-7xl px-6 py-24">
+        <section className="border-b border-zinc-800">
+          <div className="mx-auto max-w-7xl px-6 py-24">
+
             <p className="inline-flex rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300">
               ✨ Premium Collection
             </p>
@@ -21,18 +20,18 @@ export default function ProductsPage() {
             <h1 className="mt-6 text-5xl font-extrabold md:text-7xl">
               Find Your
               <br />
-              <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent">
+              <span className="text-yellow-400">
                 Perfect Notebook
               </span>
             </h1>
 
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-gray-400">
-              Every AuraNotes notebook is crafted to inspire creativity,
-              productivity and ambition. Discover premium designs made to
-              match your personality.
+            <p className="mt-8 max-w-2xl text-lg text-gray-400">
+              Discover premium AuraNotes designs crafted for students,
+              creators and dreamers.
             </p>
 
-            <div className="mt-10 flex flex-wrap gap-4 text-sm text-gray-300">
+            <div className="mt-10 flex gap-4 flex-wrap">
+
               <div className="rounded-full border border-zinc-700 px-5 py-2">
                 📚 {notebooks.length} Designs
               </div>
@@ -41,25 +40,22 @@ export default function ProductsPage() {
                 ⭐ Premium Quality
               </div>
 
-              <div className="rounded-full border border-zinc-700 px-5 py-2">
-                🚚 Fast Delivery
-              </div>
             </div>
+
           </div>
         </section>
 
-        {/* Products */}
-        <section className="mx-auto max-w-7xl px-6 py-20">
-          <div className="mb-12 flex items-center justify-between">
-            <h2 className="text-3xl font-bold">All Products</h2>
 
-            <p className="text-gray-400">
-              {notebooks.length} Products
-            </p>
-          </div>
+        <section className="mx-auto max-w-7xl px-6 py-20">
+
+          <h2 className="mb-10 text-3xl font-bold">
+            All Products
+          </h2>
 
           <ProductsClient />
+
         </section>
+
       </main>
 
       <Footer />

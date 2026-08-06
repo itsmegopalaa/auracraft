@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import SearchBox from "./search/SearchBox";
+
 
 export default function Navbar() {
   const { cart } = useCart();
-
+const { wishlist } = useWishlist();
   const totalItems = cart.reduce(
     (sum, item) => sum + item.quantity,
     0
@@ -52,9 +54,17 @@ export default function Navbar() {
 
           <SearchBox />
 
-          <button className="text-2xl transition hover:scale-110">
-            ❤️
-          </button>
+          <Link
+  href="/wishlist"
+  className="text-2xl transition hover:scale-110"
+>
+  ❤️
+  {wishlist.length > 0 && (
+    <span className="ml-1 text-sm text-yellow-400">
+      {wishlist.length}
+    </span>
+  )}
+</Link>
 
           <Link
             href="/cart"

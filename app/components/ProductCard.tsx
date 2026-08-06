@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
+import toast from "react-hot-toast";
 
 type ProductCardProps = {
   id: number;
@@ -52,14 +53,24 @@ export default function ProductCard({
 
 
       <button
-        onClick={() =>
-          toggleWishlist({
-            id,
-            name,
-            price,
-            image,
-          })
-        }
+        onClick={() => {
+  const wasLiked = liked;
+
+  toggleWishlist({
+    id,
+    name,
+    price,
+    image,
+  });
+
+  if (wasLiked) {
+    toast("Removed from Wishlist 💔", {
+      icon: "🗑️",
+    });
+  } else {
+    toast.success("Added to Wishlist ❤️");
+  }
+}}
         className="
           absolute right-4 top-4 z-20
           rounded-full bg-black/50

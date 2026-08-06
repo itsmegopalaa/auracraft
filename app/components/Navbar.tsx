@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
+import SearchBox from "./search/SearchBox";
 
 export default function Navbar() {
   const { cart } = useCart();
@@ -13,6 +14,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-black/70 backdrop-blur-xl">
+
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
         {/* Logo */}
@@ -21,6 +23,7 @@ export default function Navbar() {
             AuraCraft
           </h1>
         </Link>
+
 
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-8 font-medium text-gray-300">
@@ -31,33 +34,23 @@ export default function Navbar() {
 
           <Link href="/products" className="transition hover:text-yellow-400">
             Products
-         <Link
-  href="/products"
-  className="transition hover:text-yellow-400"
->
-  Products
-</Link>
+          </Link>
+
+          <Link href="/about" className="transition hover:text-yellow-400">
             About
-         <Link
-  href="/about"
-  className="transition hover:text-yellow-400"
->
-  About
-</Link>
+          </Link>
+
+          <Link href="/contact" className="transition hover:text-yellow-400">
             Contact
-         <Link
-  href="/contact"
-  className="transition hover:text-yellow-400"
->
-  Contact
-</Link>
+          </Link>
+
+        </div>
+
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
 
-          <button className="text-2xl transition hover:scale-110">
-            🔍
-          </button>
+          <SearchBox />
 
           <button className="text-2xl transition hover:scale-110">
             ❤️
@@ -70,6 +63,7 @@ export default function Navbar() {
             🛒 {totalItems}
           </Link>
 
+
           <Link
             href="/products"
             className="rounded-full bg-yellow-400 px-6 py-3 font-semibold text-black transition hover:scale-105"
@@ -80,6 +74,7 @@ export default function Navbar() {
         </div>
 
       </div>
+
     </nav>
   );
 }

@@ -1,9 +1,10 @@
+import WishlistButton from "./WishlistButton";
 import Image from "next/image";
 import { notebooks } from "../../data/notebooks";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import AddToCartButton from "./AddToCartButton";
-
+import RelatedProducts from "../../components/products/RelatedProducts";
 export default async function ProductPage({
   params,
 }: {
@@ -132,7 +133,89 @@ export default async function ProductPage({
               {product.description}
             </p>
 
+<div className="
+  mt-8
+  grid
+  grid-cols-2
+  gap-4
+">
 
+  <div className="
+    rounded-2xl
+    border border-zinc-800
+    bg-zinc-900
+    p-4
+    text-center
+  ">
+    <p className="text-2xl">
+      🚚
+    </p>
+    <p className="mt-2 font-semibold">
+      Fast Delivery
+    </p>
+    <p className="text-sm text-gray-400">
+      Delivered safely
+    </p>
+  </div>
+
+
+  <div className="
+    rounded-2xl
+    border border-zinc-800
+    bg-zinc-900
+    p-4
+    text-center
+  ">
+    <p className="text-2xl">
+      🔒
+    </p>
+    <p className="mt-2 font-semibold">
+      Secure Payment
+    </p>
+    <p className="text-sm text-gray-400">
+      100% safe checkout
+    </p>
+  </div>
+
+
+  <div className="
+    rounded-2xl
+    border border-zinc-800
+    bg-zinc-900
+    p-4
+    text-center
+  ">
+    <p className="text-2xl">
+      ✨
+    </p>
+    <p className="mt-2 font-semibold">
+      Premium Quality
+    </p>
+    <p className="text-sm text-gray-400">
+      Crafted with care
+    </p>
+  </div>
+
+
+  <div className="
+    rounded-2xl
+    border border-zinc-800
+    bg-zinc-900
+    p-4
+    text-center
+  ">
+    <p className="text-2xl">
+      ↩️
+    </p>
+    <p className="mt-2 font-semibold">
+      Easy Replacement
+    </p>
+    <p className="text-sm text-gray-400">
+      Hassle free support
+    </p>
+  </div>
+
+</div>
 
             <div className="
               mt-8
@@ -184,7 +267,14 @@ export default async function ProductPage({
                 image: product.image,
               }}
             />
-
+<WishlistButton
+  product={{
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+  }}
+/>
           </div>
 
 
@@ -192,7 +282,10 @@ export default async function ProductPage({
 
       </main>
 
-
+<RelatedProducts
+  currentId={product.id}
+  category={product.category}
+/>
       <Footer />
     </>
   );

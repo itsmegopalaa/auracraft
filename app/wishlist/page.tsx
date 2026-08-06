@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import ConfirmModal from "../components/ui/ConfirmModal";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Image from "next/image";
@@ -7,6 +9,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 
 export default function WishlistPage() {
+    const [removeId, setRemoveId] = useState<number | null>(null);
   const { wishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
 
@@ -81,7 +84,7 @@ export default function WishlistPage() {
                 </button>
 
                 <button
-                  onClick={() => toggleWishlist(product)}
+                  onClick={() => setRemoveId(product.id)}
                   className="mt-3 w-full rounded-full border border-red-500 py-3 text-red-400 transition hover:bg-red-500 hover:text-white"
                 >
                   Remove ❤️
@@ -97,7 +100,24 @@ export default function WishlistPage() {
 
       </div>
       </main>
+<ConfirmModal
+  open={removeId !== null}
+  title="Remove from wishlist?"
+  message="Are you sure you want to remove this notebook from your wishlist?"
+  confirmText="Remove"
+  onCancel={() => setRemoveId(null)}
+  onConfirm={() => {
+    const product = wishlist.find(
+      (item) => item.id === removeId
+    );
 
+    if (product) {
+      toggleWishlist(product);
+    }
+
+    setRemoveId(null);
+  }}
+/>
     <Footer />
   </>
 );

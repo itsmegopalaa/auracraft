@@ -1,3 +1,4 @@
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProductsClient from "./ProductsClient";
@@ -57,6 +58,7 @@ export default function ProductsPage() {
         </section>
 
       </main>
+
 
       <Footer />
     </>

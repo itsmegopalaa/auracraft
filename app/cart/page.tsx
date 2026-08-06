@@ -1,12 +1,14 @@
 "use client";
 
 import Navbar from "../components/Navbar";
+import { useState } from "react";
+import ConfirmModal from "../components/ui/ConfirmModal";
 import Footer from "../components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 export default function CartPage() {
-
+const [removeId, setRemoveId] = useState<number | null>(null);
   const {
     cart,
     removeFromCart,
@@ -163,7 +165,7 @@ md:justify-between
 
                 <button
                   onClick={() =>
-                    removeFromCart(item.id)
+                   setRemoveId(item.id)
                   }
                  className="
   rounded-full
@@ -231,7 +233,19 @@ md:justify-between
       </div>
 
      </main>
-
+<ConfirmModal
+  open={removeId !== null}
+  title="Remove item?"
+  message="Are you sure you want to remove this notebook from your cart?"
+  confirmText="Remove"
+  onCancel={() => setRemoveId(null)}
+  onConfirm={() => {
+    if (removeId !== null) {
+      removeFromCart(removeId);
+      setRemoveId(null);
+    }
+  }}
+/>
     <Footer />
   </>
 ); 

@@ -27,44 +27,43 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body>
-        <CartProvider>
-          <WishlistProvider>
-            {children}
-            <body>
-  <CartProvider>
-    <WishlistProvider>
+  <html
+    lang="en"
+    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+  >
+    <body>
+      <CartProvider>
+        <WishlistProvider>
 
-      {children}
+          {children}
 
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: "#18181b",
-            color: "#fff",
-            border: "1px solid #facc15",
-            borderRadius: "16px",
-          },
-          success: {
-            iconTheme: {
-              primary: "#facc15",
-              secondary: "#000",
-            },
-          },
-        }}
-      />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: "#18181b",
+                color: "#ffffff",
+                border: "1px solid #facc15",
+                borderRadius: "16px",
+              },
+              success: {
+                iconTheme: {
+                  primary: "#facc15",
+                  secondary: "#000000",
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: "#ef4444",
+                  secondary: "#ffffff",
+                },
+              },
+            }}
+          />
 
-    </WishlistProvider>
-  </CartProvider>
-</body>
-          </WishlistProvider>
-        </CartProvider>
-      </body>
-    </html>
-  );
+        </WishlistProvider>
+      </CartProvider>
+    </body>
+  </html>
+);
 }

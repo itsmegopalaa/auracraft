@@ -51,7 +51,7 @@ export default function Hero() {
 
           </div>
 
-          <<div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-gray-400 md:justify-start">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-gray-400 md:justify-start">
 
             <span>⭐ 4.9/5 Rating</span>
 

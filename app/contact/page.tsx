@@ -8,7 +8,8 @@ export default function ContactPage() {
 
       <main className="min-h-screen bg-black px-6 py-24 text-white">
 
-        <section className="mx-auto max-w-5xl">
+        <section className="mx-auto max-w-6xl">
+
 
           <div className="text-center">
 
@@ -16,84 +17,114 @@ export default function ContactPage() {
               ✨ Contact AuraCraft
             </p>
 
+
             <h1 className="mt-8 text-5xl font-extrabold md:text-7xl">
-              Let's Create
+              Let's Build
               <br />
               <span className="text-yellow-400">
-                Something Amazing
+                Your Next Idea
               </span>
             </h1>
 
-            <p className="mt-6 text-lg text-gray-400">
-              Have a question, custom notebook idea or business inquiry?
-              We would love to hear from you.
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-400">
+              Have a custom notebook idea, collaboration request or any
+              question? Our team would love to hear from you.
             </p>
 
           </div>
 
 
-          <div className="mt-16 grid gap-8 md:grid-cols-2">
+
+          <div className="mt-16 grid gap-10 md:grid-cols-2">
 
 
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10 transition hover:border-yellow-400">
 
-              <h2 className="text-2xl font-bold">
-                Get In Touch
+              <h2 className="text-3xl font-bold">
+                Connect With Us
               </h2>
 
-              <div className="mt-6 space-y-4 text-gray-400">
+
+              <div className="mt-8 space-y-5 text-gray-400 text-lg">
 
                 <p>
-                  📧 Email: hello@auracraft.com
+                  📧 hello@auracraft.com
                 </p>
 
                 <p>
-                  📱 Instagram: @auracraft
+                  📱 @auracraft
                 </p>
 
                 <p>
-                  🇮🇳 Made with ❤️ in India
+                  🇮🇳 Crafted with passion in India
+                </p>
+
+
+              </div>
+
+
+
+              <div className="mt-10 rounded-2xl border border-zinc-700 bg-black p-5">
+
+                <p className="text-yellow-400 font-bold">
+                  AuraCraft Promise
+                </p>
+
+                <p className="mt-2 text-gray-400">
+                  Premium designs. Meaningful pages. Ideas that deserve a
+                  beautiful home.
                 </p>
 
               </div>
 
+
             </div>
 
 
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
 
-              <h2 className="text-2xl font-bold mb-6">
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10">
+
+              <h2 className="text-3xl font-bold mb-8">
                 Send Message
               </h2>
 
+
               <input
                 placeholder="Your Name"
-                className="w-full rounded-xl border border-zinc-700 bg-black p-4 mb-4"
+                className="mb-4 w-full rounded-xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
               />
+
 
               <input
                 placeholder="Your Email"
-                className="w-full rounded-xl border border-zinc-700 bg-black p-4 mb-4"
+                className="mb-4 w-full rounded-xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
               />
+
 
               <textarea
                 placeholder="Your Message"
-                rows={4}
-                className="w-full rounded-xl border border-zinc-700 bg-black p-4"
+                rows={5}
+                className="w-full rounded-xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
               />
 
-              <button className="mt-5 w-full rounded-full bg-yellow-400 py-4 font-bold text-black hover:scale-105 transition">
+
+              <button className="mt-6 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-105">
                 Send Message →
               </button>
+
 
             </div>
 
 
           </div>
 
+
         </section>
 
       </main>
+
 
       <Footer />
     </>

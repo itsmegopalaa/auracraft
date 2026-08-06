@@ -1,8 +1,12 @@
 import Link from "next/link";
-
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 export default function SuccessPage() {
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+  <>
+    <Navbar />
+
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-24">
 
       <div className="max-w-xl text-center rounded-3xl border border-zinc-800 bg-zinc-900 p-12 shadow-xl">
 
@@ -53,5 +57,8 @@ export default function SuccessPage() {
       </div>
 
     </main>
-  );
+
+    <Footer />
+  </>
+);
 }

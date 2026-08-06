@@ -1,5 +1,6 @@
 "use client";
-
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 
@@ -10,7 +11,10 @@ export default function CheckoutPage() {
     return sum + item.price * item.quantity;
   }, 0);
 
-  return (
+ return (
+  <>
+    <Navbar />
+
     <main className="min-h-screen bg-black text-white px-6 py-24">
 
       <div className="max-w-6xl mx-auto">
@@ -143,5 +147,8 @@ export default function CheckoutPage() {
       </div>
 
     </main>
-  );
+
+    <Footer />
+  </>
+);
 }

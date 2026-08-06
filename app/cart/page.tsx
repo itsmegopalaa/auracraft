@@ -1,4 +1,7 @@
 "use client";
+
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
@@ -22,8 +25,10 @@ item.quantity
 
 
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-24">
+  <>
+    <Navbar />
 
+    <main className="min-h-screen bg-black text-white px-6 py-24">
       <div className="max-w-5xl mx-auto">
 
 
@@ -179,6 +184,9 @@ item.quantity
 
       </div>
 
-    </main>
-  );
+     </main>
+
+    <Footer />
+  </>
+);
 }

@@ -1,5 +1,6 @@
 "use client";
-
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
@@ -10,6 +11,9 @@ export default function WishlistPage() {
   const { addToCart } = useCart();
 
   return (
+  <>
+    <Navbar />
+
     <main className="min-h-screen bg-black text-white px-6 py-24">
       <div className="max-w-7xl mx-auto">
 
@@ -92,6 +96,9 @@ export default function WishlistPage() {
         )}
 
       </div>
-    </main>
-  );
+      </main>
+
+    <Footer />
+  </>
+);
 }

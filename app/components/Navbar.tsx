@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -7,6 +7,7 @@ import SearchBox from "./search/SearchBox";
 
 
 export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const { cart } = useCart();
 const { wishlist } = useWishlist();
   const totalItems = cart.reduce(
@@ -48,9 +49,14 @@ const { wishlist } = useWishlist();
 
         </div>
 
-
+<button
+  onClick={() => setMenuOpen(!menuOpen)}
+  className="rounded-lg p-2 text-3xl text-yellow-400 md:hidden"
+>
+  {menuOpen ? "✕" : "☰"}
+</button>
         {/* Right Side */}
-        <div className="flex items-center gap-4">
+       <div className="hidden items-center gap-4 md:flex">
 
           <SearchBox />
 
@@ -84,7 +90,51 @@ const { wishlist } = useWishlist();
         </div>
 
       </div>
+{menuOpen && (
+  <div className="border-t border-zinc-800 bg-black px-6 py-6 md:hidden">
+    <div className="flex flex-col gap-5 text-lg">
 
+      <Link href="/" onClick={() => setMenuOpen(false)}>
+        Home
+      </Link>
+
+      <Link href="/products" onClick={() => setMenuOpen(false)}>
+        Products
+      </Link>
+
+      <Link href="/about" onClick={() => setMenuOpen(false)}>
+        About
+      </Link>
+
+      <Link href="/contact" onClick={() => setMenuOpen(false)}>
+        Contact
+      </Link>
+
+      <Link
+        href="/wishlist"
+        onClick={() => setMenuOpen(false)}
+      >
+        ❤️ Wishlist ({wishlist.length})
+      </Link>
+
+      <Link
+        href="/cart"
+        onClick={() => setMenuOpen(false)}
+      >
+        🛒 Cart ({totalItems})
+      </Link>
+
+      <Link
+        href="/products"
+        onClick={() => setMenuOpen(false)}
+        className="mt-2 rounded-full bg-yellow-400 py-3 text-center font-bold text-black"
+      >
+        Shop Now →
+      </Link>
+
+    </div>
+  </div>
+)}
     </nav>
   );
 }

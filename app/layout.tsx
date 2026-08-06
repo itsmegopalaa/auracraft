@@ -1,5 +1,7 @@
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { Toaster } from "react-hot-toast";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -33,6 +35,33 @@ export default function RootLayout({
         <CartProvider>
           <WishlistProvider>
             {children}
+            <body>
+  <CartProvider>
+    <WishlistProvider>
+
+      {children}
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#18181b",
+            color: "#fff",
+            border: "1px solid #facc15",
+            borderRadius: "16px",
+          },
+          success: {
+            iconTheme: {
+              primary: "#facc15",
+              secondary: "#000",
+            },
+          },
+        }}
+      />
+
+    </WishlistProvider>
+  </CartProvider>
+</body>
           </WishlistProvider>
         </CartProvider>
       </body>

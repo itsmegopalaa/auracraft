@@ -31,17 +31,26 @@ export default function Navbar() {
 
           <Link href="/products" className="transition hover:text-yellow-400">
             Products
-          </Link>
-
-          <a href="/#why" className="transition hover:text-yellow-400">
+         <Link
+  href="/products"
+  className="transition hover:text-yellow-400"
+>
+  Products
+</Link>
             About
-          </a>
-
-          <a href="#footer" className="transition hover:text-yellow-400">
+         <Link
+  href="/about"
+  className="transition hover:text-yellow-400"
+>
+  About
+</Link>
             Contact
-          </a>
-
-        </div>
+         <Link
+  href="/contact"
+  className="transition hover:text-yellow-400"
+>
+  Contact
+</Link>
 
         {/* Right Side */}
         <div className="flex items-center gap-4">

@@ -8,8 +8,8 @@ export default function CheckoutPage() {
 
   const total = cart.reduce((sum, item) => {
     return (
-      sum +
-      Number(item.price.replace("₹", "")) * item.quantity
+     sum +
+item.price * item.quantity
     );
   }, 0);
 
@@ -71,10 +71,7 @@ export default function CheckoutPage() {
                   </span>
 
                   <span>
-                    ₹
-                    {Number(
-                      item.price.replace("₹", "")
-                    ) * item.quantity}
+                   ₹{item.price * item.quantity}
                   </span>
                 </div>
               ))}

@@ -5,7 +5,7 @@ type ProductCardProps = {
   id: number;
   name: string;
   image: string;
-  price: string;
+ price: number;
   category: string;
   rating: number;
   bestseller: boolean;
@@ -56,9 +56,9 @@ export default function ProductCard({
           ⭐ {rating}
         </p>
 
-        <p className="mt-2 text-2xl font-bold text-white">
-          {price}
-        </p>
+        <p className="mt-2 text-lg font-semibold text-white">
+  ₹{price}
+</p>
 
         <Link
           href={`/products/${id}`}

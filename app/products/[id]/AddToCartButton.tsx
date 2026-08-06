@@ -6,7 +6,7 @@ type Props = {
   product: {
     id: number;
     name: string;
-    price: string;
+    price: number;
     image: string;
   };
 };
@@ -24,7 +24,7 @@ export default function AddToCartButton({ product }: Props) {
 
         alert(`${product.name} added to cart 🛒`);
       }}
-      className="mt-8 rounded-full bg-yellow-400 px-10 py-4 font-bold text-black hover:scale-105 transition"
+      className="mt-8 rounded-full bg-yellow-400 px-10 py-4 font-bold text-black transition hover:scale-105"
     >
       Add to Cart 🛒
     </button>

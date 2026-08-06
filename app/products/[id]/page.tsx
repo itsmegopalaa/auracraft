@@ -53,8 +53,9 @@ export default async function ProductPage({
               ⭐ {product.rating}
             </p>
 
+            {/* 👇 Sirf ye line change hui hai */}
             <p className="mt-4 text-3xl font-bold">
-              {product.price}
+              ₹{product.price}
             </p>
 
             <p className="mt-6 text-gray-400 text-lg">

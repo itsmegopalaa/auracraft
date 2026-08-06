@@ -15,8 +15,8 @@ export default function CartPage() {
   const total = cart.reduce((sum, item) => {
     return (
       sum +
-      Number(item.price.replace("₹", "")) *
-      item.quantity
+item.price *
+item.quantity
     );
   }, 0);
 
@@ -68,7 +68,7 @@ export default function CartPage() {
 
 
                     <p className="mt-2 text-yellow-400 text-xl">
-                      {item.price}
+                     ₹{item.price}
                     </p>
 
 

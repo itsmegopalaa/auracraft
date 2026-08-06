@@ -1,67 +1,116 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
-   <footer id="footer" className="border-t border-zinc-800 mt-24">
+    <footer className="border-t border-zinc-800 mt-24 bg-black">
+
       <div className="max-w-7xl mx-auto px-6 py-16 grid gap-12 md:grid-cols-3">
-        
+
+
         {/* Brand */}
         <div>
+
           <h2 className="text-3xl font-bold text-yellow-400">
             AuraCraft
           </h2>
 
-          <p className="mt-5 text-gray-400 leading-7">
+          <p className="mt-5 leading-7 text-gray-400">
             Premium personalized notebooks crafted for students,
             creators and dreamers. Designed to inspire every page
             of your journey.
           </p>
+
         </div>
 
+
+
         {/* Quick Links */}
-       <ul className="space-y-3 text-gray-400">
-  <li>
-    <a href="/" className="hover:text-yellow-400 transition">
-      Home
-    </a>
-  </li>
+        <div>
 
-  <li>
-    <a href="/products" className="hover:text-yellow-400 transition">
-      Products
-    </a>
-  </li>
+          <h3 className="mb-5 text-xl font-semibold">
+            Explore
+          </h3>
 
-  <li>
-    <a href="/#why" className="hover:text-yellow-400 transition">
-      About
-    </a>
-  </li>
 
-  <li>
-    <a href="/#footer" className="hover:text-yellow-400 transition">
-      Contact
-    </a>
-  </li>
-</ul>
+          <ul className="space-y-3 text-gray-400">
+
+            <li>
+              <Link href="/" className="transition hover:text-yellow-400">
+                Home
+              </Link>
+            </li>
+
+
+            <li>
+              <Link href="/products" className="transition hover:text-yellow-400">
+                Products
+              </Link>
+            </li>
+
+
+            <li>
+              <Link href="/about" className="transition hover:text-yellow-400">
+                About
+              </Link>
+            </li>
+
+
+            <li>
+              <Link href="/contact" className="transition hover:text-yellow-400">
+                Contact
+              </Link>
+            </li>
+
+          </ul>
+
+        </div>
+
+
+
 
         {/* Connect */}
         <div>
-          <h3 className="text-xl font-semibold mb-5">
+
+          <h3 className="mb-5 text-xl font-semibold">
             Connect
           </h3>
 
+
           <ul className="space-y-3 text-gray-400">
-            <li>Instagram</li>
-            <li>YouTube</li>
-            <li>LinkedIn</li>
-            <li>Email</li>
+
+            <li className="transition hover:text-yellow-400 cursor-pointer">
+              Instagram 📸
+            </li>
+
+            <li className="transition hover:text-yellow-400 cursor-pointer">
+              YouTube ▶️
+            </li>
+
+            <li className="transition hover:text-yellow-400 cursor-pointer">
+              LinkedIn 💼
+            </li>
+
+            <li className="transition hover:text-yellow-400 cursor-pointer">
+              hello@auracraft.com
+            </li>
+
           </ul>
+
+
         </div>
 
+
       </div>
 
-      <div className="border-t border-zinc-800 py-6 text-center text-gray-500 text-sm">
+
+
+      <div className="border-t border-zinc-800 py-6 text-center text-sm text-gray-500">
+
         © 2026 AuraCraft • Crafted with ❤️ in India
+
       </div>
+
+
     </footer>
   );
 }

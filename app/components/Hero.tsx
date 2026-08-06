@@ -42,13 +42,16 @@ export default function Hero() {
               Shop Collection →
             </Link>
 
-            <button className="rounded-full border border-zinc-700 px-8 py-4 transition duration-300 hover:border-yellow-400 hover:bg-yellow-400/10">
-              Our Story
-            </button>
+           <Link
+  href="/about"
+  className="rounded-full border border-zinc-700 px-8 py-4 text-center transition duration-300 hover:border-yellow-400 hover:bg-yellow-400/10"
+>
+  Our Story →
+</Link>
 
           </div>
 
-          <div className="mt-10 flex items-center justify-center gap-6 text-sm text-gray-400 md:justify-start">
+          <<div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-gray-400 md:justify-start">
 
             <span>⭐ 4.9/5 Rating</span>
 
@@ -74,7 +77,7 @@ export default function Hero() {
             width={550}
             height={700}
             priority
-           className="drop-shadow-[0_0_80px_rgba(250,204,21,0.35)] transition-all duration-700 hover:scale-110 hover:rotate-1"
+           className="drop-shadow-[0_0_80px_rgba(250,204,21,0.35)] transition-all duration-700 hover:scale-105 hover:-rotate-1"
           />
 
         </div>

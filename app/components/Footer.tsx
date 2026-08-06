@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-zinc-800 mt-24">
+   <footer id="footer" className="border-t border-zinc-800 mt-24">
       <div className="max-w-7xl mx-auto px-6 py-16 grid gap-12 md:grid-cols-3">
         
         {/* Brand */}
@@ -17,18 +17,31 @@ export default function Footer() {
         </div>
 
         {/* Quick Links */}
-        <div>
-          <h3 className="text-xl font-semibold mb-5">
-            Quick Links
-          </h3>
+       <ul className="space-y-3 text-gray-400">
+  <li>
+    <a href="/" className="hover:text-yellow-400 transition">
+      Home
+    </a>
+  </li>
 
-          <ul className="space-y-3 text-gray-400">
-            <li><a href="#" className="hover:text-yellow-400 transition">Home</a></li>
-            <li><a href="#" className="hover:text-yellow-400 transition">Products</a></li>
-            <li><a href="#" className="hover:text-yellow-400 transition">About</a></li>
-            <li><a href="#" className="hover:text-yellow-400 transition">Contact</a></li>
-          </ul>
-        </div>
+  <li>
+    <a href="/products" className="hover:text-yellow-400 transition">
+      Products
+    </a>
+  </li>
+
+  <li>
+    <a href="/#why" className="hover:text-yellow-400 transition">
+      About
+    </a>
+  </li>
+
+  <li>
+    <a href="/#footer" className="hover:text-yellow-400 transition">
+      Contact
+    </a>
+  </li>
+</ul>
 
         {/* Connect */}
         <div>

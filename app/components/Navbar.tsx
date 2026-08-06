@@ -1,36 +1,6 @@
 "use client";
+
 import Link from "next/link";
-<div className="hidden md:flex items-center gap-8 text-gray-300">
-
-  <Link
-    href="/"
-    className="hover:text-yellow-400 transition"
-  >
-    Home
-  </Link>
-
-  <Link
-    href="/products"
-    className="hover:text-yellow-400 transition"
-  >
-    Products
-  </Link>
-
-  <Link
-    href="/about"
-    className="hover:text-yellow-400 transition"
-  >
-    About
-  </Link>
-
-  <Link
-    href="/contact"
-    className="hover:text-yellow-400 transition"
-  >
-    Contact
-  </Link>
-
-</div>
 import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
@@ -55,33 +25,21 @@ export default function Navbar() {
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-8 font-medium text-gray-300">
 
-          <Link
-            href="/"
-            className="transition hover:text-yellow-400"
-          >
+          <Link href="/" className="transition hover:text-yellow-400">
             Home
           </Link>
 
-          <Link
-            href="/"
-            className="transition hover:text-yellow-400"
-          >
+          <Link href="/products" className="transition hover:text-yellow-400">
             Products
           </Link>
 
-          <Link
-            href="/"
-            className="transition hover:text-yellow-400"
-          >
+          <a href="/#why" className="transition hover:text-yellow-400">
             About
-          </Link>
+          </a>
 
-          <Link
-            href="/"
-            className="transition hover:text-yellow-400"
-          >
+          <a href="#footer" className="transition hover:text-yellow-400">
             Contact
-          </Link>
+          </a>
 
         </div>
 
@@ -103,10 +61,11 @@ export default function Navbar() {
             🛒 {totalItems}
           </Link>
 
-          <Link href="/">
-            <button className="rounded-full bg-yellow-400 px-6 py-3 font-semibold text-black transition hover:scale-105">
-              Shop Now
-            </button>
+          <Link
+            href="/products"
+            className="rounded-full bg-yellow-400 px-6 py-3 font-semibold text-black transition hover:scale-105"
+          >
+            Shop Now
           </Link>
 
         </div>

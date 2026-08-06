@@ -1,6 +1,9 @@
 export default function WhyAuraCraft() {
   return (
-    <section className="py-24 max-w-6xl mx-auto text-center">
+    <section
+  id="why"
+  className="py-24 max-w-6xl mx-auto text-center"
+>
       <h2 className="text-5xl font-bold">
         Why <span className="text-yellow-400">AuraCraft?</span>
       </h2>

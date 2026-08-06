@@ -199,7 +199,19 @@ md:justify-between
     <span>Subtotal</span>
     <span>₹{total}</span>
   </div>
+<div className="mt-4 flex justify-between text-gray-400">
+  <span>Delivery</span>
+  <span className="text-green-400">
+    FREE
+  </span>
+</div>
 
+<div className="mt-4 flex justify-between text-gray-400">
+  <span>Premium Packaging</span>
+  <span className="text-green-400">
+    FREE
+  </span>
+</div>
   <div className="my-6 border-t border-zinc-700"></div>
 
   <div className="flex justify-between text-2xl font-bold">

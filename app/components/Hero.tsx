@@ -6,6 +6,7 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-black">
+<div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-yellow-500/10 blur-3xl" />
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#facc1530,transparent_60%)]" />
 
@@ -73,7 +74,7 @@ export default function Hero() {
             width={550}
             height={700}
             priority
-            className="drop-shadow-[0_0_60px_rgba(250,204,21,0.25)] transition duration-500 hover:scale-105"
+           className="drop-shadow-[0_0_80px_rgba(250,204,21,0.35)] transition-all duration-700 hover:scale-110 hover:rotate-1"
           />
 
         </div>

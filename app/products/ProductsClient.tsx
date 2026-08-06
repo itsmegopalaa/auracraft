@@ -29,17 +29,16 @@ export default function ProductsClient() {
   return (
     <>
       {/* Search + Filters */}
-      <div className="mb-12 flex flex-col gap-6">
+      <div className="mb-10 flex flex-col gap-5 md:mb-12 md:gap-6">
 
         <input
           type="text"
           placeholder="🔍 Search notebooks..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-5 py-4 text-white outline-none transition focus:border-yellow-400"
-        />
-
-        <div className="flex flex-wrap gap-3">
+         className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-3.5 text-white outline-none transition focus:border-yellow-400 md:px-5 md:py-4"
+/>
+     < div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide md:flex-wrap md:overflow-visible">
           {categories.map((item) => (
             <button
               key={item}
@@ -55,14 +54,14 @@ export default function ProductsClient() {
           ))}
         </div>
 
-        <p className="text-gray-400">
+      <p className="rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm text-gray-400 w-fit">
           Showing <span className="text-yellow-400">{filteredProducts.length}</span> products
         </p>
 
       </div>
 
       {/* Products Grid */}
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {filteredProducts.map((book) => (
           <ProductCard
             key={book.id}

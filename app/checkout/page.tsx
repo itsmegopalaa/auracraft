@@ -17,6 +17,8 @@ const [address, setAddress] = useState("");
 const [city, setCity] = useState("");
 const [state, setState] = useState("");
 const [pin, setPin] = useState("");
+const [payment, setPayment] = useState("COD");
+const [loading, setLoading] = useState(false);
   const total = cart.reduce((sum, item) => {
     return sum + item.price * item.quantity;
   }, 0);
@@ -53,8 +55,17 @@ const [pin, setPin] = useState("");
    toast.error("Your cart is empty.");
     return;
   }
+  if (!payment) {
+  toast.error("Please select a payment method.");
+  return;
+}
+setLoading(true);
+
 toast.success("Order placed successfully!");
+
+setTimeout(() => {
   router.push("/success");
+}, 1200);
 };
 if (cart.length === 0) {
   return (
@@ -243,34 +254,59 @@ onChange={(e) => setPin(e.target.value)}
     Payment Method
   </h3>
 
-  <div className="space-y-4">
+ <div className="space-y-4">
 
-    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-yellow-400 bg-black p-4">
+  {[
+    {
+      id: "COD",
+      label: "💵 Cash on Delivery (Recommended)",
+    },
+    {
+      id: "UPI",
+      label: "📱 UPI Payment",
+    },
+    {
+      id: "CARD",
+      label: "💳 Credit / Debit Card",
+    },
+  ].map((method) => (
+
+    <label
+      key={method.id}
+      className={`
+        flex
+        cursor-pointer
+        items-center
+        gap-3
+        rounded-2xl
+        border
+        p-4
+        transition
+        ${
+          payment === method.id
+            ? "border-yellow-400 bg-zinc-900"
+            : "border-zinc-700 bg-black hover:border-yellow-400"
+        }
+      `}
+    >
+
       <input
         type="radio"
         name="payment"
-        defaultChecked
+        value={method.id}
+        checked={payment === method.id}
+        onChange={() => setPayment(method.id)}
       />
-      <span>💵 Cash on Delivery (Recommended)</span>
+
+      <span className="font-semibold">
+        {method.label}
+      </span>
+
     </label>
 
-    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-700 bg-black p-4 hover:border-yellow-400">
-      <input
-        type="radio"
-        name="payment"
-      />
-      <span>📱 UPI Payment</span>
-    </label>
+  ))}
 
-    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-700 bg-black p-4 hover:border-yellow-400">
-      <input
-        type="radio"
-        name="payment"
-      />
-      <span>💳 Credit / Debit Card</span>
-    </label>
-
-  </div>
+</div>
 
 </div>
             <div className="mt-8 rounded-2xl bg-black p-4 text-sm text-gray-400">
@@ -280,9 +316,21 @@ onChange={(e) => setPin(e.target.value)}
 
            <button
   onClick={handlePlaceOrder}
-  className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-105"
+  disabled={loading}
+  className="
+    mt-8
+    w-full
+    rounded-full
+    bg-yellow-400
+    py-4
+    font-bold
+    text-black
+    transition
+    hover:scale-105
+    disabled:opacity-50
+  "
 >
-  Place Order →
+  {loading ? "Processing Order..." : "Place Order →"}
 </button>
 
 

@@ -50,17 +50,21 @@ export default function WishlistPage() {
                 className="group rounded-3xl border border-zinc-800 bg-zinc-900 p-5 transition hover:-translate-y-2 hover:border-yellow-400"
               >
 
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={500}
-                  height={700}
-                  className="h-72 w-full rounded-2xl object-cover transition group-hover:scale-105"
-                />
+               <Link href={`/products/${product.id}`}>
+  <Image
+    src={product.image}
+    alt={product.name}
+    width={500}
+    height={700}
+    className="h-72 w-full rounded-2xl object-cover transition group-hover:scale-105"
+  />
+</Link>
 
-                <h2 className="mt-5 text-xl font-bold">
-                  {product.name}
-                </h2>
+<Link href={`/products/${product.id}`}>
+  <h2 className="mt-5 text-xl font-bold hover:text-yellow-400 transition">
+    {product.name}
+  </h2>
+</Link>
 
                 <p className="mt-3 text-yellow-400 font-bold text-lg">
                   ₹{product.price}

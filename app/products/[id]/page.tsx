@@ -184,18 +184,20 @@ export default async function ProductPage({
 
         </section>
 
-<ProductReviews />
-        <RelatedProducts
-          currentId={product.id}
-          category={product.category}
-        />
+<section className="mx-auto max-w-7xl px-6 py-24">
+  <ProductReviews />
+</section>
 
+<section className="mx-auto max-w-7xl px-6 pb-24">
+  <RelatedProducts
+    currentId={product.id}
+    category={product.category}
+  />
+</section>
 
-      </main>
+</main>
 
-
-      <Footer />
-
+<Footer />
     </>
   );
 }

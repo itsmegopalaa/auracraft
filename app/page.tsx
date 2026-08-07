@@ -9,6 +9,7 @@ import Footer from "./components/Footer";
 import BrandStory from "./components/BrandStory";
 import Testimonials from "./components/Testimonials";
 import Newsletter from "./components/Newsletter";
+import TrustBadges from "./components/TrustBadges";
 
 export default function Home() {
   return (
@@ -68,6 +69,8 @@ export default function Home() {
       {/* New Arrivals */}
       <NewArrivals />
 <BrandStory />
+
+<TrustBadges />
 
 <Testimonials />
 

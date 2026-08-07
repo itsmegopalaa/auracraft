@@ -6,6 +6,7 @@ import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
 import RelatedProducts from "../../components/products/RelatedProducts";
 import ProductReviews from "../../components/products/ProductReviews";
+import TrustBadges from "../../components/TrustBadges";
 
 export default async function ProductPage({
   params,
@@ -179,32 +180,10 @@ export default async function ProductPage({
                 image: product.image,
               }}
             />
+<TrustBadges />
 
-<div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-center">
-    <div className="text-2xl">📖</div>
-    <h3 className="mt-2 font-bold">Premium Paper</h3>
-    <p className="mt-1 text-sm text-gray-400">
-      Smooth writing experience
-    </p>
-  </div>
 
-  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-center">
-    <div className="text-2xl">🛡️</div>
-    <h3 className="mt-2 font-bold">Quality Guarantee</h3>
-    <p className="mt-1 text-sm text-gray-400">
-      Crafted with care
-    </p>
-  </div>
-
-  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-center">
-    <div className="text-2xl">🚚</div>
-    <h3 className="mt-2 font-bold">Secure Delivery</h3>
-    <p className="mt-1 text-sm text-gray-400">
-      Safe doorstep delivery
-    </p>
-  </div>
-</div>
+ 
           </div>
 
         </section>

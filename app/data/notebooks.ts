@@ -1,3 +1,16 @@
+export type Notebook = {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  description?: string;
+  category?: string;
+  rating?: number;
+  paper?: string;
+  size?: string;
+  quantity?: number;
+};
+
 export const notebooks = [
   {
     id: 1,

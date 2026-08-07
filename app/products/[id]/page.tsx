@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
+import ShareButton from "./ShareButton";
 import RelatedProducts from "../../components/products/RelatedProducts";
 import ProductReviews from "../../components/products/ProductReviews";
 import TrustBadges from "../../components/TrustBadges";
@@ -162,15 +163,16 @@ export default async function ProductPage({
             </div>
 
 
-            <AddToCartButton
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-              }}
-            />
+           <AddToCartButton
+  product={{
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+  }}
+/>
 
+<ShareButton />
 
 <TrustBadges />
 

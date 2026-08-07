@@ -7,17 +7,15 @@ import {
   useState,
 } from "react";
 
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
+import { Notebook } from "../data/notebooks";
+
+type CartItem = Notebook & {
   quantity: number;
 };
 
 type CartContextType = {
-  cart: Product[];
-  addToCart: (product: Product) => void;
+  cart: CartItem[];
+  addToCart: (product: Notebook) => void;
   removeFromCart: (id: number) => void;
   increaseQuantity: (id: number) => void;
   decreaseQuantity: (id: number) => void;
@@ -27,15 +25,13 @@ const CartContext = createContext<CartContextType | undefined>(
   undefined
 );
 
-
 export function CartProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
-  const [cart, setCart] = useState<Product[]>([]);
-
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   // Load cart from browser storage
   useEffect(() => {
@@ -44,30 +40,28 @@ export function CartProvider({
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     }
+
+    setLoaded(true);
   }, []);
 
-
-  // Save cart whenever it changes
+  // Save cart
   useEffect(() => {
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(cart)
-    );
-  }, [cart]);
+    if (loaded) {
+      localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+      );
+    }
+  }, [cart, loaded]);
 
 
-  // Add product / increase quantity
-  function addToCart(product: Product) {
-
+  function addToCart(product: Notebook) {
     setCart((prev) => {
-
-      const existingProduct = prev.find(
+      const existing = prev.find(
         (item) => item.id === product.id
       );
 
-
-      if (existingProduct) {
-
+      if (existing) {
         return prev.map((item) =>
           item.id === product.id
             ? {
@@ -76,9 +70,7 @@ export function CartProvider({
               }
             : item
         );
-
       }
-
 
       return [
         ...prev,
@@ -87,27 +79,20 @@ export function CartProvider({
           quantity: 1,
         },
       ];
-
     });
-
   }
 
 
-  // Remove product completely
   function removeFromCart(id: number) {
-
     setCart((prev) =>
       prev.filter(
         (item) => item.id !== id
       )
     );
-
   }
 
 
-  // Increase quantity
   function increaseQuantity(id: number) {
-
     setCart((prev) =>
       prev.map((item) =>
         item.id === id
@@ -118,28 +103,20 @@ export function CartProvider({
           : item
       )
     );
-
   }
 
 
-  // Decrease quantity
   function decreaseQuantity(id: number) {
-
     setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                quantity: item.quantity - 1,
-              }
-            : item
-        )
-        .filter(
-          (item) => item.quantity > 0
-        )
+      prev.map((item) =>
+        item.id === id && item.quantity > 1
+          ? {
+              ...item,
+              quantity: item.quantity - 1,
+            }
+          : item
+      )
     );
-
   }
 
 
@@ -156,15 +133,11 @@ export function CartProvider({
       {children}
     </CartContext.Provider>
   );
-
 }
 
 
-
 export function useCart() {
-
   const context = useContext(CartContext);
-
 
   if (!context) {
     throw new Error(
@@ -172,7 +145,5 @@ export function useCart() {
     );
   }
 
-
   return context;
-
 }

@@ -8,6 +8,7 @@ import WhyAuraCraft from "./components/WhyAuraCraft";
 import Footer from "./components/Footer";
 import BrandStory from "./components/BrandStory";
 import Testimonials from "./components/Testimonials";
+import Newsletter from "./components/Newsletter";
 
 export default function Home() {
   return (
@@ -19,9 +20,7 @@ export default function Home() {
       {/* Hero */}
       <Hero />
 
-<BrandStory />
-<Testimonials />
-<FeaturedNotebooks />
+
       {/* Featured Products */}
       <FeaturedNotebooks />
 
@@ -68,6 +67,12 @@ export default function Home() {
 
       {/* New Arrivals */}
       <NewArrivals />
+<BrandStory />
+
+<Testimonials />
+
+<Newsletter />
+
 
       {/* Footer */}
       <Footer />

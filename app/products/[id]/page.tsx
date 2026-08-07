@@ -8,6 +8,7 @@ import ShareButton from "./ShareButton";
 import RelatedProducts from "../../components/products/RelatedProducts";
 import ProductReviews from "../../components/products/ProductReviews";
 import TrustBadges from "../../components/TrustBadges";
+import Reviews from "./Reviews";
 
 export default async function ProductPage({
   params,
@@ -181,6 +182,7 @@ export default async function ProductPage({
           </div>
 
         </section>
+<Reviews />
 
 <section className="mx-auto max-w-7xl px-6 py-24">
   <ProductReviews />

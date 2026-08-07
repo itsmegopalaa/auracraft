@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 import toast from "react-hot-toast";
+import WishlistButton from "./WishlistButton";
 
 type Props = {
   product: {
@@ -65,7 +66,14 @@ const router = useRouter();
     >
       Buy Now ⚡
     </button>
-
+<WishlistButton
+  product={{
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+  }}
+/>
   </div>
 );
 }

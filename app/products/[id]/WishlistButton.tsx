@@ -12,25 +12,21 @@ type Props = {
 };
 
 export default function WishlistButton({ product }: Props) {
-
   const {
     toggleWishlist,
     isWishlisted,
   } = useWishlist();
 
-
   const saved = isWishlisted(product.id);
-
 
   return (
     <button
       onClick={() => toggleWishlist(product)}
       className="
-        mt-4
-        w-full
         rounded-full
         border
         border-yellow-400
+        px-10
         py-4
         font-bold
         text-yellow-400

@@ -173,6 +173,12 @@ export default async function ProductPage({
   }}
 />
 
+
+
+
+<ShareButton productName={product.name} />
+
+<TrustBadges />
 <ShareButton productName={product.name} />
 <TrustBadges />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function ShareButton() {
   const [sharing, setSharing] = useState(false);
@@ -11,23 +12,41 @@ export default function ShareButton() {
     setSharing(true);
 
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "AuraCraft Premium Notebook",
-          text: "Check out this premium notebook from AuraCraft",
-          url: window.location.href,
-        });
-      } else {
-        await navigator.clipboard.writeText(
-          window.location.href
-        );
+      const shareData = {
+        title: "AuraCraft Premium Notebook",
+        text: "Check out this premium notebook from AuraCraft ✨",
+        url: window.location.href,
+      };
 
-        alert("Product link copied!");
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare(shareData)
+      ) {
+        await navigator.share(shareData);
+        return;
       }
-    } catch (error: any) {
-      // User cancel share - ignore
-      if (error.name !== "AbortError") {
-        console.error(error);
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(window.location.href);
+
+      toast.success("Product link copied!");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      console.error("Share failed:", error);
+
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Product link copied!");
+      } catch {
+        toast.error("Unable to share this product.");
       }
     } finally {
       setSharing(false);
@@ -36,18 +55,28 @@ export default function ShareButton() {
 
   return (
     <button
+      type="button"
       onClick={handleShare}
       disabled={sharing}
+      aria-label="Share this product"
       className="
-        rounded-xl
+        mt-4
+        w-full
+        rounded-2xl
         border
         border-zinc-700
-        px-5
-        py-3
+        bg-zinc-900
+        px-6
+        py-4
+        font-semibold
         text-white
-        hover:border-yellow-400
         transition
-        disabled:opacity-50
+        duration-200
+        hover:border-yellow-400
+        hover:bg-zinc-800
+        active:scale-[0.98]
+        disabled:cursor-not-allowed
+        disabled:opacity-60
       "
     >
       {sharing ? "Sharing..." : "Share Product 📤"}

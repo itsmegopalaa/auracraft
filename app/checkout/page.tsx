@@ -41,7 +41,7 @@ const [loading, setLoading] = useState(false);
     return;
   }
 
-  if (!/^\S+@\S+\.\S+$/.test(email)) {
+ if (!/^\S+@\S+\.\S+$/.test(email)) {
     toast.error("Please enter a valid email address.");
     return;
   }
@@ -61,11 +61,21 @@ const [loading, setLoading] = useState(false);
 }
 setLoading(true);
 
-toast.success("Order placed successfully!");
+if (payment === "COD") {
+  toast.success("Order placed successfully!");
 
-setTimeout(() => {
-  router.push("/success");
-}, 1200);
+  setTimeout(() => {
+    router.push("/success");
+  }, 1200);
+
+  return;
+}
+
+setLoading(false);
+
+toast.error(
+  `${payment === "UPI" ? "UPI" : "Card"} payment is not available yet.`
+);
 };
 if (cart.length === 0) {
   return (

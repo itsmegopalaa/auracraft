@@ -62,6 +62,25 @@ const [loading, setLoading] = useState(false);
 setLoading(true);
 
 if (payment === "COD") {
+  const orderId = `AC${Date.now().toString().slice(-8)}`;
+
+  const order = {
+    orderId,
+    name,
+    phone,
+    email,
+    address,
+    city,
+    state,
+    pin,
+    payment,
+    items: cart,
+    total,
+    delivery: "3-5 Working Days",
+  };
+
+  localStorage.setItem("auracraft_last_order", JSON.stringify(order));
+
   toast.success("Order placed successfully!");
 
   setTimeout(() => {

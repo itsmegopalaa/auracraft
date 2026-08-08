@@ -164,24 +164,33 @@ export default async function ProductPage({
             </div>
 
 
-           <AddToCartButton
-  product={{
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    image: product.image,
-  }}
-/>
+          <div className="mt-8 flex flex-col gap-4">
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <AddToCartButton
+      product={{
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      }}
+    />
 
+    <WishlistButton
+      product={{
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      }}
+    />
+  </div>
 
+  <ShareButton productName={product.name} />
+</div>
 
-
-<ShareButton productName={product.name} />
-
-<TrustBadges />
-<ShareButton productName={product.name} />
-<TrustBadges />
-
+<div className="mt-8">
+  <TrustBadges />
+</div>
 
  
           </div>

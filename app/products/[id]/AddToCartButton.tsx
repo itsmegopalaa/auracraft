@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 import toast from "react-hot-toast";
-import WishlistButton from "./WishlistButton";
 
 type Props = {
   product: {
@@ -16,64 +15,60 @@ type Props = {
 
 export default function AddToCartButton({ product }: Props) {
   const { addToCart } = useCart();
-const router = useRouter();
+  const router = useRouter();
+
   return (
-  <div className="mt-8 flex flex-wrap gap-4">
+    <div className="flex flex-1 gap-3">
+      <button
+        onClick={() => {
+          addToCart({
+            ...product,
+            quantity: 1,
+          });
 
-    <button
-      onClick={() => {
-        addToCart({
-          ...product,
-          quantity: 1,
-        });
+          toast.success(`${product.name} added to cart 🛒`);
+        }}
+        className="
+          flex-1
+          rounded-full
+          bg-yellow-400
+          px-5
+          py-4
+          font-bold
+          text-black
+          transition
+          hover:scale-[1.02]
+          hover:bg-yellow-300
+        "
+      >
+        Add to Cart 🛒
+      </button>
 
-        toast.success(`${product.name} added to cart 🛒`);
-      }}
-      className="
-        rounded-full
-        bg-yellow-400
-        px-10 py-4
-        font-bold
-        text-black
-        transition
-        hover:scale-105
-      "
-    >
-      Add to Cart 🛒
-    </button>
+      <button
+        onClick={() => {
+          addToCart({
+            ...product,
+            quantity: 1,
+          });
 
-
-    <button
-      onClick={() => {
-        addToCart({
-          ...product,
-          quantity: 1,
-        });
-
-        router.push("/checkout");
-      }}
-      className="
-        rounded-full
-        border
-        border-yellow-400
-        px-10 py-4
-        font-bold
-        text-yellow-400
-        transition
-        hover:bg-yellow-400
-        hover:text-black
-      "
-    >
-      Buy Now ⚡
-    </button>
-<WishlistButton
-  product={{
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    image: product.image,
-  }}
-/>
-  </div>
-);
+          router.push("/checkout");
+        }}
+        className="
+          flex-1
+          rounded-full
+          border
+          border-yellow-400
+          px-5
+          py-4
+          font-bold
+          text-yellow-400
+          transition
+          hover:bg-yellow-400
+          hover:text-black
+        "
+      >
+        Buy Now ⚡
+      </button>
+    </div>
+  );
 }

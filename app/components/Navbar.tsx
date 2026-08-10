@@ -21,7 +21,7 @@ export default function Navbar() {
 
           <Link href="/">
             <h1 className="text-3xl font-extrabold tracking-wide text-yellow-400">
-              AuraCraft
+              MineNote
             </h1>
           </Link>
 
@@ -39,7 +39,7 @@ export default function Navbar() {
 
             <Link href="/">
               <h1 className="text-3xl font-extrabold text-yellow-400">
-                AuraCraft
+                MineNote
               </h1>
             </Link>
 

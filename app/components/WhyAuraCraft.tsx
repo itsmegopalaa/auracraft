@@ -1,17 +1,17 @@
 export default function WhyAuraCraft() {
   return (
     <section
-  id="why"
-  className="py-24 max-w-6xl mx-auto text-center"
->
+      id="why"
+      className="py-24 max-w-6xl mx-auto text-center"
+    >
       <h2 className="text-5xl font-bold">
-        Why <span className="text-yellow-400">AuraCraft?</span>
+        Why <span className="text-yellow-400">MineNote?</span>
       </h2>
 
       <p className="mt-6 text-gray-400 max-w-3xl mx-auto text-lg">
         We believe a notebook is more than paper. It carries your ideas,
-        dreams, memories and ambitions. Every AuraNote is designed to inspire
-        you every single day.
+        dreams, memories and ambitions. Every AuraNotes notebook is designed
+        to inspire you every single day.
       </p>
 
       <div className="grid md:grid-cols-3 gap-8 mt-16">

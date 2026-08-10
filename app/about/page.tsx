@@ -12,7 +12,7 @@ export default function AboutPage() {
         <section className="mx-auto max-w-6xl text-center">
 
           <p className="inline-flex rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300">
-            ✨ About AuraCraft
+            ✨About MineNote
           </p>
 
 
@@ -27,7 +27,7 @@ export default function AboutPage() {
 
 
           <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-gray-400">
-            AuraCraft creates premium notebooks that are more than paper and
+            MineNotecreates premium notebooks that are more than paper and
             covers. They are a space for your dreams, ideas, creativity and
             the stories you are building every day.
           </p>

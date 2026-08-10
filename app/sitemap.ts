@@ -1,22 +1,12 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+
+const base = "https" + "://minenote.in";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    {
-      url: "https://auracraft.com",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://auracraft.com/products",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://auracraft.com/about",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://auracraft.com/contact",
-      lastModified: new Date(),
-    },
+    { url: base, lastModified: new Date() },
+    { url: base + "/products", lastModified: new Date() },
+    { url: base + "/about", lastModified: new Date() },
+    { url: base + "/contact", lastModified: new Date() },
   ];
 }

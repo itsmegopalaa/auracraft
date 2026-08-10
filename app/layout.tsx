@@ -18,15 +18,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "AuraCraft | Premium Notebooks & Creative Designs",
-    template: "%s | AuraCraft",
+    default: "MineNote | Personalized Notebooks & Creative Designs",
+    template: "%s | MineNote",
   },
 
   description:
-    "AuraCraft creates premium notebooks with unique designs, quality paper, and creative styles made for students, creators, and dreamers.",
+    "MineNote creates personalized notebooks with unique designs, quality paper, and creative styles made for students, creators, and dreamers.",
 
   keywords: [
-    "AuraCraft",
+    "MineNote",
     "premium notebooks",
     "designer notebooks",
     "A4 notebooks",
@@ -37,25 +37,25 @@ export const metadata: Metadata = {
 
   authors: [
     {
-      name: "AuraCraft",
+      name: "MineNote",
     },
   ],
 
-  creator: "AuraCraft",
+  creator: "MineNote",
 
   openGraph: {
-    title: "AuraCraft | Premium Creative Notebooks",
+    title: "MineNote | Personalized Notebooks & Creative Designs",
     description:
       "Discover premium notebooks designed for creativity, learning, and imagination.",
     type: "website",
-    siteName: "AuraCraft",
+    siteName: "MineNote",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "AuraCraft | Premium Creative Notebooks",
+    title: "MineNote | Personalized Notebooks & Creative Designs",
     description:
-      "Premium notebooks with unique designs and quality craftsmanship.",
+      "MineNote creates personalized notebooks with unique designs, quality paper, and creative styles made for students, creators, and dreamers.",
   },
 };
 
@@ -65,43 +65,40 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-  <html
-    lang="en"
-    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-  >
-    <body>
-      <CartProvider>
-        <WishlistProvider>
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <CartProvider>
+          <WishlistProvider>
+            {children}
 
-          {children}
-
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: "#18181b",
-                color: "#ffffff",
-                border: "1px solid #facc15",
-                borderRadius: "16px",
-              },
-              success: {
-                iconTheme: {
-                  primary: "#facc15",
-                  secondary: "#000000",
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: "#18181b",
+                  color: "#ffffff",
+                  border: "1px solid #facc15",
+                  borderRadius: "16px",
                 },
-              },
-              error: {
-                iconTheme: {
-                  primary: "#ef4444",
-                  secondary: "#ffffff",
+                success: {
+                  iconTheme: {
+                    primary: "#facc15",
+                    secondary: "#000000",
+                  },
                 },
-              },
-            }}
-          />
-
-        </WishlistProvider>
-      </CartProvider>
-    </body>
-  </html>
-);
+                error: {
+                  iconTheme: {
+                    primary: "#ef4444",
+                    secondary: "#ffffff",
+                  },
+                },
+              }}
+            />
+          </WishlistProvider>
+        </CartProvider>
+      </body>
+    </html>
+  );
 }

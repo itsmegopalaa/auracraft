@@ -28,7 +28,8 @@ export default function Hero() {
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-8 text-gray-400">
-            AuraNotes by AuraCraft transforms ordinary notebooks into premium
+
+AuraNotes by MineNote transforms ordinary notebooks into premium
             creations designed for students, creators and dreamers who want
             every page to inspire their next big idea.
           </p>

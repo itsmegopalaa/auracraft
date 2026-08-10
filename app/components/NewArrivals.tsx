@@ -12,7 +12,7 @@ export default function NewArrivals() {
       </h2>
 
       <p className="text-center text-gray-400 mt-5 mb-14">
-        Fresh designs added to the AuraCraft collection.
+       Fresh AuraNotes designs made for your ideas.
       </p>
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

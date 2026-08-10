@@ -20,7 +20,7 @@ export default function MobileNavbar() {
         {/* Center Logo */}
         <Link href="/">
           <h1 className="text-3xl font-extrabold tracking-wide text-yellow-400">
-            AuraCraft
+            MineNote
           </h1>
         </Link>
 

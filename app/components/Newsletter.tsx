@@ -8,7 +8,7 @@ export default function Newsletter() {
         </p>
 
         <h2 className="mt-4 text-4xl font-extrabold md:text-5xl">
-          Join the <span className="text-yellow-400">AuraCraft</span> Family
+          Join the <span className="text-yellow-400">MineNote</span> Family
         </h2>
 
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-gray-400">
@@ -32,7 +32,7 @@ export default function Newsletter() {
         </form>
 
         <p className="mt-5 text-xs text-gray-600">
-          No spam. Just AuraCraft updates and inspiration.
+         No spam. Just MineNote updates and inspiration.
         </p>
 
       </div>

@@ -11,7 +11,8 @@ export default function Footer() {
         <div>
 
           <h2 className="text-3xl font-bold text-yellow-400">
-            AuraCraft
+            MineNote
+
           </h2>
 
           <p className="mt-5 leading-7 text-gray-400">
@@ -106,7 +107,7 @@ export default function Footer() {
 
       <div className="border-t border-zinc-800 py-6 text-center text-sm text-gray-500">
 
-        © 2026 AuraCraft • Crafted with ❤️ in India
+      © 2026 MineNote • A brand by AuraCraft • Crafted with ❤️ in India
 
       </div>
 

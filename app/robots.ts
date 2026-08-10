@@ -6,7 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-
-    sitemap: "https://auracraft.com/sitemap.xml",
+    sitemap: "https://minenote.in/sitemap.xml",
   };
 }

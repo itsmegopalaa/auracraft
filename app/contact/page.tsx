@@ -14,9 +14,11 @@ export default function ContactPage() {
           <div className="text-center">
 
             <p className="inline-flex rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300">
-              ✨ Contact AuraCraft
+              ✨ Contact MineNote
             </p>
-
+<p className="mt-2 text-sm text-gray-400">
+  MineNote — a brand by AuraCraft
+</p>
 
             <h1 className="mt-8 text-5xl font-extrabold md:text-7xl">
               Let's Build

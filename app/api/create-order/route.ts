@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import Razorpay from "razorpay";
 
 export async function POST(request: Request) {
   try {
@@ -24,34 +23,59 @@ export async function POST(request: Request) {
       );
     }
 
-    const razorpay = new Razorpay({
-      key_id: keyId,
-      key_secret: keySecret,
-    });
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
 
-    const order = await razorpay.orders.create({
-      amount,
-      currency: "INR",
-      receipt,
-    });
+    const razorpayResponse = await fetch(
+      "https://api.razorpay.com/v1/orders",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount,
+          currency: "INR",
+          receipt,
+        }),
+      }
+    );
 
-    return NextResponse.json({
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-    });
-  } catch (error: unknown) {
-    console.error("Razorpay create order error:", error);
+    const razorpayData = await razorpayResponse.json();
 
-    const message =
-      error instanceof Error ? error.message : "Unable to create Razorpay order.";
+    if (!razorpayResponse.ok) {
+      console.error("RAZORPAY API ERROR:", {
+        status: razorpayResponse.status,
+        code: razorpayData?.error?.code,
+        description: razorpayData?.error?.description,
+        reason: razorpayData?.error?.reason,
+        source: razorpayData?.error?.source,
+      });
 
-    if (/authentication|auth|key_id|credentials/i.test(message)) {
       return NextResponse.json(
-        { error: "Razorpay authentication failed." },
-        { status: 401 }
+        {
+          error:
+            razorpayData?.error?.description ||
+            "Razorpay rejected the order.",
+        },
+        { status: razorpayResponse.status }
       );
     }
+
+    return NextResponse.json({
+      order_id: razorpayData.id,
+      amount: razorpayData.amount,
+      currency: razorpayData.currency,
+    });
+  } catch (error: unknown) {
+    console.error("Razorpay create order error:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      name: error instanceof Error ? error.name : "Unknown",
+      details:
+        typeof error === "object" && error !== null
+          ? JSON.stringify(error, Object.getOwnPropertyNames(error))
+          : String(error),
+    });
 
     return NextResponse.json(
       { error: "Unable to create payment order." },

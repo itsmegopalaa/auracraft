@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -32,50 +31,77 @@ type Order = {
 
 export default function SuccessPage() {
   const [order, setOrder] = useState<Order | null>(null);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     try {
       const savedOrder = localStorage.getItem("auracraft_last_order");
 
-      if (!savedOrder) {
-        return;
-      }
+      if (savedOrder) {
+        const parsedOrder: Order = JSON.parse(savedOrder);
 
-      const parsedOrder = JSON.parse(savedOrder);
-
-      if (
-        parsedOrder &&
-        parsedOrder.orderId &&
-        Array.isArray(parsedOrder.items)
-      ) {
-        setOrder(parsedOrder);
+        if (
+          parsedOrder &&
+          parsedOrder.orderId &&
+          Array.isArray(parsedOrder.items)
+        ) {
+          setOrder(parsedOrder);
+        }
       }
     } catch (error) {
       console.error("Failed to load saved order:", error);
+    } finally {
+      setChecked(true);
     }
   }, []);
+
+  if (!checked) {
+    return (
+      <>
+        <main className="min-h-screen bg-black px-6 py-24 text-white">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10">
+              <div className="text-5xl">⏳</div>
+
+              <h1 className="mt-6 text-2xl font-bold">
+                Loading your order...
+              </h1>
+
+              <p className="mt-3 text-gray-400">
+                Please wait a moment.
+              </p>
+            </div>
+          </div>
+        </main>
+
+        <Footer />
+      </>
+    );
+  }
 
   if (!order) {
     return (
       <>
-        <main className="min-h-screen bg-black px-4 py-16 text-white">
+        <main className="min-h-screen bg-black px-6 py-24 text-white">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="text-6xl">🧾</div>
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10">
+              <div className="text-5xl">🧾</div>
 
-            <h1 className="mt-6 text-3xl font-bold">
-              Order Details Not Found
-            </h1>
+              <h1 className="mt-6 text-3xl font-bold">
+                Order Details Not Found
+              </h1>
 
-            <p className="mt-4 text-gray-400">
-              We couldn't find a recent MineNote order on this device.
-            </p>
+              <p className="mt-4 text-gray-400">
+                We couldn't find a recent MineNote order on this device.
+              </p>
 
-            <Link
-              href="/products"
-              className="mt-8 inline-block rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105"
-            >
-              Explore Products →
-            </Link>
+              <Link
+                href="/products"
+                className="mt-8 inline-block rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105"
+              >
+                Explore Products →
+              </Link>
+            </div>
           </div>
         </main>
 
@@ -86,8 +112,8 @@ export default function SuccessPage() {
 
   return (
     <>
-      <main className="min-h-screen bg-black px-4 py-12 text-white md:py-16">
-        <div className="mx-auto max-w-5xl">
+      <main className="min-h-screen bg-black px-6 py-24 text-white">
+        <div className="mx-auto max-w-6xl">
           {/* Confirmation */}
           <div className="rounded-3xl border border-yellow-400/30 bg-zinc-900 p-8 text-center shadow-2xl md:p-12">
             <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-yellow-400 text-5xl font-bold text-black">
@@ -295,9 +321,9 @@ export default function SuccessPage() {
             </Link>
           </div>
         </div>
-
-        <Footer />
       </main>
+
+      <Footer />
     </>
   );
 }

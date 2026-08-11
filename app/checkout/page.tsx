@@ -65,38 +65,107 @@ export default function CheckoutPage() {
     return true;
   };
 
-  const handlePlaceOrder = () => {
+  const saveOrderToDatabase = async ({
+    orderId,
+    paymentMethod,
+    paymentStatus,
+    orderStatus,
+    razorpayOrderId,
+    razorpayPaymentId,
+  }: {
+    orderId: string;
+    paymentMethod: string;
+    paymentStatus: string;
+    orderStatus: string;
+    razorpayOrderId?: string | null;
+    razorpayPaymentId?: string | null;
+  }) => {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orderId,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        address: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        pin: pin.trim(),
+        paymentMethod,
+        paymentStatus,
+        orderStatus,
+        items: cart,
+        total,
+        razorpayOrderId: razorpayOrderId || null,
+        razorpayPaymentId: razorpayPaymentId || null,
+        delivery: "3-5 Working Days",
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      console.error("ORDER SAVE FAILED:", result);
+      throw new Error(result.error || "Unable to save order.");
+    }
+
+    return result.order;
+  };
+
+  const handlePlaceOrder = async () => {
     if (!validateDetails()) return;
 
     setLoading(true);
 
-    const orderId = `MN${Date.now().toString().slice(-8)}`;
+    try {
+      const orderId = `MN${Date.now().toString().slice(-8)}`;
 
-    const order = {
-      orderId,
-      name,
-      phone,
-      email,
-      address,
-      city,
-      state,
-      pin,
-      payment: "COD",
-      items: cart,
-      total,
-      delivery: "3-5 Working Days",
-    };
+      const savedOrder = await saveOrderToDatabase({
+        orderId,
+        paymentMethod: "COD",
+        paymentStatus: "pending",
+        orderStatus: "pending",
+      });
 
-    localStorage.setItem(
-      "auracraft_last_order",
-      JSON.stringify(order)
-    );
+      const order = {
+        orderId,
+        name,
+        phone,
+        email,
+        address,
+        city,
+        state,
+        pin,
+        payment: "COD",
+        items: cart,
+        total,
+        delivery: "3-5 Working Days",
+        databaseOrderId: savedOrder.id,
+      };
 
-    toast.success("Order placed successfully!");
+      localStorage.setItem(
+        "auracraft_last_order",
+        JSON.stringify(order)
+      );
 
-    setTimeout(() => {
-      router.push("/success");
-    }, 1000);
+      toast.success("Order placed successfully!");
+
+      setTimeout(() => {
+        router.push("/success");
+      }, 700);
+    } catch (error) {
+      console.error("COD ORDER ERROR:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to place order."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOnlinePaymentClick = () => {
@@ -297,7 +366,7 @@ export default function CheckoutPage() {
                     className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading
-                      ? "Processing Order..."
+                      ? "Saving Order..."
                       : "Place Order →"}
                   </button>
                 ) : (
@@ -307,36 +376,68 @@ export default function CheckoutPage() {
                       name={name}
                       email={email}
                       phone={phone}
-                      onSuccess={(paymentResponse) => {
-                        const orderId = `MN${Date.now()
-                          .toString()
-                          .slice(-8)}`;
+                      onSuccess={async (paymentResponse) => {
+                        try {
+                          setLoading(true);
 
-                        const order = {
-                          orderId,
-                          name,
-                          phone,
-                          email,
-                          address,
-                          city,
-                          state,
-                          pin,
-                          payment: "Razorpay",
-                          items: cart,
-                          total,
-                          delivery: "3-5 Working Days",
-                          razorpayPaymentId:
-                            paymentResponse.razorpay_payment_id,
-                          razorpayOrderId:
-                            paymentResponse.razorpay_order_id,
-                        };
+                          const orderId = `MN${Date.now()
+                            .toString()
+                            .slice(-8)}`;
 
-                        localStorage.setItem(
-                          "auracraft_last_order",
-                          JSON.stringify(order)
-                        );
+                          await saveOrderToDatabase({
+                            orderId,
+                            paymentMethod: "Razorpay",
+                            paymentStatus: "paid",
+                            orderStatus: "confirmed",
+                            razorpayPaymentId:
+                              paymentResponse.razorpay_payment_id,
+                            razorpayOrderId:
+                              paymentResponse.razorpay_order_id,
+                          });
 
-                        router.push("/success");
+                          const order = {
+                            orderId,
+                            name,
+                            phone,
+                            email,
+                            address,
+                            city,
+                            state,
+                            pin,
+                            payment: "Razorpay",
+                            items: cart,
+                            total,
+                            delivery: "3-5 Working Days",
+                            razorpayPaymentId:
+                              paymentResponse.razorpay_payment_id,
+                            razorpayOrderId:
+                              paymentResponse.razorpay_order_id,
+                          };
+
+                          localStorage.setItem(
+                            "auracraft_last_order",
+                            JSON.stringify(order)
+                          );
+
+                          toast.success(
+                            "Payment successful! Order confirmed."
+                          );
+
+                          router.push("/success");
+                        } catch (error) {
+                          console.error(
+                            "ONLINE ORDER SAVE ERROR:",
+                            error
+                          );
+
+                          toast.error(
+                            error instanceof Error
+                              ? error.message
+                              : "Payment succeeded but order saving failed."
+                          );
+                        } finally {
+                          setLoading(false);
+                        }
                       }}
                     />
                   </div>

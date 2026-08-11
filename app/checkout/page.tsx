@@ -377,68 +377,69 @@ export default function CheckoutPage() {
                       email={email}
                       phone={phone}
                       onSuccess={async (paymentResponse) => {
-                        try {
-                          setLoading(true);
+  try {
+    setLoading(true);
 
-                          const orderId = `MN${Date.now()
-                            .toString()
-                            .slice(-8)}`;
+    const orderId = `MN${Date.now()
+      .toString()
+      .slice(-8)}`;
 
-                          await saveOrderToDatabase({
-                            orderId,
-                            paymentMethod: "Razorpay",
-                            paymentStatus: "paid",
-                            orderStatus: "confirmed",
-                            razorpayPaymentId:
-                              paymentResponse.razorpay_payment_id,
-                            razorpayOrderId:
-                              paymentResponse.razorpay_order_id,
-                          });
+    const savedOrder = await saveOrderToDatabase({
+      orderId,
+      paymentMethod: "Razorpay",
+      paymentStatus: "paid",
+      orderStatus: "confirmed",
+      razorpayPaymentId:
+        paymentResponse.razorpay_payment_id,
+      razorpayOrderId:
+        paymentResponse.razorpay_order_id,
+    });
 
-                          const order = {
-                            orderId,
-                            name,
-                            phone,
-                            email,
-                            address,
-                            city,
-                            state,
-                            pin,
-                            payment: "Razorpay",
-                            items: cart,
-                            total,
-                            delivery: "3-5 Working Days",
-                            razorpayPaymentId:
-                              paymentResponse.razorpay_payment_id,
-                            razorpayOrderId:
-                              paymentResponse.razorpay_order_id,
-                          };
+    const order = {
+      orderId,
+      name,
+      phone,
+      email,
+      address,
+      city,
+      state,
+      pin,
+      payment: "Razorpay",
+      items: cart,
+      total,
+      delivery: "3-5 Working Days",
+      databaseOrderId: savedOrder.id,
+      razorpayPaymentId:
+        paymentResponse.razorpay_payment_id,
+      razorpayOrderId:
+        paymentResponse.razorpay_order_id,
+    };
 
-                          localStorage.setItem(
-                            "auracraft_last_order",
-                            JSON.stringify(order)
-                          );
+    localStorage.setItem(
+      "auracraft_last_order",
+      JSON.stringify(order)
+    );
 
-                          toast.success(
-                            "Payment successful! Order confirmed."
-                          );
+    toast.success(
+      "Payment successful! Order confirmed."
+    );
 
-                          router.push("/success");
-                        } catch (error) {
-                          console.error(
-                            "ONLINE ORDER SAVE ERROR:",
-                            error
-                          );
+    router.push("/success");
+  } catch (error) {
+    console.error(
+      "ONLINE ORDER SAVE ERROR:",
+      error
+    );
 
-                          toast.error(
-                            error instanceof Error
-                              ? error.message
-                              : "Payment succeeded but order saving failed."
-                          );
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Payment succeeded but order saving failed."
+    );
+  } finally {
+    setLoading(false);
+  }
+}}
                     />
                   </div>
                 )}

@@ -197,13 +197,76 @@ export default async function AdminOrderDetailPage({
         </div>
 
         <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-zinc-900">
-            Ordered Items
-          </h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-zinc-900">
+              Ordered Items
+            </h2>
 
-          <pre className="mt-5 overflow-x-auto rounded-xl bg-zinc-950 p-5 text-sm text-zinc-100">
-            {JSON.stringify(order.items, null, 2)}
-          </pre>
+            <span className="text-sm text-zinc-500">
+              {Array.isArray(order.items) ? order.items.length : 0} item
+              {Array.isArray(order.items) && order.items.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <div className="mt-5 divide-y divide-zinc-100">
+            {Array.isArray(order.items) && order.items.length > 0 ? (
+              order.items.map((item: {
+                id: number;
+                name: string;
+                price: number;
+                quantity: number;
+                image: string;
+              }) => {
+                const lineTotal = Number(item.price) * Number(item.quantity);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex gap-4 py-5 first:pt-0 last:pb-0"
+                  >
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-zinc-900">
+                        {item.name}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-zinc-500">
+                        ₹{Number(item.price).toLocaleString("en-IN")} ×{" "}
+                        {item.quantity}
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <p className="font-semibold text-zinc-900">
+                        ₹{lineTotal.toLocaleString("en-IN")}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="py-5 text-sm text-zinc-500">
+                No item details available.
+              </p>
+            )}
+          </div>
+
+          <div className="mt-6 flex items-center justify-between border-t border-zinc-200 pt-5">
+            <span className="text-sm font-medium text-zinc-500">
+              Order Total
+            </span>
+
+            <span className="text-2xl font-bold text-zinc-900">
+              ₹{Number(order.total).toLocaleString("en-IN")}
+            </span>
+          </div>
         </section>
       </div>
     </main>

@@ -20,8 +20,6 @@ export async function POST(request: Request) {
       state,
       pin,
       paymentMethod,
-      paymentStatus,
-      orderStatus,
       items,
       total,
       razorpayOrderId,
@@ -39,7 +37,8 @@ export async function POST(request: Request) {
       !state ||
       !pin ||
       !paymentMethod ||
-      !items ||
+      !Array.isArray(items) ||
+      items.length === 0 ||
       total === undefined
     ) {
       return NextResponse.json(
@@ -48,25 +47,58 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!["COD", "Razorpay"].includes(paymentMethod)) {
+      return NextResponse.json(
+        { error: "Invalid payment method." },
+        { status: 400 }
+      );
+    }
+
+    const numericTotal = Number(total);
+
+    if (!Number.isFinite(numericTotal) || numericTotal <= 0) {
+      return NextResponse.json(
+        { error: "Invalid order total." },
+        { status: 400 }
+      );
+    }
+
+    let paymentStatus = "pending";
+    let orderStatus = "placed";
+
+    if (paymentMethod === "Razorpay") {
+      if (!razorpayOrderId || !razorpayPaymentId) {
+        return NextResponse.json(
+          { error: "Missing Razorpay payment details." },
+          { status: 400 }
+        );
+      }
+
+      paymentStatus = "paid";
+      orderStatus = "confirmed";
+    }
+
     const { data, error } = await supabaseAdmin
       .from("orders")
       .insert({
-        order_id: orderId,
-        name,
-        phone,
-        email,
-        address,
-        city,
-        state,
-        pin,
+        order_id: String(orderId),
+        name: String(name).trim(),
+        phone: String(phone).trim(),
+        email: String(email).trim(),
+        address: String(address).trim(),
+        city: String(city).trim(),
+        state: String(state).trim(),
+        pin: String(pin).trim(),
         payment_method: paymentMethod,
-        payment_status: paymentStatus || "pending",
-        order_status: orderStatus || "pending",
+        payment_status: paymentStatus,
+        order_status: orderStatus,
         items,
-        total,
-        razorpay_order_id: razorpayOrderId || null,
-        razorpay_payment_id: razorpayPaymentId || null,
-        delivery: delivery || "3-5 Working Days",
+        total: Math.round(numericTotal),
+        razorpay_order_id:
+          paymentMethod === "Razorpay" ? razorpayOrderId : null,
+        razorpay_payment_id:
+          paymentMethod === "Razorpay" ? razorpayPaymentId : null,
+        delivery: "3-5 Working Days",
       })
       .select()
       .single();
@@ -92,7 +124,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "Invalid order request." },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }

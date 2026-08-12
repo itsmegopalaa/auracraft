@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Script from "next/script";
 import toast from "react-hot-toast";
+import { Notebook } from "../data/notebooks";
 
 declare global {
   interface Window {
@@ -39,7 +40,10 @@ interface RazorpayResponse {
 
 interface RazorpayInstance {
   open: () => void;
-  on: (event: string, callback: (response: unknown) => void) => void;
+  on: (
+    event: string,
+    callback: (response: unknown) => void
+  ) => void;
 }
 
 interface RazorpayCheckoutProps {
@@ -47,6 +51,7 @@ interface RazorpayCheckoutProps {
   name: string;
   email: string;
   phone: string;
+  items: Array<Notebook & { quantity: number }>;
   onSuccess: (response: RazorpayResponse) => void;
 }
 
@@ -55,13 +60,16 @@ export default function RazorpayCheckout({
   name,
   email,
   phone,
+  items,
   onSuccess,
 }: RazorpayCheckoutProps) {
   const [loading, setLoading] = useState(false);
 
   const openCheckout = async () => {
     if (!window.Razorpay) {
-      toast.error("Payment gateway is still loading. Please try again.");
+      toast.error(
+        "Payment gateway is still loading. Please try again."
+      );
       return;
     }
 
@@ -70,32 +78,47 @@ export default function RazorpayCheckout({
       return;
     }
 
-    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    if (!Array.isArray(items) || items.length === 0) {
+      toast.error("Your cart is empty.");
+      return;
+    }
+
+    const keyId =
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
     if (!keyId) {
-      toast.error("Razorpay key is not configured.");
+      toast.error(
+        "Razorpay key is not configured."
+      );
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("/api/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100),
-          receipt: `MN_${Date.now()}`,
-        }),
-      });
+      const response = await fetch(
+        "/api/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: items.map((item) => ({
+              id: item.id,
+              quantity: item.quantity,
+            })),
+            receipt: `MN_${Date.now()}`,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Unable to create payment order."
+          data.error ||
+            "Unable to create payment order."
         );
       }
 
@@ -104,7 +127,8 @@ export default function RazorpayCheckout({
         amount: data.amount,
         currency: data.currency,
         name: "MineNote",
-        description: "MineNote Notebook Order",
+        description:
+          "MineNote Notebook Order",
         order_id: data.order_id,
         prefill: {
           name,
@@ -114,30 +138,47 @@ export default function RazorpayCheckout({
         theme: {
           color: "#facc15",
         },
-        handler: async (paymentResponse) => {
+        handler: async (
+          paymentResponse
+        ) => {
           try {
-            const verifyResponse = await fetch(
-              "/api/verify-payment",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(paymentResponse),
-              }
-            );
+            const verifyResponse =
+              await fetch(
+                "/api/verify-payment",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type":
+                      "application/json",
+                  },
+                  body: JSON.stringify(
+                    paymentResponse
+                  ),
+                }
+              );
 
-            const verification = await verifyResponse.json();
+            const verification =
+              await verifyResponse.json();
 
-            if (!verifyResponse.ok || !verification.verified) {
-              toast.error("Payment verification failed.");
+            if (
+              !verifyResponse.ok ||
+              !verification.verified
+            ) {
+              toast.error(
+                "Payment verification failed."
+              );
               return;
             }
 
-            toast.success("Payment verified successfully!");
+            toast.success(
+              "Payment verified successfully!"
+            );
+
             onSuccess(paymentResponse);
           } catch {
-            toast.error("Unable to verify payment.");
+            toast.error(
+              "Unable to verify payment."
+            );
           } finally {
             setLoading(false);
           }
@@ -145,15 +186,22 @@ export default function RazorpayCheckout({
         modal: {
           ondismiss: () => {
             setLoading(false);
-            toast.error("Payment cancelled.");
+            toast.error(
+              "Payment cancelled."
+            );
           },
         },
       });
 
-      razorpay.on("payment.failed", () => {
-        setLoading(false);
-        toast.error("Payment failed. Please try again.");
-      });
+      razorpay.on(
+        "payment.failed",
+        () => {
+          setLoading(false);
+          toast.error(
+            "Payment failed. Please try again."
+          );
+        }
+      );
 
       razorpay.open();
     } catch (error) {

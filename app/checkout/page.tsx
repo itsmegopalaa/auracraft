@@ -72,6 +72,7 @@ export default function CheckoutPage() {
     orderStatus,
     razorpayOrderId,
     razorpayPaymentId,
+    razorpaySignature,
   }: {
     orderId: string;
     paymentMethod: string;
@@ -79,6 +80,7 @@ export default function CheckoutPage() {
     orderStatus: string;
     razorpayOrderId?: string | null;
     razorpayPaymentId?: string | null;
+    razorpaySignature?: string | null;
   }) => {
     const response = await fetch("/api/orders", {
       method: "POST",
@@ -101,6 +103,7 @@ export default function CheckoutPage() {
         total,
         razorpayOrderId: razorpayOrderId || null,
         razorpayPaymentId: razorpayPaymentId || null,
+        razorpaySignature: razorpaySignature || null,
         delivery: "3-5 Working Days",
       }),
     });
@@ -376,6 +379,7 @@ export default function CheckoutPage() {
                       name={name}
                       email={email}
                       phone={phone}
+                      items={cart}
                       onSuccess={async (paymentResponse) => {
   try {
     setLoading(true);
@@ -391,6 +395,8 @@ export default function CheckoutPage() {
       orderStatus: "confirmed",
       razorpayPaymentId:
         paymentResponse.razorpay_payment_id,
+      razorpaySignature:
+        paymentResponse.razorpay_signature,
       razorpayOrderId:
         paymentResponse.razorpay_order_id,
     });

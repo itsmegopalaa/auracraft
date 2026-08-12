@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { calculateOrder } from "@/app/lib/order-pricing";
 
 export async function POST(request: Request) {
   try {
@@ -7,23 +8,50 @@ export async function POST(request: Request) {
 
     if (!keyId || !keySecret) {
       return NextResponse.json(
-        { error: "Razorpay server credentials are not configured." },
+        {
+          error:
+            "Razorpay server credentials are not configured.",
+        },
         { status: 500 }
       );
     }
 
     const body = await request.json();
-    const amount = Number(body.amount);
-    const receipt = String(body.receipt || `mn_${Date.now()}`);
 
-    if (!Number.isInteger(amount) || amount < 100) {
+    const { items, receipt } = body;
+
+    let calculatedOrder;
+
+    try {
+      calculatedOrder = calculateOrder(items);
+    } catch (error) {
       return NextResponse.json(
-        { error: "Amount must be at least 100 paise." },
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : "Invalid cart.",
+        },
         { status: 400 }
       );
     }
 
-    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const amount = Math.round(calculatedOrder.total * 100);
+    const safeReceipt =
+      typeof receipt === "string" && receipt.trim()
+        ? receipt.trim()
+        : `MN_${Date.now()}`;
+
+    if (!Number.isInteger(amount) || amount < 100) {
+      return NextResponse.json(
+        { error: "Invalid payment amount." },
+        { status: 400 }
+      );
+    }
+
+    const auth = Buffer.from(
+      `${keyId}:${keySecret}`
+    ).toString("base64");
 
     const razorpayResponse = await fetch(
       "https://api.razorpay.com/v1/orders",
@@ -36,18 +64,20 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           amount,
           currency: "INR",
-          receipt,
+          receipt: safeReceipt,
         }),
       }
     );
 
-    const razorpayData = await razorpayResponse.json();
+    const razorpayData =
+      await razorpayResponse.json();
 
     if (!razorpayResponse.ok) {
       console.error("RAZORPAY API ERROR:", {
         status: razorpayResponse.status,
         code: razorpayData?.error?.code,
-        description: razorpayData?.error?.description,
+        description:
+          razorpayData?.error?.description,
         reason: razorpayData?.error?.reason,
         source: razorpayData?.error?.source,
       });
@@ -66,19 +96,29 @@ export async function POST(request: Request) {
       order_id: razorpayData.id,
       amount: razorpayData.amount,
       currency: razorpayData.currency,
+      items: calculatedOrder.items,
+      total: calculatedOrder.total,
     });
   } catch (error: unknown) {
-    console.error("Razorpay create order error:", {
-      message: error instanceof Error ? error.message : "Unknown error",
-      name: error instanceof Error ? error.name : "Unknown",
-      details:
-        typeof error === "object" && error !== null
-          ? JSON.stringify(error, Object.getOwnPropertyNames(error))
-          : String(error),
-    });
+    console.error(
+      "Razorpay create order error:",
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
+        name:
+          error instanceof Error
+            ? error.name
+            : "Unknown",
+      }
+    );
 
     return NextResponse.json(
-      { error: "Unable to create payment order." },
+      {
+        error:
+          "Unable to create payment order.",
+      },
       { status: 500 }
     );
   }

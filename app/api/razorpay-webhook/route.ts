@@ -100,7 +100,7 @@ export async function POST(request: Request) {
           .from("orders")
           .update({
             payment_status: "failed",
-            order_status: "pending",
+            order_status: "cancelled",
           })
           .eq("razorpay_order_id", razorpayOrderId);
 

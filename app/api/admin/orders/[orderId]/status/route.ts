@@ -22,7 +22,7 @@ export async function PATCH(
 
     const { orderId } = await context.params;
     const body = await request.json();
-    const status = body.orderStatus as Status;
+    const status = body.status as Status;
 
     if (!ALLOWED_STATUSES.includes(status)) {
       return NextResponse.json(

@@ -40,7 +40,7 @@ export default function OrderStatusForm({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            orderStatus: status,
+            status,
           }),
         }
       );

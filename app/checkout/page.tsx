@@ -130,7 +130,7 @@ export default function CheckoutPage() {
         orderId,
         paymentMethod: "COD",
         paymentStatus: "pending",
-        orderStatus: "pending",
+       orderStatus: "placed",
       });
 
       const order = {

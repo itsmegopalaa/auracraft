@@ -34,6 +34,7 @@ export default function SuccessPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [checked, setChecked] = useState(false);
   const [orderStatus, setOrderStatus] = useState<string>("placed");
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     async function loadOrder() {
@@ -210,21 +211,46 @@ export default function SuccessPage() {
                 {order.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-4 rounded-2xl bg-black p-4"
+                    className="overflow-hidden rounded-2xl border border-zinc-800 bg-black"
                   >
-                    <div>
-                      <p className="font-semibold">
-                        {item.name}
-                      </p>
+                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+                      <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 sm:h-32 sm:w-24">
+                        {item.image && !imageErrors[item.id] ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="h-full w-full object-contain p-1"
+                            onError={() =>
+                              setImageErrors((current) => ({
+                                ...current,
+                                [item.id]: true,
+                              }))
+                            }
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center px-2 text-center text-xs text-gray-500">
+                            <span className="text-2xl">📓</span>
+                            <span className="mt-1">
+                              Preview unavailable
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
-                      <p className="mt-1 text-sm text-gray-400">
-                        ₹{item.price} × {item.quantity}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-white">
+                          {item.name}
+                        </p>
+
+                        <p className="mt-1 text-sm text-gray-400">
+                          ₹{item.price} × {item.quantity}
+                        </p>
+                      </div>
+
+                      <p className="text-lg font-bold text-yellow-400">
+                        ₹{item.price * item.quantity}
                       </p>
                     </div>
-
-                    <p className="font-bold text-yellow-400">
-                      ₹{item.price * item.quantity}
-                    </p>
                   </div>
                 ))}
               </div>

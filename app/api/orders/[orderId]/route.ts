@@ -1,0 +1,98 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function GET(
+  request: Request,
+  context: { params: Promise<{ orderId: string }> }
+) {
+  try {
+    const { orderId } = await context.params;
+
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email")?.trim().toLowerCase();
+
+    if (!orderId || !email) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Order ID and email are required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        `
+          order_id,
+          name,
+          phone,
+          email,
+          address,
+          city,
+          state,
+          pin,
+          payment_method,
+          payment_status,
+          order_status,
+          items,
+          total,
+          delivery,
+          razorpay_order_id,
+          razorpay_payment_id,
+          created_at
+        `
+      )
+      .eq("order_id", orderId)
+      .ilike("email", email)
+      .maybeSingle();
+
+    if (error) {
+      console.error("CUSTOMER ORDER API ERROR:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unable to load order.",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!order) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Order not found.",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("CUSTOMER ORDER API ERROR:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unable to load order.",
+      },
+      { status: 500 }
+    );
+  }
+}

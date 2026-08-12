@@ -27,32 +27,87 @@ type Order = {
   delivery: string;
   razorpayPaymentId?: string;
   razorpayOrderId?: string;
+  orderStatus?: string;
 };
 
 export default function SuccessPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [checked, setChecked] = useState(false);
+  const [orderStatus, setOrderStatus] = useState<string>("placed");
 
   useEffect(() => {
-    try {
-      const savedOrder = localStorage.getItem("auracraft_last_order");
+    async function loadOrder() {
+      try {
+        const savedOrder = localStorage.getItem(
+          "auracraft_last_order"
+        );
 
-      if (savedOrder) {
+        if (!savedOrder) {
+          return;
+        }
+
         const parsedOrder: Order = JSON.parse(savedOrder);
 
         if (
-          parsedOrder &&
-          parsedOrder.orderId &&
-          Array.isArray(parsedOrder.items)
+          !parsedOrder ||
+          !parsedOrder.orderId ||
+          !Array.isArray(parsedOrder.items) ||
+          !parsedOrder.email
         ) {
-          setOrder(parsedOrder);
+          return;
         }
+
+        setOrder(parsedOrder);
+
+        const response = await fetch(
+          `/api/orders/${encodeURIComponent(
+            parsedOrder.orderId
+          )}?email=${encodeURIComponent(parsedOrder.email)}`,
+          {
+            cache: "no-store",
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          console.error(
+            "CUSTOMER ORDER LOAD FAILED:",
+            JSON.stringify(result, null, 2)
+          );
+
+          throw new Error(
+            result?.error ||
+              `Unable to load order (HTTP ${response.status}).`
+          );
+        }
+
+        const databaseOrder = result.order;
+
+        setOrderStatus(
+          databaseOrder.order_status || "placed"
+        );
+
+        setOrder((current) =>
+          current
+            ? {
+                ...current,
+                orderStatus:
+                  databaseOrder.order_status,
+              }
+            : current
+        );
+      } catch (error) {
+        console.error(
+          "Failed to load order:",
+          error
+        );
+      } finally {
+        setChecked(true);
       }
-    } catch (error) {
-      console.error("Failed to load saved order:", error);
-    } finally {
-      setChecked(true);
     }
+
+    loadOrder();
   }, []);
 
   if (!checked) {
@@ -261,47 +316,110 @@ export default function SuccessPage() {
 
           {/* Status */}
           <div className="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-7">
-            <h2 className="text-2xl font-bold">
-              What's Next? ✨
-            </h2>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <h2 className="text-2xl font-bold">
+                Order Status ✨
+              </h2>
+
+              <span className="w-fit rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold capitalize text-black">
+                {orderStatus}
+              </span>
+            </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl bg-black p-5">
+              <div
+                className={`rounded-2xl p-5 ${
+                  ["placed", "confirmed", "processing", "shipped", "delivered"].includes(
+                    orderStatus
+                  )
+                    ? "bg-yellow-400 text-black"
+                    : "bg-black"
+                }`}
+              >
                 <div className="text-3xl">📋</div>
 
                 <h3 className="mt-3 font-bold">
                   Order Received
                 </h3>
 
-                <p className="mt-2 text-sm text-gray-400">
+                <p
+                  className={`mt-2 text-sm ${
+                    ["placed", "confirmed", "processing", "shipped", "delivered"].includes(
+                      orderStatus
+                    )
+                      ? "text-black/70"
+                      : "text-gray-400"
+                  }`}
+                >
                   We've received your order details.
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-black p-5">
+              <div
+                className={`rounded-2xl p-5 ${
+                  ["confirmed", "processing", "shipped", "delivered"].includes(
+                    orderStatus
+                  )
+                    ? "bg-yellow-400 text-black"
+                    : "bg-black"
+                }`}
+              >
                 <div className="text-3xl">📦</div>
 
                 <h3 className="mt-3 font-bold">
                   Preparing
                 </h3>
 
-                <p className="mt-2 text-sm text-gray-400">
+                <p
+                  className={`mt-2 text-sm ${
+                    ["confirmed", "processing", "shipped", "delivered"].includes(
+                      orderStatus
+                    )
+                      ? "text-black/70"
+                      : "text-gray-400"
+                  }`}
+                >
                   Your notebooks will be carefully packed.
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-black p-5">
+              <div
+                className={`rounded-2xl p-5 ${
+                  ["shipped", "delivered"].includes(orderStatus)
+                    ? "bg-yellow-400 text-black"
+                    : "bg-black"
+                }`}
+              >
                 <div className="text-3xl">🚚</div>
 
                 <h3 className="mt-3 font-bold">
                   Delivery
                 </h3>
 
-                <p className="mt-2 text-sm text-gray-400">
+                <p
+                  className={`mt-2 text-sm ${
+                    ["shipped", "delivered"].includes(orderStatus)
+                      ? "text-black/70"
+                      : "text-gray-400"
+                  }`}
+                >
                   Expected within {order.delivery}.
                 </p>
               </div>
             </div>
+
+            {orderStatus === "cancelled" && (
+              <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-950/40 p-5">
+                <h3 className="font-bold text-red-300">
+                  Order Cancelled
+                </h3>
+
+                <p className="mt-2 text-sm text-red-200/80">
+                  This order has been cancelled. Please contact MineNote
+                  if you need assistance.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Actions */}

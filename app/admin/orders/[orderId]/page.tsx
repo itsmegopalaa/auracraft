@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 import OrderStatusForm from "./OrderStatusForm";
+import FulfillmentForm from "./FulfillmentForm";
 
 type PageProps = {
   params: Promise<{
@@ -195,6 +196,29 @@ export default async function AdminOrderDetailPage({
             </div>
           </section>
         </div>
+
+        <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-900">
+              Fulfillment
+            </h2>
+
+            <p className="mt-1 text-sm text-zinc-500">
+              Add shipping and tracking details for this order.
+            </p>
+          </div>
+
+          <div className="mt-5">
+            <FulfillmentForm
+              orderId={order.order_id}
+              shippingPartner={order.shipping_partner}
+              trackingId={order.tracking_id}
+              trackingUrl={order.tracking_url}
+              shippedAt={order.shipped_at}
+              deliveredAt={order.delivered_at}
+            />
+          </div>
+        </section>
 
         <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-4">

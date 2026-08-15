@@ -193,11 +193,22 @@ export async function POST(request: Request) {
         razorpayOrderId
       );
 
-      return NextResponse.json({
-        received: true,
-        handled: false,
-        reason: "Order not found.",
-      });
+      /*
+       * IMPORTANT:
+       *
+       * Do not acknowledge this webhook as successfully
+       * processed. The browser may still be completing the
+       * internal MineNote order creation.
+       *
+       * Returning 500 tells Razorpay to retry the webhook.
+       */
+      return NextResponse.json(
+        {
+          error:
+            "MineNote order not found yet. Please retry webhook.",
+        },
+        { status: 500 }
+      );
     }
 
     /*

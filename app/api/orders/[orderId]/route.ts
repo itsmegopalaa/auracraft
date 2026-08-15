@@ -40,12 +40,18 @@ export async function GET(
           pin,
           payment_method,
           payment_status,
+          paid_at,
           order_status,
           items,
           total,
           delivery,
           razorpay_order_id,
           razorpay_payment_id,
+          shipping_partner,
+          tracking_id,
+          tracking_url,
+          shipped_at,
+          delivered_at,
           created_at
         `
       )

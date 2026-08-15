@@ -138,6 +138,10 @@ export async function POST(request: Request) {
             ? String(razorpayPaymentId)
             : null,
         delivery: "3-5 Working Days",
+paid_at:
+  paymentMethod === "Razorpay"
+    ? new Date().toISOString()
+    : null,
       })
       .select()
       .single();

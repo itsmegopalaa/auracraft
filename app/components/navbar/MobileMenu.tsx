@@ -69,6 +69,14 @@ export default function MobileMenu({ setMenuOpen }: Props) {
           Contact
         </Link>
 
+        <Link
+          href="/track-order"
+          onClick={() => setMenuOpen(false)}
+          className="font-semibold text-yellow-400"
+        >
+          🔎 Track Order
+        </Link>
+
 
         <Link
           href="/products"

@@ -146,6 +146,28 @@ export async function PATCH(
       });
     }
 
+    const allowedTransitions: Record<Status, readonly Status[]> = {
+      placed: ["confirmed", "cancelled"],
+      confirmed: ["processing", "cancelled"],
+      processing: ["shipped", "cancelled"],
+      shipped: ["delivered"],
+      delivered: [],
+      cancelled: [],
+    };
+
+    const currentStatus = existingOrder.order_status as Status;
+    const allowedNextStatuses = allowedTransitions[currentStatus] ?? [];
+
+    if (!allowedNextStatuses.includes(status)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Cannot change order status from "${currentStatus}" to "${status}".`,
+        },
+        { status: 400 }
+      );
+    }
+
     const updateData: {
       order_status: Status;
       shipped_at?: string;

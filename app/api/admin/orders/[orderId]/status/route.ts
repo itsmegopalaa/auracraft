@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { requireAdmin } from "@/app/lib/admin-auth";
+import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 
 const ALLOWED_STATUSES = [
@@ -75,7 +75,17 @@ export async function PATCH(
   context: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+
+    if (adminAuth.error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: adminAuth.error,
+        },
+        { status: adminAuth.status }
+      );
+    }
 
     const { orderId } = await context.params;
     const body = await request.json();
@@ -97,7 +107,7 @@ export async function PATCH(
       await supabase
         .from("orders")
         .select(
-          "order_id, name, email, payment_method, payment_status, order_status, total, delivery"
+          "order_id, name, email, payment_method, payment_status, order_status, total, delivery, shipped_at, delivered_at"
         )
         .eq("order_id", orderId)
         .maybeSingle();
@@ -136,14 +146,33 @@ export async function PATCH(
       });
     }
 
+    const updateData: {
+      order_status: Status;
+      shipped_at?: string;
+      delivered_at?: string;
+    } = {
+      order_status: status,
+    };
+
+    if (status === "shipped") {
+      updateData.shipped_at = new Date().toISOString();
+    }
+
+    if (status === "delivered") {
+      updateData.shipped_at =
+        existingOrder.shipped_at ?? new Date().toISOString();
+
+      updateData.delivered_at = new Date().toISOString();
+    }
+
     const { data: order, error } = await supabase
       .from("orders")
-      .update({
-        order_status: status,
-      })
+      .update(updateData)
       .eq("order_id", orderId)
-      .select("order_id, order_status")
+      .select("order_id, order_status, shipped_at, delivered_at")
       .single();
+
+
 
     if (error) {
       console.error("ADMIN ORDER STATUS ERROR:", error);

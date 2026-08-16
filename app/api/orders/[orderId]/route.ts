@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/utils/supabase/server";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,25 +14,32 @@ export async function GET(
   try {
     const { orderId } = await context.params;
 
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email")?.trim().toLowerCase();
-
-    if (!orderId || !email) {
+    if (!orderId) {
       return NextResponse.json(
         {
           success: false,
-          error: "Order ID and email are required.",
+          error: "Order ID is required.",
         },
         { status: 400 }
       );
     }
 
-    const { data: order, error } = await supabaseAdmin
+    const url = new URL(request.url);
+    const email = url.searchParams.get("email")?.trim().toLowerCase();
+
+    const supabase = await createServerClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    let query = supabaseAdmin
       .from("orders")
       .select(
         `
           order_id,
           name,
+          email,
           payment_method,
           payment_status,
           paid_at,
@@ -47,9 +55,25 @@ export async function GET(
           created_at
         `
       )
-      .eq("order_id", orderId)
-      .ilike("email", email)
-      .maybeSingle();
+      .eq("order_id", orderId);
+
+    if (user) {
+      query = query.eq("customer_id", user.id);
+    } else {
+      if (!email) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Email address is required to track an order.",
+          },
+          { status: 400 }
+        );
+      }
+
+      query = query.ilike("email", email);
+    }
+
+    const { data: order, error } = await query.maybeSingle();
 
     if (error) {
       console.error("CUSTOMER ORDER API ERROR:", {

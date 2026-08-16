@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 type Props = {
   setMenuOpen: (value: boolean) => void;
@@ -12,6 +14,9 @@ export default function MobileMenu({ setMenuOpen }: Props) {
 
   const { cart } = useCart();
   const { wishlist } = useWishlist();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const supabase = createClient();
 
   const totalItems = cart.reduce(
     (sum, item) => sum + item.quantity,
@@ -47,6 +52,15 @@ export default function MobileMenu({ setMenuOpen }: Props) {
           <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm font-bold text-black">
             {totalItems}
           </span>
+        </Link>
+
+        <Link
+          href={isLoggedIn ? "/account" : "/login"}
+          onClick={() => setMenuOpen(false)}
+          className="flex items-center justify-between rounded-2xl border border-zinc-700 bg-zinc-900 px-5 py-4 font-semibold text-yellow-400"
+        >
+          <span>👤 {isLoggedIn ? "My Account" : "Login"}</span>
+          <span>→</span>
         </Link>
 
 

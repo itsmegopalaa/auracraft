@@ -380,13 +380,14 @@ export default function CheckoutPage() {
                       email={email}
                       phone={phone}
                       items={cart}
-                      onSuccess={async (paymentResponse) => {
+                      onSuccess={async (
+                        paymentResponse,
+                        mineNoteOrderId
+                      ) => {
   try {
     setLoading(true);
 
-    const orderId = `MN${Date.now()
-      .toString()
-      .slice(-8)}`;
+    const orderId = mineNoteOrderId;
 
     const savedOrder = await saveOrderToDatabase({
       orderId,

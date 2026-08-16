@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 import { calculateOrder } from "@/app/lib/order-pricing";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: "You must be signed in to make an online payment.",
+        },
+        { status: 401 }
+      );
+    }
+
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
@@ -18,7 +34,11 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const { items, receipt } = body;
+    const { items } = body;
+
+    const mineNoteOrderId = `MN${Date.now()
+      .toString()
+      .slice(-8)}`;
 
     let calculatedOrder;
 
@@ -37,10 +57,7 @@ export async function POST(request: Request) {
     }
 
     const amount = Math.round(calculatedOrder.total * 100);
-    const safeReceipt =
-      typeof receipt === "string" && receipt.trim()
-        ? receipt.trim()
-        : `MN_${Date.now()}`;
+    const safeReceipt = mineNoteOrderId;
 
     if (!Number.isInteger(amount) || amount < 100) {
       return NextResponse.json(
@@ -65,6 +82,10 @@ export async function POST(request: Request) {
           amount,
           currency: "INR",
           receipt: safeReceipt,
+          notes: {
+            minenote_order_id: mineNoteOrderId,
+            customer_id: user.id,
+          },
         }),
       }
     );
@@ -98,6 +119,7 @@ export async function POST(request: Request) {
       currency: razorpayData.currency,
       items: calculatedOrder.items,
       total: calculatedOrder.total,
+      mineNoteOrderId,
     });
   } catch (error: unknown) {
     console.error(

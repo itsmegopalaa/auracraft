@@ -127,8 +127,6 @@ export default function SuccessPage() {
         const response = await fetch(
           `/api/orders/${encodeURIComponent(
             parsedOrder.orderId
-          )}?email=${encodeURIComponent(
-            parsedOrder.email
           )}`,
           {
             cache: "no-store",

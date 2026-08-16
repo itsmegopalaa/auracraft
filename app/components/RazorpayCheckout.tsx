@@ -52,7 +52,10 @@ interface RazorpayCheckoutProps {
   email: string;
   phone: string;
   items: Array<Notebook & { quantity: number }>;
-  onSuccess: (response: RazorpayResponse) => void;
+  onSuccess: (
+    response: RazorpayResponse,
+    mineNoteOrderId: string
+  ) => void;
 }
 
 export default function RazorpayCheckout({
@@ -174,7 +177,17 @@ export default function RazorpayCheckout({
               "Payment verified successfully!"
             );
 
-            onSuccess(paymentResponse);
+            if (!data.mineNoteOrderId) {
+        toast.error(
+          "Payment succeeded, but the order reference is missing."
+        );
+        return;
+      }
+
+      onSuccess(
+        paymentResponse,
+        data.mineNoteOrderId
+      );
           } catch {
             toast.error(
               "Unable to verify payment."

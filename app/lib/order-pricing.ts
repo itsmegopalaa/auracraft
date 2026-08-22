@@ -1,24 +1,16 @@
-import { notebooks } from "../data/notebooks";
+import { createClient } from "@/utils/supabase/server";
 
 export type OrderItemInput = {
-  id: number;
+  id: string;
   quantity: number;
 };
 
-export function calculateOrder(
-  items: unknown
-) {
+export async function calculateOrder(items: unknown) {
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error("Cart is empty.");
   }
 
-  const normalizedItems: Array<{
-    id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
-  }> = [];
+  const normalizedInput: OrderItemInput[] = [];
 
   for (const rawItem of items) {
     if (!rawItem || typeof rawItem !== "object") {
@@ -27,11 +19,11 @@ export function calculateOrder(
 
     const item = rawItem as Record<string, unknown>;
 
-    const id = Number(item.id);
+    const id = String(item.id ?? "").trim();
     const quantity = Number(item.quantity);
 
     if (
-      !Number.isInteger(id) ||
+      !id ||
       !Number.isInteger(quantity) ||
       quantity < 1 ||
       quantity > 50
@@ -39,29 +31,69 @@ export function calculateOrder(
       throw new Error("Invalid product quantity.");
     }
 
-    const product = notebooks.find(
-      (notebook) => notebook.id === id
-    );
-
-    if (!product) {
-      throw new Error("Invalid product.");
-    }
-
-    const existing = normalizedItems.find(
+    const existing = normalizedInput.find(
       (existingItem) => existingItem.id === id
     );
 
     if (existing) {
       existing.quantity += quantity;
     } else {
-      normalizedItems.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
+      normalizedInput.push({
+        id,
         quantity,
-        image: product.image,
       });
     }
+  }
+
+  const productIds = normalizedInput.map((item) => item.id);
+
+  const supabase = await createClient();
+
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("id, name, price, image, stock, active")
+    .in("id", productIds)
+    .eq("active", true);
+
+  if (error) {
+    console.error("Order pricing product lookup error:", error);
+    throw new Error("Unable to validate products.");
+  }
+
+  if (!products || products.length !== productIds.length) {
+    throw new Error("One or more products are invalid or unavailable.");
+  }
+
+  const normalizedItems: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }> = [];
+
+  for (const inputItem of normalizedInput) {
+    const product = products.find(
+      (item) => item.id === inputItem.id
+    );
+
+    if (!product) {
+      throw new Error("Invalid product.");
+    }
+
+    if (inputItem.quantity > product.stock) {
+      throw new Error(
+        `Only ${product.stock} unit(s) of "${product.name}" are available.`
+      );
+    }
+
+    normalizedItems.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: inputItem.quantity,
+      image: product.image ?? "/images/notebooks/placeholder.png",
+    });
   }
 
   const total = normalizedItems.reduce(

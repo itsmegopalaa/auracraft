@@ -6,12 +6,12 @@ import { useWishlist } from "../context/WishlistContext";
 import toast from "react-hot-toast";
 
 type ProductCardProps = {
-  id: number;
+  id: string | number;
   name: string;
   image: string;
   price: string | number;
-  category: string;
-  rating: number;
+  category?: string;
+  rating?: number;
   bestseller: boolean;
 };
 
@@ -27,7 +27,7 @@ export default function ProductCard({
 
   const { toggleWishlist, isWishlisted } = useWishlist();
 
-  const liked = isWishlisted(id);
+  const liked = isWishlisted(String(id));
 
 
   return (
@@ -57,7 +57,7 @@ export default function ProductCard({
   const wasLiked = liked;
 
   toggleWishlist({
-    id,
+    id: String(id),
     name,
     price,
     image,

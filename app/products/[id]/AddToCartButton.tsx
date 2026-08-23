@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 type Props = {
   product: {
-    id: number;
+    id: string;
     name: string;
     price: number;
     image: string;
@@ -23,7 +23,7 @@ export default function AddToCartButton({ product }: Props) {
         onClick={() => {
           addToCart({
             ...product,
-            quantity: 1,
+            id: String(product.id),
           });
 
           toast.success(`${product.name} added to cart 🛒`);
@@ -48,7 +48,7 @@ export default function AddToCartButton({ product }: Props) {
         onClick={() => {
           addToCart({
             ...product,
-            quantity: 1,
+            id: String(product.id),
           });
 
           router.push("/checkout");

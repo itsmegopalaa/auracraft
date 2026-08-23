@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     let calculatedOrder;
 
     try {
-      calculatedOrder = calculateOrder(items);
+      calculatedOrder = await calculateOrder(items);
     } catch (error) {
       return NextResponse.json(
         {

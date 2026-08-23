@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 export default function CartPage() {
-const [removeId, setRemoveId] = useState<number | null>(null);
+const [removeId, setRemoveId] = useState<string | null>(null);
   const {
     cart,
     removeFromCart,
@@ -96,7 +96,7 @@ md:justify-between
 
                  <Link href={`/products/${item.id}`}>
   <Image
-    src={item.image}
+    src={item.image ?? "/images/notebooks/placeholder.png"}
     alt={item.name}
     width={120}
     height={160}

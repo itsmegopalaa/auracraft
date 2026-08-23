@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Script from "next/script";
 import toast from "react-hot-toast";
-import { Notebook } from "../data/notebooks";
+import type { CartItem } from "../context/CartContext";
 
 declare global {
   interface Window {
@@ -51,7 +51,7 @@ interface RazorpayCheckoutProps {
   name: string;
   email: string;
   phone: string;
-  items: Array<Notebook & { quantity: number }>;
+  items: CartItem[];
   onSuccess: (
     response: RazorpayResponse,
     mineNoteOrderId: string
@@ -145,52 +145,16 @@ export default function RazorpayCheckout({
           paymentResponse
         ) => {
           try {
-            const verifyResponse =
-              await fetch(
-                "/api/verify-payment",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type":
-                      "application/json",
-                  },
-                  body: JSON.stringify(
-                    paymentResponse
-                  ),
-                }
-              );
-
-            const verification =
-              await verifyResponse.json();
-
-            if (
-              !verifyResponse.ok ||
-              !verification.verified
-            ) {
+            if (!data.mineNoteOrderId) {
               toast.error(
-                "Payment verification failed."
+                "Payment succeeded, but the order reference is missing."
               );
               return;
             }
 
-            toast.success(
-              "Payment verified successfully!"
-            );
-
-            if (!data.mineNoteOrderId) {
-        toast.error(
-          "Payment succeeded, but the order reference is missing."
-        );
-        return;
-      }
-
-      onSuccess(
-        paymentResponse,
-        data.mineNoteOrderId
-      );
-          } catch {
-            toast.error(
-              "Unable to verify payment."
+            onSuccess(
+              paymentResponse,
+              data.mineNoteOrderId
             );
           } finally {
             setLoading(false);

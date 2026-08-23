@@ -47,7 +47,48 @@ export function CartProvider({
         const parsed = JSON.parse(savedCart);
 
         if (Array.isArray(parsed)) {
-          setCart(parsed);
+          const normalized = parsed.reduce<CartItem[]>(
+            (result, rawItem) => {
+              if (
+                !rawItem ||
+                typeof rawItem !== "object" ||
+                !rawItem.id
+              ) {
+                return result;
+              }
+
+              const item = rawItem as CartItem;
+
+              if (
+                !Number.isFinite(Number(item.price)) ||
+                !Number.isInteger(Number(item.quantity)) ||
+                Number(item.quantity) < 1
+              ) {
+                return result;
+              }
+
+              const existing = result.find(
+                (existingItem) =>
+                  existingItem.id === String(item.id)
+              );
+
+              if (existing) {
+                existing.quantity += Number(item.quantity);
+              } else {
+                result.push({
+                  ...item,
+                  id: String(item.id),
+                  price: Number(item.price),
+                  quantity: Number(item.quantity),
+                });
+              }
+
+              return result;
+            },
+            []
+          );
+
+          setCart(normalized);
         }
       }
     } catch (error) {
@@ -70,14 +111,19 @@ export function CartProvider({
   function addToCart(product: CartProduct) {
     setCart((prev) => {
       const existing = prev.find(
-        (item) => item.id === product.id
+        (item) => item.id === String(product.id)
       );
 
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
+          item.id === String(product.id)
             ? {
                 ...item,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                description: product.description,
+                category: product.category,
                 quantity: item.quantity + 1,
               }
             : item
@@ -88,6 +134,7 @@ export function CartProvider({
         ...prev,
         {
           ...product,
+          id: String(product.id),
           quantity: 1,
         },
       ];
@@ -96,14 +143,14 @@ export function CartProvider({
 
   function removeFromCart(id: string) {
     setCart((prev) =>
-      prev.filter((item) => item.id !== id)
+      prev.filter((item) => item.id !== String(id))
     );
   }
 
   function increaseQuantity(id: string) {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id
+        item.id === String(id)
           ? {
               ...item,
               quantity: item.quantity + 1,
@@ -116,7 +163,7 @@ export function CartProvider({
   function decreaseQuantity(id: string) {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id && item.quantity > 1
+        item.id === String(id) && item.quantity > 1
           ? {
               ...item,
               quantity: item.quantity - 1,

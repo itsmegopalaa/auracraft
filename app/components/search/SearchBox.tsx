@@ -1,30 +1,82 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { notebooks } from "../../data/notebooks";
+
+type SearchProduct = {
+  id: string;
+  name: string;
+  image?: string | null;
+  price: number;
+  category?: string | null;
+};
 
 export default function SearchBox() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [results, setResults] = useState<SearchProduct[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
-  const results = notebooks.filter((book) =>
-    book.name.toLowerCase().includes(search.toLowerCase())
-  );
-
   useEffect(() => {
-    if (open) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
+    if (!open) return;
+
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [open]);
 
+  useEffect(() => {
+    const query = search.trim();
 
-  // Outside click close
+    if (!query) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch(
+          `/api/products/search?q=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Search request failed.");
+        }
+
+        const data = (await response.json()) as SearchProduct[];
+
+        setResults(data);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Search error:", error);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [search]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -43,78 +95,90 @@ export default function SearchBox() {
     };
   }, []);
 
+  function closeSearch() {
+    setOpen(false);
+    setSearch("");
+  }
 
   return (
     <div ref={boxRef} className="relative">
-
       <button
         onClick={() => setOpen(true)}
         className="text-2xl transition hover:scale-110"
+        aria-label="Search products"
       >
         🔍
       </button>
 
-
-     {open && (
-  <div
-    className="
-      fixed
-      left-1/2
-      top-24
-      z-[100]
-      w-[90vw]
-      max-w-2xl
-      -translate-x-1/2
-      rounded-2xl
-      border
-      border-zinc-800
-      bg-zinc-950
-      p-4
-      shadow-2xl
-       transition-all
-duration-300
-ease-out
-    "
-  >
-
+      {open && (
+        <div
+          className="
+            fixed
+            left-1/2
+            top-24
+            z-[100]
+            w-[90vw]
+            max-w-2xl
+            -translate-x-1/2
+            rounded-2xl
+            border
+            border-zinc-800
+            bg-zinc-950
+            p-4
+            shadow-2xl
+          "
+        >
           <input
             ref={inputRef}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && results.length > 0) {
+            onChange={(event) => setSearch(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && results.length > 0) {
                 window.location.href = `/products/${results[0].id}`;
+              }
+
+              if (event.key === "Escape") {
+                closeSearch();
               }
             }}
             placeholder="Search notebooks..."
             className="
-              w-full rounded-xl
-              border border-zinc-700
-              bg-black px-4 py-3
+              w-full
+              rounded-xl
+              border
+              border-zinc-700
+              bg-black
+              px-4
+              py-3
               text-white
               outline-none
               focus:border-yellow-400
             "
           />
 
-
-          {search && (
+          {search.trim() && (
             <div className="mt-4 space-y-2">
-
-              {results.length > 0 ? (
-                results.map((book) => (
+              {loading ? (
+                <p className="p-3 text-gray-400">
+                  Searching...
+                </p>
+              ) : results.length > 0 ? (
+                results.map((product) => (
                   <Link
-                    key={book.id}
-                    href={`/products/${book.id}`}
-                    onClick={() => setOpen(false)}
+                    key={product.id}
+                    href={`/products/${product.id}`}
+                    onClick={closeSearch}
                     className="
-                      block rounded-xl p-3
+                      block
+                      rounded-xl
+                      p-3
                       text-gray-300
+                      transition
                       hover:bg-zinc-800
                       hover:text-yellow-400
                     "
                   >
-                    {book.name}
+                    {product.name}
                   </Link>
                 ))
               ) : (
@@ -122,13 +186,10 @@ ease-out
                   No notebook found
                 </p>
               )}
-
             </div>
           )}
-
         </div>
       )}
-
     </div>
   );
 }

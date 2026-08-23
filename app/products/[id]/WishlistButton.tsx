@@ -4,7 +4,7 @@ import { useWishlist } from "../../context/WishlistContext";
 
 type Props = {
   product: {
-    id: number;
+    id: string;
     name: string;
     price: number;
     image: string;
@@ -17,11 +17,11 @@ export default function WishlistButton({ product }: Props) {
     isWishlisted,
   } = useWishlist();
 
-  const saved = isWishlisted(product.id);
+  const saved = isWishlisted(String(product.id));
 
   return (
     <button
-      onClick={() => toggleWishlist(product)}
+      onClick={() => toggleWishlist({ ...product, id: String(product.id) })}
       className="
         rounded-full
         border

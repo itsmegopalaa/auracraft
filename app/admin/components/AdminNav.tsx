@@ -44,6 +44,13 @@ export default function AdminNav() {
             >
               Orders
             </Link>
+
+            <Link
+              href="/admin/products"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+            >
+              Products
+            </Link>
           </div>
         </div>
 

@@ -7,18 +7,24 @@ import {
   useState,
 } from "react";
 
-import { Notebook } from "../data/notebooks";
-
-type CartItem = Notebook & {
+export type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  image?: string | null;
+  description?: string | null;
+  category?: string | null;
   quantity: number;
 };
 
+type CartProduct = Omit<CartItem, "quantity">;
+
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (product: Notebook) => void;
-  removeFromCart: (id: number) => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
+  addToCart: (product: CartProduct) => void;
+  removeFromCart: (id: string) => void;
+  increaseQuantity: (id: string) => void;
+  decreaseQuantity: (id: string) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(
@@ -33,39 +39,91 @@ export function CartProvider({
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // Load cart from browser storage
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
+    try {
+      const savedCart = localStorage.getItem("cart");
 
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+
+        if (Array.isArray(parsed)) {
+          const normalized = parsed.reduce<CartItem[]>(
+            (result, rawItem) => {
+              if (
+                !rawItem ||
+                typeof rawItem !== "object" ||
+                !rawItem.id
+              ) {
+                return result;
+              }
+
+              const item = rawItem as CartItem;
+
+              if (
+                !Number.isFinite(Number(item.price)) ||
+                !Number.isInteger(Number(item.quantity)) ||
+                Number(item.quantity) < 1
+              ) {
+                return result;
+              }
+
+              const existing = result.find(
+                (existingItem) =>
+                  existingItem.id === String(item.id)
+              );
+
+              if (existing) {
+                existing.quantity += Number(item.quantity);
+              } else {
+                result.push({
+                  ...item,
+                  id: String(item.id),
+                  price: Number(item.price),
+                  quantity: Number(item.quantity),
+                });
+              }
+
+              return result;
+            },
+            []
+          );
+
+          setCart(normalized);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load cart:", error);
+      localStorage.removeItem("cart");
+    } finally {
+      setLoaded(true);
     }
-
-    setLoaded(true);
   }, []);
 
-  // Save cart
   useEffect(() => {
-    if (loaded) {
-      localStorage.setItem(
-        "cart",
-        JSON.stringify(cart)
-      );
-    }
+    if (!loaded) return;
+
+    localStorage.setItem(
+      "cart",
+      JSON.stringify(cart)
+    );
   }, [cart, loaded]);
 
-
-  function addToCart(product: Notebook) {
+  function addToCart(product: CartProduct) {
     setCart((prev) => {
       const existing = prev.find(
-        (item) => item.id === product.id
+        (item) => item.id === String(product.id)
       );
 
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
+          item.id === String(product.id)
             ? {
                 ...item,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                description: product.description,
+                category: product.category,
                 quantity: item.quantity + 1,
               }
             : item
@@ -76,26 +134,23 @@ export function CartProvider({
         ...prev,
         {
           ...product,
+          id: String(product.id),
           quantity: 1,
         },
       ];
     });
   }
 
-
-  function removeFromCart(id: number) {
+  function removeFromCart(id: string) {
     setCart((prev) =>
-      prev.filter(
-        (item) => item.id !== id
-      )
+      prev.filter((item) => item.id !== String(id))
     );
   }
 
-
-  function increaseQuantity(id: number) {
+  function increaseQuantity(id: string) {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id
+        item.id === String(id)
           ? {
               ...item,
               quantity: item.quantity + 1,
@@ -105,11 +160,10 @@ export function CartProvider({
     );
   }
 
-
-  function decreaseQuantity(id: number) {
+  function decreaseQuantity(id: string) {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id && item.quantity > 1
+        item.id === String(id) && item.quantity > 1
           ? {
               ...item,
               quantity: item.quantity - 1,
@@ -118,7 +172,6 @@ export function CartProvider({
       )
     );
   }
-
 
   return (
     <CartContext.Provider
@@ -134,7 +187,6 @@ export function CartProvider({
     </CartContext.Provider>
   );
 }
-
 
 export function useCart() {
   const context = useContext(CartContext);

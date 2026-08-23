@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 type Props = {
   product: {
-    id: number;
+    id: string;
     name: string;
     price: number;
     image: string;
@@ -17,17 +17,35 @@ export default function AddToCartButton({ product }: Props) {
   const { addToCart } = useCart();
   const router = useRouter();
 
+  const handleAddToCart = () => {
+    addToCart({
+      ...product,
+      id: String(product.id),
+    });
+
+    toast.success(`${product.name} added to cart 🛒`);
+  };
+
+  const handleBuyNow = () => {
+    // Buy Now must start a fresh purchase of exactly 1 unit.
+    localStorage.setItem(
+      "cart",
+      JSON.stringify([
+        {
+          ...product,
+          id: String(product.id),
+          quantity: 1,
+        },
+      ])
+    );
+
+    router.push("/checkout");
+  };
+
   return (
     <div className="flex flex-1 gap-3">
       <button
-        onClick={() => {
-          addToCart({
-            ...product,
-            quantity: 1,
-          });
-
-          toast.success(`${product.name} added to cart 🛒`);
-        }}
+        onClick={handleAddToCart}
         className="
           flex-1
           rounded-full
@@ -45,14 +63,7 @@ export default function AddToCartButton({ product }: Props) {
       </button>
 
       <button
-        onClick={() => {
-          addToCart({
-            ...product,
-            quantity: 1,
-          });
-
-          router.push("/checkout");
-        }}
+        onClick={handleBuyNow}
         className="
           flex-1
           rounded-full

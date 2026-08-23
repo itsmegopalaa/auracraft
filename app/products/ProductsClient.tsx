@@ -2,9 +2,13 @@
 
 import { useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
-import { notebooks } from "../data/notebooks";
+import type { Product } from "../lib/products";
 
-export default function ProductsClient() {
+type Props = {
+  products: Product[];
+};
+
+export default function ProductsClient({ products }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("Featured");
@@ -13,42 +17,56 @@ export default function ProductsClient() {
 
   const categories = [
     "All",
-    ...new Set(notebooks.map((book) => book.category)),
+    ...new Set(
+      products
+        .map((product) => product.category)
+        .filter(
+          (category): category is string =>
+            Boolean(category)
+        )
+    ),
   ];
 
   const filteredProducts = useMemo(() => {
-    const products = notebooks.filter((book) => {
+    const filtered = products.filter((product) => {
       const searchText = search.toLowerCase();
 
       const matchesSearch =
-        book.name.toLowerCase().includes(searchText) ||
-        book.description?.toLowerCase().includes(searchText);
+        product.name.toLowerCase().includes(searchText) ||
+        product.description
+          ?.toLowerCase()
+          .includes(searchText);
 
       const matchesCategory =
-        category === "All" || book.category === category;
+        category === "All" ||
+        product.category === category;
 
       const matchesPrice =
         priceFilter === "All" ||
-        (priceFilter === "Under ₹500" && book.price < 500) ||
+        (priceFilter === "Under ₹500" &&
+          product.price < 500) ||
         (priceFilter === "₹500–₹1000" &&
-          book.price >= 500 &&
-          book.price <= 1000) ||
-        (priceFilter === "₹1000+" && book.price > 1000);
+          product.price >= 500 &&
+          product.price <= 1000) ||
+        (priceFilter === "₹1000+" &&
+          product.price > 1000);
 
       const matchesRating =
         ratingFilter === "All" ||
-        (ratingFilter === "4★+" && (book.rating ?? 0) >= 4) ||
-        (ratingFilter === "3★+" && (book.rating ?? 0) >= 3);
+        (ratingFilter === "4★+" &&
+          (product.rating ?? 0) >= 4) ||
+        (ratingFilter === "3★+" &&
+          (product.rating ?? 0) >= 3);
 
       return (
-        matchesSearch &&
+        Boolean(matchesSearch) &&
         matchesCategory &&
         matchesPrice &&
         matchesRating
       );
     });
 
-    return [...products].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (sort === "Price: Low → High") {
         return a.price - b.price;
       }
@@ -58,13 +76,25 @@ export default function ProductsClient() {
       }
 
       if (sort === "Rating") {
-        return (b.rating ?? 0) - (a.rating ?? 0);
+        return (
+          (b.rating ?? 0) -
+          (a.rating ?? 0)
+        );
       }
 
-      // Featured
-      return Number(b.featured ?? false) - Number(a.featured ?? false);
+      return (
+        Number(b.featured) -
+        Number(a.featured)
+      );
     });
-  }, [search, category, sort, priceFilter, ratingFilter]);
+  }, [
+    products,
+    search,
+    category,
+    sort,
+    priceFilter,
+    ratingFilter,
+  ]);
 
   const clearFilters = () => {
     setSearch("");
@@ -76,21 +106,23 @@ export default function ProductsClient() {
 
   return (
     <div className="space-y-6">
-      {/* Search */}
       <input
         type="text"
         placeholder="🔍 Search notebooks..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
         className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-3.5 text-white outline-none transition focus:border-yellow-400 md:px-5 md:py-4"
       />
 
-      {/* Categories */}
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide md:flex-wrap md:overflow-visible">
         {categories.map((item) => (
           <button
             key={item}
-            onClick={() => setCategory(item)}
+            onClick={() =>
+              setCategory(item)
+            }
             className={`whitespace-nowrap rounded-full px-5 py-2 font-medium transition ${
               category === item
                 ? "bg-yellow-400 text-black"
@@ -102,12 +134,12 @@ export default function ProductsClient() {
         ))}
       </div>
 
-      {/* Filters */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {/* Sort */}
         <select
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(e) =>
+            setSort(e.target.value)
+          }
           className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-yellow-400"
         >
           <option>Featured</option>
@@ -116,10 +148,11 @@ export default function ProductsClient() {
           <option>Rating</option>
         </select>
 
-        {/* Price */}
         <select
           value={priceFilter}
-          onChange={(e) => setPriceFilter(e.target.value)}
+          onChange={(e) =>
+            setPriceFilter(e.target.value)
+          }
           className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-yellow-400"
         >
           <option>All</option>
@@ -128,10 +161,11 @@ export default function ProductsClient() {
           <option>₹1000+</option>
         </select>
 
-        {/* Rating */}
         <select
           value={ratingFilter}
-          onChange={(e) => setRatingFilter(e.target.value)}
+          onChange={(e) =>
+            setRatingFilter(e.target.value)
+          }
           className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-yellow-400"
         >
           <option>All</option>
@@ -140,7 +174,6 @@ export default function ProductsClient() {
         </select>
       </div>
 
-      {/* Result count + clear */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="w-fit rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm text-gray-400">
           Showing{" "}
@@ -164,31 +197,33 @@ export default function ProductsClient() {
         )}
       </div>
 
-      {/* Products */}
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredProducts.map((book) => (
+          {filteredProducts.map((product) => (
             <ProductCard
-              key={book.id}
-              id={book.id}
-              name={book.name}
-              image={book.image}
-              price={book.price}
-              category={book.category}
-              rating={book.rating}
-              bestseller={book.bestseller}
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              image={product.image ?? ""}
+              price={product.price}
+              category={product.category ?? undefined}
+              rating={product.rating ?? undefined}
+              bestseller={product.bestseller}
             />
           ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-16 text-center">
           <div className="text-4xl">🔍</div>
+
           <h3 className="mt-4 text-xl font-semibold text-white">
             No notebooks found
           </h3>
+
           <p className="mt-2 text-gray-400">
             Try changing your search or filters.
           </p>
+
           <button
             onClick={clearFilters}
             className="mt-5 rounded-full bg-yellow-400 px-5 py-2.5 font-semibold text-black transition hover:bg-yellow-300"

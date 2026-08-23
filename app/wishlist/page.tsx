@@ -9,7 +9,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 
 export default function WishlistPage() {
-    const [removeId, setRemoveId] = useState<number | null>(null);
+    const [removeId, setRemoveId] = useState<string | null>(null);
   const { wishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
 
@@ -73,13 +73,12 @@ export default function WishlistPage() {
                 <button
                   onClick={() =>
                     addToCart({
-                      id: product.id,
+                      id: String(product.id),
                       name: product.name,
                       price: Number(
                         String(product.price).replace("₹", "")
                       ),
                       image: product.image,
-                      quantity: 1,
                     })
                   }
                   className="mt-5 w-full rounded-full bg-yellow-400 py-3 font-bold text-black transition hover:scale-105"

@@ -8,7 +8,7 @@ import {
 } from "react";
 
 type WishlistProduct = {
-  id: number;
+  id: string;
   name: string;
   price: number | string;
   image: string;
@@ -17,7 +17,7 @@ type WishlistProduct = {
 type WishlistContextType = {
   wishlist: WishlistProduct[];
   toggleWishlist: (product: WishlistProduct) => void;
-  isWishlisted: (id: number) => boolean;
+  isWishlisted: (id: string) => boolean;
 };
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
@@ -80,7 +80,7 @@ export function WishlistProvider({
   }
 
 
-  function isWishlisted(id:number){
+  function isWishlisted(id: string){
     return wishlist.some(
       (item)=>item.id === id
     );

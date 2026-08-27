@@ -12,6 +12,15 @@ const supabaseAdmin = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createServerClient();
@@ -203,6 +212,44 @@ export async function POST(request: Request) {
               "Payment amount does not match the order.",
           },
           { status: 400 }
+        );
+      }
+
+      /*
+       * Bind the Razorpay order to the authenticated
+       * MineNote customer and the exact MineNote order ID.
+       *
+       * These values were written server-side when the
+       * Razorpay order was created in /api/create-order.
+       */
+      const razorpayNotes =
+        razorpayOrderData.notes ?? {};
+
+      if (
+        razorpayNotes.customer_id !== user.id ||
+        razorpayNotes.minenote_order_id !== String(orderId)
+      ) {
+        console.error(
+          "RAZORPAY ORDER OWNERSHIP / ID MISMATCH:",
+          {
+            expectedCustomerId: user.id,
+            receivedCustomerId:
+              razorpayNotes.customer_id,
+            expectedMineNoteOrderId:
+              String(orderId),
+            receivedMineNoteOrderId:
+              razorpayNotes.minenote_order_id,
+            razorpayOrderId:
+              String(razorpayOrderId),
+          }
+        );
+
+        return NextResponse.json(
+          {
+            error:
+              "Payment order does not match this customer or order.",
+          },
+          { status: 403 }
         );
       }
 
@@ -415,6 +462,16 @@ export async function POST(request: Request) {
         ? "Paid online via Razorpay"
         : "Cash on Delivery";
 
+    const safeName = escapeHtml(String(name).trim());
+    const safeAddress = escapeHtml(String(address).trim());
+    const safeCity = escapeHtml(String(city).trim());
+    const safeState = escapeHtml(String(state).trim());
+    const safePin = escapeHtml(String(pin).trim());
+    const safeItems = calculatedOrder.items.map((item) => ({
+      ...item,
+      safeName: escapeHtml(item.name),
+    }));
+
     const { error: emailError } = await resend.emails.send({
       from: "MineNote <orders@minenote.in>",
       to: [String(email).trim()],
@@ -423,7 +480,7 @@ export async function POST(request: Request) {
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #18181b; max-width: 640px; margin: 0 auto; padding: 24px;">
           <h1 style="margin-bottom: 8px;">Order Confirmed 🎉</h1>
 
-          <p>Hi ${String(name).trim()},</p>
+          <p>Hi ${safeName},</p>
 
           <p>
             Thank you for ordering from <strong>MineNote</strong>.
@@ -441,10 +498,10 @@ export async function POST(request: Request) {
           <h2>Items</h2>
 
           <ul>
-            ${calculatedOrder.items
+            ${safeItems
               .map(
                 (item) =>
-                  `<li>${item.name} × ${item.quantity} — ₹${item.price * item.quantity}</li>`
+                  `<li>${item.safeName} × ${item.quantity} — ₹${item.price * item.quantity}</li>`
               )
               .join("")}
           </ul>
@@ -452,9 +509,9 @@ export async function POST(request: Request) {
           <h2>Delivery Address</h2>
 
           <p>
-            ${String(address).trim()}<br />
-            ${String(city).trim()}, ${String(state).trim()}<br />
-            PIN: ${String(pin).trim()}
+            ${safeAddress}<br />
+            ${safeCity}, ${safeState}<br />
+            PIN: ${safePin}
           </p>
 
           <p style="margin-top: 28px;">

@@ -19,8 +19,8 @@ export default function ShareButton({
 
     try {
       const shareData = {
-        title: `${productName} | AuraCraft`,
-        text: `Check out ${productName} from AuraCraft ✨`,
+        title: `${productName} | MineNote`,
+        text: `Check out ${productName} from MineNote ✨`,
         url: window.location.href,
       };
 

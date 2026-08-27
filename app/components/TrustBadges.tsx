@@ -29,7 +29,7 @@ export default function TrustBadges() {
         <div className="text-2xl">✨</div>
 
         <h3 className="mt-3 font-bold text-white">
-          AuraCraft Quality
+          MineNote Quality
         </h3>
 
         <p className="mt-2 text-sm text-gray-400">

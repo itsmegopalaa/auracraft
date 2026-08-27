@@ -125,7 +125,7 @@ export default function Footer() {
             </li>
 
             <li>
-              hello@auracraft.com
+              orders@minenote.in
             </li>
           </ul>
         </div>

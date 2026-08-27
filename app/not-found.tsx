@@ -14,7 +14,7 @@ export default function NotFound() {
 
       <p className="mt-4 max-w-xl text-lg leading-8 text-gray-400">
         Oops! The page you&apos;re looking for doesn&apos;t exist or may have been moved.
-        Let&apos;s get you back to exploring AuraCraft.
+        Let&apos;s get you back to exploring MineNote.
       </p>
 
       <div className="mt-10 flex flex-wrap justify-center gap-4">

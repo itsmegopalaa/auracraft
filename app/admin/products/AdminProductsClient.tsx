@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState } from "react";
 
 type Product = {
@@ -173,9 +175,11 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-4">
                       {product.image ? (
-                        <img
+                        <Image
                           src={product.image}
                           alt={product.name}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-xl object-cover"
                         />
                       ) : (

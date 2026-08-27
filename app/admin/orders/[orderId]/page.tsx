@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 import OrderStatusForm from "./OrderStatusForm";
 import FulfillmentForm from "./FulfillmentForm";
+import Link from "next/link";
 
 type PageProps = {
   params: Promise<{
@@ -71,12 +73,12 @@ export default async function AdminOrderDetailPage({
     <main className="min-h-screen bg-zinc-50 p-6 md:p-8">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
-          <a
+          <Link
             href="/admin/orders"
             className="text-sm font-medium text-zinc-500 hover:text-zinc-900"
           >
             ← Back to orders
-          </a>
+          </Link>
 
           <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
@@ -249,9 +251,11 @@ export default async function AdminOrderDetailPage({
                     className="flex gap-4 py-5 first:pt-0 last:pb-0"
                   >
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.name}
+                        width={80}
+                        height={80}
                         className="h-full w-full object-cover"
                       />
                     </div>

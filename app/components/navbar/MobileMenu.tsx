@@ -16,7 +16,23 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   const { wishlist } = useWishlist();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const supabase = createClient();
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(Boolean(data.user));
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(Boolean(session?.user));
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const totalItems = cart.reduce(
     (sum, item) => sum + item.quantity,

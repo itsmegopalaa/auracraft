@@ -13,8 +13,8 @@ export default function NotFound() {
       </h2>
 
       <p className="mt-4 max-w-xl text-lg leading-8 text-gray-400">
-        Oops! The page you're looking for doesn't exist or may have been moved.
-        Let's get you back to exploring AuraCraft.
+        Oops! The page you&apos;re looking for doesn&apos;t exist or may have been moved.
+        Let&apos;s get you back to exploring AuraCraft.
       </p>
 
       <div className="mt-10 flex flex-wrap justify-center gap-4">

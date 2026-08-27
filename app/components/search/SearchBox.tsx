@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type SearchProduct = {
   id: string;
@@ -12,6 +13,8 @@ type SearchProduct = {
 };
 
 export default function SearchBox() {
+  const router = useRouter();
+
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<SearchProduct[]>([]);
@@ -34,8 +37,6 @@ export default function SearchBox() {
     const query = search.trim();
 
     if (!query) {
-      setResults([]);
-      setLoading(false);
       return;
     }
 
@@ -134,7 +135,7 @@ export default function SearchBox() {
             onChange={(event) => setSearch(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && results.length > 0) {
-                window.location.href = `/products/${results[0].id}`;
+                router.push(`/products/${results[0].id}`);
               }
 
               if (event.key === "Escape") {

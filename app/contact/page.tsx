@@ -21,7 +21,7 @@ export default function ContactPage() {
 </p>
 
             <h1 className="mt-8 text-5xl font-extrabold md:text-7xl">
-              Let's Build
+              Let&apos;s Build
               <br />
               <span className="text-yellow-400">
                 Your Next Idea

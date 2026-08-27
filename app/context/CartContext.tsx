@@ -88,14 +88,18 @@ export function CartProvider({
             []
           );
 
-          setCart(normalized);
+          queueMicrotask(() => {
+            setCart(normalized);
+          });
         }
       }
     } catch (error) {
       console.error("Failed to load cart:", error);
       localStorage.removeItem("cart");
     } finally {
-      setLoaded(true);
+      queueMicrotask(() => {
+        setLoaded(true);
+      });
     }
   }, []);
 

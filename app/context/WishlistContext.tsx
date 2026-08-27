@@ -39,10 +39,16 @@ export function WishlistProvider({
     const saved = localStorage.getItem("wishlist");
 
     if (saved) {
-      setWishlist(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+
+      queueMicrotask(() => {
+        setWishlist(parsed);
+      });
     }
 
-    setLoaded(true);
+    queueMicrotask(() => {
+      setLoaded(true);
+    });
   }, []);
 
 

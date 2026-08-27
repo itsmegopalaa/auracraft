@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Footer from "../components/Footer";
@@ -288,7 +290,7 @@ export default function SuccessPage() {
               </h1>
 
               <p className="mt-4 text-gray-400">
-                We couldn't find a recent MineNote order on this device.
+                We couldn&apos;t find a recent MineNote order on this device.
               </p>
 
               <Link
@@ -369,9 +371,11 @@ export default function SuccessPage() {
                       <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 sm:h-32 sm:w-24">
                         {item.image &&
                         !imageErrors[item.id] ? (
-                          <img
+                          <Image
                             src={item.image}
                             alt={item.name}
+                            width={96}
+                            height={176}
                             className="h-full w-full object-contain p-1"
                             onError={() =>
                               setImageErrors(

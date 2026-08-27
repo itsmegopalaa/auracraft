@@ -17,6 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://minenote.in"),
+
+  alternates: {
+    canonical: "/",
+  },
+
   title: {
     default: "MineNote | Personalized Notebooks & Creative Designs",
     template: "%s | MineNote",

@@ -52,7 +52,7 @@ item.quantity
     </h2>
 
     <p className="mt-4 text-gray-400">
-      Looks like you haven't added anything yet.
+      Looks like you haven&apos;t added anything yet.
     </p>
 
     <Link

@@ -56,8 +56,17 @@ export async function calculateOrder(items: unknown) {
     .eq("active", true);
 
   if (error) {
-    console.error("Order pricing product lookup error:", error);
-    throw new Error("Unable to validate products.");
+    console.error("ORDER PRICING PRODUCT LOOKUP ERROR:", {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+      productIds,
+    });
+
+    throw new Error(
+      `Unable to validate products: ${error.message}`
+    );
   }
 
   if (!products || products.length !== productIds.length) {

@@ -8,8 +8,8 @@ export default function Testimonials() {
       <div className="grid md:grid-cols-2 gap-8 mt-16">
         <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
           <p className="text-gray-300 text-lg">
-            "MineNote feels different from ordinary notebooks. The cover
-            design is elegant and inspiring."
+            &quot;MineNote feels different from ordinary notebooks. The cover
+            design is elegant and inspiring.&quot;
           </p>
 
           <p className="mt-6 font-bold text-white">

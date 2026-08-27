@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProductsClient from "./ProductsClient";
 import { createClient } from "@/utils/supabase/server";
+import { getProductRatings } from "../lib/product-rating";
 
 export default async function ProductsPage() {
   const supabase = await createClient();
@@ -19,6 +20,20 @@ export default async function ProductsPage() {
   }
 
   const storefrontProducts = products ?? [];
+
+  const ratings = await getProductRatings(
+    storefrontProducts.map((product) => product.id)
+  );
+
+  const productsWithLiveRatings = storefrontProducts.map((product) => {
+    const rating = ratings[product.id];
+
+    return {
+      ...product,
+      rating: rating?.effective_rating ?? product.rating,
+      review_count: rating?.review_count ?? 0,
+    };
+  });
 
   return (
     <>
@@ -61,7 +76,7 @@ export default async function ProductsPage() {
             All Products
           </h2>
 
-          <ProductsClient products={storefrontProducts} />
+          <ProductsClient products={productsWithLiveRatings} />
         </section>
       </main>
 

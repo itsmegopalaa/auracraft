@@ -32,6 +32,7 @@ export default function RelatedProducts({
             price={product.price}
             category={product.category ?? undefined}
             rating={product.rating ?? undefined}
+            reviewCount={product.review_count ?? 0}
             bestseller={product.bestseller}
           />
         ))}

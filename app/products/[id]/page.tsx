@@ -2,6 +2,7 @@ import ProductGallery from "../../components/products/ProductGallery";
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import type { Product } from "../../lib/products";
+import { getProductRating, getProductRatings } from "../../lib/product-rating";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import AddToCartButton from "./AddToCartButton";
@@ -36,6 +37,8 @@ export default async function ProductPage({
 
   const typedProduct = product as Product;
 
+  const productRating = await getProductRating(typedProduct.id);
+
   const { data: relatedProductsData, error: relatedProductsError } =
     await supabase
       .from("products")
@@ -54,7 +57,21 @@ export default async function ProductPage({
     );
   }
 
-  const relatedProducts = (relatedProductsData ?? []) as Product[];
+  const relatedProductsBase = (relatedProductsData ?? []) as Product[];
+
+  const relatedRatings = await getProductRatings(
+    relatedProductsBase.map((product) => product.id)
+  );
+
+  const relatedProducts = relatedProductsBase.map((product) => {
+    const rating = relatedRatings[product.id];
+
+    return {
+      ...product,
+      rating: rating?.effective_rating ?? product.rating,
+      review_count: rating?.review_count ?? 0,
+    };
+  });
 
   return (
     <>
@@ -86,9 +103,18 @@ export default async function ProductPage({
               {typedProduct.name}
             </h1>
 
-            <p className="mt-5 text-2xl text-yellow-400">
-              ⭐ {typedProduct.rating}
-            </p>
+            <div className="mt-5 flex items-center gap-3">
+              <p className="text-2xl text-yellow-400">
+                ⭐ {productRating?.effective_rating?.toFixed(1) ?? typedProduct.rating ?? "—"}
+              </p>
+
+              {productRating && productRating.review_count > 0 && (
+                <span className="text-sm text-gray-400">
+                  ({productRating.review_count}{" "}
+                  {productRating.review_count === 1 ? "review" : "reviews"})
+                </span>
+              )}
+            </div>
 
             <p className="mt-6 text-4xl font-extrabold text-yellow-400">
               ₹{typedProduct.price}
@@ -159,7 +185,7 @@ export default async function ProductPage({
 
         {/* Reviews */}
         <section className="mx-auto mt-24 max-w-7xl">
-          <ProductReviews />
+          <ProductReviews productId={typedProduct.id} />
         </section>
 
         {/* Related Products */}

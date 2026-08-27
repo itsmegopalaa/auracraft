@@ -8,6 +8,7 @@ export type Product = {
   stock: number;
   active: boolean;
   rating?: number | null;
+  review_count?: number;
   bestseller: boolean;
   featured: boolean;
   new_arrival: boolean;

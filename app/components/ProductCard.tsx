@@ -12,6 +12,7 @@ type ProductCardProps = {
   price: string | number;
   category?: string;
   rating?: number;
+  reviewCount?: number;
   bestseller: boolean;
 };
 
@@ -22,6 +23,7 @@ export default function ProductCard({
   price,
   category,
   rating,
+  reviewCount = 0,
   bestseller,
 }: ProductCardProps) {
 
@@ -127,9 +129,18 @@ export default function ProductCard({
         </h3>
 
 
-        <p className="mt-3 text-yellow-400">
-          ⭐ {rating}
-        </p>
+        <div className="mt-3 flex items-center gap-2">
+          <p className="text-yellow-400">
+            ⭐ {rating ?? "—"}
+          </p>
+
+          {reviewCount > 0 && (
+            <span className="text-sm text-gray-500">
+              ({reviewCount}{" "}
+              {reviewCount === 1 ? "review" : "reviews"})
+            </span>
+          )}
+        </div>
 
 
         <p className="

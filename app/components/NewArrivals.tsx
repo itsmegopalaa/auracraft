@@ -1,5 +1,6 @@
 import ProductCard from "./ProductCard";
 import { createClient } from "@/utils/supabase/server";
+import { getProductRatings } from "../lib/product-rating";
 
 export default async function NewArrivals() {
   const supabase = await createClient();
@@ -24,6 +25,10 @@ export default async function NewArrivals() {
     return null;
   }
 
+  const ratings = await getProductRatings(
+    (products ?? []).map((product) => product.id)
+  );
+
   return (
     <section className="mx-auto max-w-7xl py-24">
       <h2 className="text-center text-5xl font-bold">
@@ -43,7 +48,14 @@ export default async function NewArrivals() {
             image={product.image ?? ""}
             price={product.price}
             category={product.category ?? undefined}
-            rating={product.rating ?? undefined}
+            rating={
+              ratings[product.id]?.effective_rating ??
+              product.rating ??
+              undefined
+            }
+            reviewCount={
+              ratings[product.id]?.review_count ?? 0
+            }
             bestseller={product.bestseller}
           />
         ))}

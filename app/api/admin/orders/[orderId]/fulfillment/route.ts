@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/app/lib/admin-auth";
+import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 
 function isValidUrl(value: string) {
@@ -16,7 +16,17 @@ export async function PATCH(
   context: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+
+    if (adminAuth.error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: adminAuth.error,
+        },
+        { status: adminAuth.status }
+      );
+    }
 
     const { orderId } = await context.params;
     const body = await request.json();

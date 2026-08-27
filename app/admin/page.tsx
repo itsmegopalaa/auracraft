@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
-import AdminNav from "@/app/admin/components/AdminNav";
 
 export default async function AdminPage() {
   const user = await requireAdmin();
@@ -17,7 +16,6 @@ export default async function AdminPage() {
   if (error) {
     return (
       <main className="min-h-screen bg-zinc-50">
-        <AdminNav />
 
         <div className="mx-auto max-w-7xl p-6 md:p-8">
           <h1 className="text-3xl font-bold text-zinc-900">
@@ -109,7 +107,6 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-screen bg-zinc-50">
-      <AdminNav />
 
       <div className="mx-auto max-w-7xl p-6 md:p-8">
         <header className="flex flex-col gap-4 border-b border-zinc-200 pb-6 md:flex-row md:items-center md:justify-between">

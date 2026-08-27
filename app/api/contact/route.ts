@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 function escapeHtml(value: string) {
   return value
@@ -62,18 +68,39 @@ export async function POST(request: Request) {
       );
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY;
+    const { error: databaseError } = await supabaseAdmin
+      .from("contact_messages")
+      .insert({
+        name,
+        email,
+        message,
+      });
 
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY is not configured.");
+    if (databaseError) {
+      console.error("CONTACT DATABASE ERROR:", databaseError);
 
       return NextResponse.json(
         {
           success: false,
-          error: "Contact service is temporarily unavailable.",
+          error: "Unable to save your message right now.",
         },
         { status: 500 }
       );
+    }
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (!resendApiKey) {
+      console.error(
+        "RESEND_API_KEY is not configured. Contact message was saved to inbox."
+      );
+
+      return NextResponse.json({
+        success: true,
+        message:
+          "Your message has been received successfully. We’ll get back to you soon.",
+        emailNotificationSent: false,
+      });
     }
 
     const resend = new Resend(resendApiKey);
@@ -117,20 +144,23 @@ export async function POST(request: Request) {
     });
 
     if (emailError) {
-      console.error("RESEND CONTACT EMAIL ERROR:", emailError);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unable to send your message right now.",
-        },
-        { status: 500 }
+      console.error(
+        "RESEND CONTACT EMAIL ERROR: Message was saved to inbox.",
+        emailError
       );
+
+      return NextResponse.json({
+        success: true,
+        message:
+          "Your message has been received successfully. We’ll get back to you soon.",
+        emailNotificationSent: false,
+      });
     }
 
     return NextResponse.json({
       success: true,
       message: "Your message has been sent successfully.",
+      emailNotificationSent: true,
     });
   } catch (error) {
     console.error("CONTACT API ERROR:", error);

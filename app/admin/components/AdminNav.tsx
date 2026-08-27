@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
-export default function AdminNav() {
+type AdminNavProps = {
+  unreadInboxCount: number;
+  userEmail: string;
+};
+
+export default function AdminNav({
+  unreadInboxCount,
+  userEmail,
+}: AdminNavProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
+
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleSignOut() {
     setLoading(true);
@@ -19,49 +30,135 @@ export default function AdminNav() {
     router.refresh();
   }
 
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
+  const links = [
+    {
+      href: "/admin",
+      label: "Dashboard",
+      active: pathname === "/admin",
+    },
+    {
+      href: "/admin/orders",
+      label: "Orders",
+      active: pathname.startsWith("/admin/orders"),
+    },
+    {
+      href: "/admin/products",
+      label: "Products",
+      active: pathname.startsWith("/admin/products"),
+    },
+    {
+      href: "/admin/inbox",
+      label: "Inbox",
+      active: pathname.startsWith("/admin/inbox"),
+      badge: unreadInboxCount,
+    },
+  ];
+
   return (
     <nav className="border-b border-zinc-200 bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
-        <div className="flex items-center gap-6">
+      <div className="mx-auto max-w-7xl px-6 md:px-8">
+        <div className="flex min-h-16 items-center justify-between gap-4">
           <Link
             href="/admin"
-            className="text-lg font-bold text-zinc-900"
+            onClick={closeMenu}
+            className="shrink-0 text-lg font-bold text-zinc-900"
           >
             MineNote Admin
           </Link>
 
           <div className="hidden items-center gap-5 sm:flex">
-            <Link
-              href="/admin"
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
-            >
-              Dashboard
-            </Link>
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-2 text-sm font-medium transition ${
+                  link.active
+                    ? "text-zinc-900"
+                    : "text-zinc-600 hover:text-zinc-900"
+                }`}
+              >
+                <span>{link.label}</span>
 
-            <Link
-              href="/admin/orders"
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
-            >
-              Orders
-            </Link>
+                {link.badge && link.badge > 0 ? (
+                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                    {link.badge > 99 ? "99+" : link.badge}
+                  </span>
+                ) : null}
+              </Link>
+            ))}
+          </div>
 
-            <Link
-              href="/admin/products"
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+          <div className="flex items-center gap-3">
+            <span className="hidden text-xs text-zinc-500 lg:block">
+              {userEmail}
+            </span>
+
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={loading}
+              className="hidden rounded-xl border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 sm:block"
             >
-              Products
-            </Link>
+              {loading ? "Signing out..." : "Sign out"}
+            </button>
+
+            <button
+              type="button"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
+              className="rounded-xl border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 sm:hidden"
+            >
+              {menuOpen ? "✕" : "☰"}
+            </button>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSignOut}
-          disabled={loading}
-          className="rounded-xl border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? "Signing out..." : "Sign out"}
-        </button>
+        {menuOpen && (
+          <div className="border-t border-zinc-100 py-4 sm:hidden">
+            <div className="space-y-1">
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition ${
+                    link.active
+                      ? "bg-yellow-50 text-zinc-900"
+                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                  }`}
+                >
+                  <span>{link.label}</span>
+
+                  {link.badge && link.badge > 0 ? (
+                    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                      {link.badge > 99 ? "99+" : link.badge}
+                    </span>
+                  ) : null}
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-4 border-t border-zinc-100 pt-4">
+              <p className="mb-3 truncate px-4 text-xs text-zinc-500">
+                {userEmail}
+              </p>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={loading}
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? "Signing out..." : "Sign out"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

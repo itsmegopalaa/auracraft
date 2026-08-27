@@ -15,18 +15,25 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
 
     supabase.auth.getUser().then(({ data }) => {
       setIsLoggedIn(Boolean(data.user));
+      setUserName(
+        data.user?.user_metadata?.full_name?.trim() || ""
+      );
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(Boolean(session?.user));
+      setUserName(
+        session?.user?.user_metadata?.full_name?.trim() || ""
+      );
     });
 
     return () => {
@@ -71,11 +78,29 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         </Link>
 
         <Link
+          href="/track-order"
+          onClick={() => setMenuOpen(false)}
+          className="flex items-center justify-between rounded-2xl border border-zinc-700 bg-zinc-900 px-5 py-4"
+        >
+          <span>🔎 Track Order</span>
+          <span>→</span>
+        </Link>
+
+        <Link
+          href="/products"
+          onClick={() => setMenuOpen(false)}
+          className="flex items-center justify-between rounded-2xl bg-yellow-400 px-5 py-4 font-bold text-black"
+        >
+          <span>🛍️ Shop Now</span>
+          <span>→</span>
+        </Link>
+
+        <Link
           href={isLoggedIn ? "/account" : "/login"}
           onClick={() => setMenuOpen(false)}
           className="flex items-center justify-between rounded-2xl border border-zinc-700 bg-zinc-900 px-5 py-4 font-semibold text-yellow-400"
         >
-          <span>👤 {isLoggedIn ? "My Account" : "Login"}</span>
+          <span>👤 {isLoggedIn ? (userName || "Account") : "Login"}</span>
           <span>→</span>
         </Link>
 
@@ -99,22 +124,6 @@ export default function MobileMenu({ setMenuOpen }: Props) {
           Contact
         </Link>
 
-        <Link
-          href="/track-order"
-          onClick={() => setMenuOpen(false)}
-          className="font-semibold text-yellow-400"
-        >
-          🔎 Track Order
-        </Link>
-
-
-        <Link
-          href="/products"
-          onClick={() => setMenuOpen(false)}
-          className="rounded-full bg-yellow-400 py-3 text-center font-bold text-black"
-        >
-          Shop Now →
-        </Link>
 
 
       </div>

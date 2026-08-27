@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/app/lib/admin-auth";
+import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 
 export async function PATCH(request: Request) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+
+    if (adminAuth.error) {
+      return NextResponse.json(
+        { error: adminAuth.error },
+        { status: adminAuth.status }
+      );
+    }
 
     const body = await request.json();
 
@@ -116,7 +123,14 @@ export async function PATCH(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+
+    if (adminAuth.error) {
+      return NextResponse.json(
+        { error: adminAuth.error },
+        { status: adminAuth.status }
+      );
+    }
 
     const body = await request.json();
 

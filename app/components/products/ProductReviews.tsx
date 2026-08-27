@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 
 type Review = {
   id: string;
@@ -14,50 +13,23 @@ type Review = {
 
 type ProductReviewsProps = {
   productId: string;
+  initialReviews: Review[];
 };
 
 export default function ProductReviews({
   productId,
+  initialReviews,
 }: ProductReviewsProps) {
   const router = useRouter();
 
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const reviews = initialReviews;
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
-
-  async function loadReviews() {
-    setLoading(true);
-    setError("");
-
-    const supabase = createClient();
-
-    const { data, error } = await supabase
-      .from("product_reviews")
-      .select(
-        "id, rating, review_text, verified_buyer, created_at"
-      )
-      .eq("product_id", productId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("REVIEWS LOAD ERROR:", error);
-      setError("Unable to load reviews.");
-      setReviews([]);
-    } else {
-      setReviews((data ?? []) as Review[]);
-    }
-
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    void loadReviews();
-  }, [productId]);
 
   async function submitReview(
     event: React.FormEvent<HTMLFormElement>
@@ -95,8 +67,6 @@ export default function ProductReviews({
       setMessage("Review submitted successfully. ❤️");
       setReviewText("");
       setRating(5);
-
-      await loadReviews();
 
       router.refresh();
     } catch (error) {
@@ -153,11 +123,7 @@ export default function ProductReviews({
         )}
       </div>
 
-      {loading ? (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8 text-gray-400">
-          Loading reviews...
-        </div>
-      ) : reviewCount === 0 ? (
+      {reviewCount === 0 ? (
         <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8 text-gray-400">
           No customer reviews yet.
         </div>

@@ -100,6 +100,31 @@ export default async function ProductPage({
 
   const typedProduct = product as Product;
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: typedProduct.name,
+    description: typedProduct.description,
+    image: typedProduct.image
+      ? [`https://minenote.in${typedProduct.image}`]
+      : ["https://minenote.in/images/notebooks/placeholder.png"],
+    brand: {
+      "@type": "Brand",
+      name: "MineNote",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://minenote.in/products/${typedProduct.id}`,
+      priceCurrency: "INR",
+      price: typedProduct.price,
+      availability:
+        typedProduct.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
   const { data: reviewsData, error: reviewsError } = await supabase
     .from("product_reviews")
     .select("id, rating, review_text, verified_buyer, created_at")
@@ -156,6 +181,12 @@ export default async function ProductPage({
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema),
+        }}
+      />
 
       <main className="min-h-screen bg-black px-6 py-24 text-white">
         <section className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">

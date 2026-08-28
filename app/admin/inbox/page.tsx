@@ -13,19 +13,19 @@ export default async function AdminInboxPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-zinc-50">
+    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
 
       <div className="mx-auto max-w-7xl p-6 md:p-8">
-        <header className="border-b border-zinc-200 pb-6">
+        <header className="border-b border-zinc-200 dark:border-zinc-800 pb-6">
           <p className="text-sm font-medium text-yellow-600">
             MineNote Admin
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold text-zinc-900">
+          <h1 className="mt-1 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             Inbox
           </h1>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Customer messages from the MineNote contact form.
           </p>
         </header>

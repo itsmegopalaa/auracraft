@@ -81,7 +81,7 @@ export default function FulfillmentForm({
         <div>
           <label
             htmlFor="shipping-partner"
-            className="block text-sm font-medium text-zinc-700"
+            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Shipping Partner
           </label>
@@ -93,14 +93,14 @@ export default function FulfillmentForm({
             onChange={(event) => setPartner(event.target.value)}
             placeholder="e.g. Delhivery"
             disabled={loading}
-            className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
+            className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
           />
         </div>
 
         <div>
           <label
             htmlFor="tracking-id"
-            className="block text-sm font-medium text-zinc-700"
+            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Tracking ID
           </label>
@@ -112,7 +112,7 @@ export default function FulfillmentForm({
             onChange={(event) => setTracking(event.target.value)}
             placeholder="e.g. 1234567890"
             disabled={loading}
-            className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
+            className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
           />
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function FulfillmentForm({
       <div className="mt-4">
         <label
           htmlFor="tracking-url"
-          className="block text-sm font-medium text-zinc-700"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Tracking URL
         </label>
@@ -132,19 +132,19 @@ export default function FulfillmentForm({
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://..."
           disabled={loading}
-          className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
+          className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
         />
       </div>
 
       <div className="mt-5 grid gap-3 text-sm md:grid-cols-2">
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <p className="font-medium text-zinc-700">Shipped At</p>
-          <p className="mt-1 text-zinc-500">{formatDate(shippedAt)}</p>
+        <div className="rounded-xl bg-zinc-50 dark:bg-zinc-950 p-4">
+          <p className="font-medium text-zinc-700 dark:text-zinc-300">Shipped At</p>
+          <p className="mt-1 text-zinc-500 dark:text-zinc-400">{formatDate(shippedAt)}</p>
         </div>
 
-        <div className="rounded-xl bg-zinc-50 p-4">
-          <p className="font-medium text-zinc-700">Delivered At</p>
-          <p className="mt-1 text-zinc-500">{formatDate(deliveredAt)}</p>
+        <div className="rounded-xl bg-zinc-50 dark:bg-zinc-950 p-4">
+          <p className="font-medium text-zinc-700 dark:text-zinc-300">Delivered At</p>
+          <p className="mt-1 text-zinc-500 dark:text-zinc-400">{formatDate(deliveredAt)}</p>
         </div>
       </div>
 
@@ -163,7 +163,7 @@ export default function FulfillmentForm({
             href={url}
             target="_blank"
             rel="noreferrer"
-            className="text-sm font-medium text-zinc-600 underline underline-offset-4 hover:text-zinc-900"
+            className="text-sm font-medium text-zinc-600 dark:text-zinc-400 underline underline-offset-4 hover:text-zinc-900 dark:text-zinc-100"
           >
             Open Tracking Link ↗
           </a>
@@ -171,7 +171,7 @@ export default function FulfillmentForm({
       </div>
 
       {message && (
-        <p className="mt-3 text-sm text-zinc-600">{message}</p>
+        <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">{message}</p>
       )}
     </div>
   );

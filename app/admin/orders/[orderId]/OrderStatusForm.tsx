@@ -70,7 +70,7 @@ export default function OrderStatusForm({
     <div>
       <label
         htmlFor="order-status"
-        className="block text-sm font-medium text-zinc-700"
+        className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
       >
         Update status
       </label>
@@ -81,7 +81,7 @@ export default function OrderStatusForm({
           value={status}
           onChange={(event) => setStatus(event.target.value)}
           disabled={loading}
-          className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:border-yellow-400"
+          className="rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-yellow-400"
         >
           {statuses.map((item) => (
             <option key={item} value={item}>
@@ -101,7 +101,7 @@ export default function OrderStatusForm({
       </div>
 
       {message && (
-        <p className="mt-3 text-sm text-zinc-600">
+        <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
           {message}
         </p>
       )}

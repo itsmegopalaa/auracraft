@@ -82,12 +82,12 @@ export default function AdminOrdersClient({ orders }: Props) {
 
   return (
     <>
-      <section className="mb-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <section className="mb-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <label
               htmlFor="order-search"
-              className="mb-2 block text-sm font-medium text-zinc-700"
+              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Search orders
             </label>
@@ -98,14 +98,14 @@ export default function AdminOrdersClient({ orders }: Props) {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Order ID, name, email or phone..."
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
+              className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
             />
           </div>
 
           <div>
             <label
               htmlFor="order-status"
-              className="mb-2 block text-sm font-medium text-zinc-700"
+              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Order status
             </label>
@@ -114,7 +114,7 @@ export default function AdminOrdersClient({ orders }: Props) {
               id="order-status"
               value={orderStatus}
               onChange={(event) => setOrderStatus(event.target.value)}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none focus:border-yellow-400"
+              className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm outline-none focus:border-yellow-400"
             >
               <option value="all">All statuses</option>
               <option value="placed">Placed</option>
@@ -129,7 +129,7 @@ export default function AdminOrdersClient({ orders }: Props) {
           <div>
             <label
               htmlFor="payment-status"
-              className="mb-2 block text-sm font-medium text-zinc-700"
+              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Payment status
             </label>
@@ -138,7 +138,7 @@ export default function AdminOrdersClient({ orders }: Props) {
               id="payment-status"
               value={paymentStatus}
               onChange={(event) => setPaymentStatus(event.target.value)}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none focus:border-yellow-400"
+              className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm outline-none focus:border-yellow-400"
             >
               <option value="all">All payments</option>
               <option value="paid">Paid</option>
@@ -150,7 +150,7 @@ export default function AdminOrdersClient({ orders }: Props) {
           <div>
             <label
               htmlFor="payment-method"
-              className="mb-2 block text-sm font-medium text-zinc-700"
+              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Payment method
             </label>
@@ -159,7 +159,7 @@ export default function AdminOrdersClient({ orders }: Props) {
               id="payment-method"
               value={paymentMethod}
               onChange={(event) => setPaymentMethod(event.target.value)}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none focus:border-yellow-400"
+              className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm outline-none focus:border-yellow-400"
             >
               <option value="all">All methods</option>
               <option value="Razorpay">Razorpay</option>
@@ -168,14 +168,14 @@ export default function AdminOrdersClient({ orders }: Props) {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 border-t border-zinc-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-zinc-500">
+        <div className="mt-4 flex flex-col gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Showing{" "}
-            <span className="font-semibold text-zinc-900">
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
               {filteredOrders.length}
             </span>{" "}
             of{" "}
-            <span className="font-semibold text-zinc-900">
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
               {orders.length}
             </span>{" "}
             orders
@@ -185,7 +185,7 @@ export default function AdminOrdersClient({ orders }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="w-fit rounded-xl border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
+              className="w-fit rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
             >
               Clear filters
             </button>
@@ -194,9 +194,9 @@ export default function AdminOrdersClient({ orders }: Props) {
       </section>
 
       {filteredOrders.length > 0 ? (
-        <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
           <table className="w-full min-w-[1000px] text-left">
-            <thead className="border-b border-zinc-200 bg-zinc-50">
+            <thead className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
               <tr>
                 <th className="px-5 py-4 text-sm font-semibold">
                   Order
@@ -228,7 +228,7 @@ export default function AdminOrdersClient({ orders }: Props) {
               {filteredOrders.map((order) => (
                 <tr
                   key={order.id}
-                  className="border-b border-zinc-100 last:border-0"
+                  className="border-b border-zinc-100 dark:border-zinc-800 last:border-0"
                 >
                   <td className="px-5 py-4">
                     <Link
@@ -238,21 +238,21 @@ export default function AdminOrdersClient({ orders }: Props) {
                       {order.order_id}
                     </Link>
 
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {order.delivery}
                     </p>
                   </td>
 
                   <td className="px-5 py-4">
-                    <p className="font-medium text-zinc-900">
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100">
                       {order.name}
                     </p>
 
-                    <p className="text-sm text-zinc-500">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       {order.email}
                     </p>
 
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {order.phone}
                     </p>
                   </td>
@@ -266,18 +266,18 @@ export default function AdminOrdersClient({ orders }: Props) {
                       {order.payment_method}
                     </p>
 
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {order.payment_status}
                     </p>
                   </td>
 
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium capitalize text-zinc-700">
+                    <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium capitalize text-zinc-700 dark:text-zinc-300">
                       {order.order_status}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4 text-sm text-zinc-500">
+                  <td className="px-5 py-4 text-sm text-zinc-500 dark:text-zinc-400">
                     {new Date(order.created_at).toLocaleString("en-IN")}
                   </td>
                 </tr>
@@ -286,12 +286,12 @@ export default function AdminOrdersClient({ orders }: Props) {
           </table>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-12 text-center">
-          <h2 className="text-lg font-semibold text-zinc-900">
+        <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-12 text-center">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {hasFilters ? "No matching orders" : "No orders yet"}
           </h2>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             {hasFilters
               ? "Try changing your search or filters."
               : "Orders will appear here after customers place them."}

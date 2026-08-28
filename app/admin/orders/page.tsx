@@ -30,9 +30,9 @@ export default async function AdminOrdersPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-zinc-50 p-8">
+      <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-2xl font-bold text-zinc-900">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
             MineNote Admin
           </h1>
 
@@ -60,14 +60,14 @@ export default async function AdminOrdersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50 p-6 md:p-8">
+    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-900">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             MineNote Orders
           </h1>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             {orders?.length ?? 0} order
             {(orders?.length ?? 0) === 1 ? "" : "s"}
           </p>

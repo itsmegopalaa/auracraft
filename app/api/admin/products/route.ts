@@ -24,6 +24,9 @@ export async function PATCH(request: Request) {
       image,
       stock,
       active,
+      theme,
+      badge,
+      featured,
     } = body;
 
     if (typeof id !== "string" || !id.trim()) {
@@ -90,11 +93,23 @@ export async function PATCH(request: Request) {
             : null,
         stock,
         active,
+        theme:
+          typeof theme === "string"
+            ? theme.trim() || null
+            : null,
+        badge:
+          typeof badge === "string"
+            ? badge.trim() || null
+            : null,
+        featured:
+          typeof featured === "boolean"
+            ? featured
+            : false,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select(
-        "id, name, price, description, category, image, stock, active, created_at, updated_at"
+        "id, name, price, description, category, image, stock, active, theme, badge, featured, created_at, updated_at"
       )
       .single();
 
@@ -142,6 +157,9 @@ export async function POST(request: Request) {
       image,
       stock,
       active,
+      theme,
+      badge,
+      featured,
     } = body;
 
     if (typeof name !== "string" || !name.trim()) {
@@ -201,9 +219,21 @@ export async function POST(request: Request) {
             : null,
         stock,
         active,
+        theme:
+          typeof theme === "string"
+            ? theme.trim() || null
+            : null,
+        badge:
+          typeof badge === "string"
+            ? badge.trim() || null
+            : null,
+        featured:
+          typeof featured === "boolean"
+            ? featured
+            : false,
       })
       .select(
-        "id, name, price, description, category, image, stock, active, created_at, updated_at"
+        "id, name, price, description, category, image, stock, active, theme, badge, featured, created_at, updated_at"
       )
       .single();
 

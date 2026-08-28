@@ -67,7 +67,7 @@ export default function InboxMessages({ messages }: Props) {
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700">
+        <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {items.length} total
         </span>
 
@@ -77,19 +77,19 @@ export default function InboxMessages({ messages }: Props) {
       </div>
 
       {items.length > 0 ? (
-        <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
           <div className="divide-y divide-zinc-100">
             {items.map((item) => (
               <article
                 key={item.id}
                 className={`p-5 transition ${
-                  item.is_read ? "bg-white" : "bg-yellow-50/40"
+                  item.is_read ? "bg-white dark:bg-zinc-900" : "bg-yellow-50/40"
                 }`}
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="font-semibold text-zinc-900">
+                      <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
                         {item.name}
                       </h2>
 
@@ -111,7 +111,7 @@ export default function InboxMessages({ messages }: Props) {
                   <div className="flex shrink-0 flex-col items-start gap-2 md:items-end">
                     <time
                       dateTime={item.created_at}
-                      className="text-xs text-zinc-500"
+                      className="text-xs text-zinc-500 dark:text-zinc-400"
                     >
                       {new Date(item.created_at).toLocaleString("en-IN")}
                     </time>
@@ -120,7 +120,7 @@ export default function InboxMessages({ messages }: Props) {
                       type="button"
                       onClick={() => toggleRead(item)}
                       disabled={loadingId === item.id}
-                      className="rounded-xl border border-zinc-300 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {loadingId === item.id
                         ? "Updating..."
@@ -131,8 +131,8 @@ export default function InboxMessages({ messages }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-xl bg-zinc-50 p-4">
-                  <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-700">
+                <div className="mt-5 rounded-xl bg-zinc-50 dark:bg-zinc-950 p-4">
+                  <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-700 dark:text-zinc-300">
                     {item.message}
                   </p>
                 </div>
@@ -147,14 +147,14 @@ export default function InboxMessages({ messages }: Props) {
           </div>
         </section>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-12 text-center">
           <div className="text-4xl">📭</div>
 
-          <h2 className="mt-4 text-lg font-semibold text-zinc-900">
+          <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             Inbox is empty
           </h2>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Customer contact messages will appear here.
           </p>
         </div>

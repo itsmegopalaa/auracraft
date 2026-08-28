@@ -1,4 +1,5 @@
 import AdminNav from "@/app/admin/components/AdminNav";
+import AdminThemeProvider from "@/app/admin/components/AdminThemeProvider";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function AdminLayout({
@@ -24,15 +25,17 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {user ? (
-        <AdminNav
-          unreadInboxCount={unreadInboxCount}
-          userEmail={user.email ?? ""}
-        />
-      ) : null}
+    <AdminThemeProvider>
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors dark:bg-zinc-950 dark:text-zinc-100">
+        {user ? (
+          <AdminNav
+            unreadInboxCount={unreadInboxCount}
+            userEmail={user.email ?? ""}
+          />
+        ) : null}
 
-      {children}
-    </div>
+        {children}
+      </div>
+    </AdminThemeProvider>
   );
 }

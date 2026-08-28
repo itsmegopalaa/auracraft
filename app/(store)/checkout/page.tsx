@@ -370,7 +370,14 @@ export default function CheckoutPage() {
                       : "Place Order →"}
                   </button>
                 ) : (
-                  <div onClick={handleOnlinePaymentClick}>
+                  <div
+                    onClickCapture={(event) => {
+                      if (!validateDetails()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }
+                    }}
+                  >
                     <RazorpayCheckout
                       amount={total}
                       name={name}

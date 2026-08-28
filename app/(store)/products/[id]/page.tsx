@@ -100,30 +100,11 @@ export default async function ProductPage({
 
   const typedProduct = product as Product;
 
-  const productSchema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: typedProduct.name,
-    description: typedProduct.description,
-    image: typedProduct.image
-      ? [`https://minenote.in${typedProduct.image}`]
-      : ["https://minenote.in/images/notebooks/placeholder.png"],
-    brand: {
-      "@type": "Brand",
-      name: "MineNote",
-    },
-    offers: {
-      "@type": "Offer",
-      url: `https://minenote.in/products/${typedProduct.id}`,
-      priceCurrency: "INR",
-      price: typedProduct.price,
-      availability:
-        typedProduct.stock > 0
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-      itemCondition: "https://schema.org/NewCondition",
-    },
-  };
+  const productImage = typedProduct.image
+    ? typedProduct.image.startsWith("http")
+      ? typedProduct.image
+      : `https://minenote.in${typedProduct.image}`
+    : "https://minenote.in/images/notebooks/placeholder.png";
 
   const { data: reviewsData, error: reviewsError } = await supabase
     .from("product_reviews")
@@ -144,6 +125,43 @@ export default async function ProductPage({
   }));
 
   const productRating = await getProductRating(typedProduct.id);
+
+  const productSchema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: typedProduct.name,
+    description: typedProduct.description,
+    image: [productImage],
+    brand: {
+      "@type": "Brand",
+      name: "MineNote",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://minenote.in/products/${typedProduct.id}`,
+      priceCurrency: "INR",
+      price: typedProduct.price,
+      availability:
+        typedProduct.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
+  if (
+    productRating &&
+    productRating.review_count > 0 &&
+    productRating.average_review_rating !== null
+  ) {
+    productSchema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: productRating.average_review_rating,
+      reviewCount: productRating.review_count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
 
   const { data: relatedProductsData, error: relatedProductsError } =
     await supabase

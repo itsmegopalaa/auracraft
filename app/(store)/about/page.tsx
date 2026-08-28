@@ -25,7 +25,7 @@ export default function AboutPage() {
 
 
           <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-gray-400">
-            MineNotecreates premium notebooks that are more than paper and
+            MineNote creates premium notebooks that are more than paper and
             covers. They are a space for your dreams, ideas, creativity and
             the stories you are building every day.
           </p>

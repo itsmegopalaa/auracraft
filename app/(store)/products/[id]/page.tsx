@@ -10,6 +10,70 @@ import ShareButton from "./ShareButton";
 import RelatedProducts from "@/app/components/products/RelatedProducts";
 import ProductReviews from "@/app/components/products/ProductReviews";
 import TrustBadges from "@/app/components/TrustBadges";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const supabase = await createClient();
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("id, name, description, image, active")
+    .eq("id", id)
+    .eq("active", true)
+    .single();
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The requested MineNote product could not be found.",
+    };
+  }
+
+  const description =
+    product.description ||
+    `Discover the ${product.name} notebook from MineNote.`;
+
+  const image = product.image
+    ? product.image.startsWith("http")
+      ? product.image
+      : `https://minenote.in${product.image}`
+    : "https://minenote.in/images/notebooks/placeholder.png";
+
+  const canonical = `https://minenote.in/products/${product.id}`;
+
+  return {
+    title: product.name,
+    description,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: `${product.name} | MineNote`,
+      description,
+      url: canonical,
+      type: "website",
+      siteName: "MineNote",
+      images: [
+        {
+          url: image,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | MineNote`,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function ProductPage({
   params,

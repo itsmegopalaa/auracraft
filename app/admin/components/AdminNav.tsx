@@ -11,13 +11,14 @@ type AdminNavProps = {
   userEmail: string;
 };
 
+const supabase = createClient();
+
 export default function AdminNav({
   unreadInboxCount,
   userEmail,
 }: AdminNavProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
 
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,12 +56,6 @@ export default function AdminNav({
     const query = searchQuery.trim();
 
     if (!query) {
-      setSearchResults({
-        orders: [],
-        products: [],
-        inbox: [],
-      });
-      setSearching(false);
       return;
     }
 

@@ -1,5 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/app/components/Footer";
+
+export const metadata: Metadata = {
+  title: "About MineNote | Our Story",
+  description:
+    "Learn about MineNote, a notebook brand creating premium designs for students, creators and dreamers.",
+  alternates: {
+    canonical: "/about",
+  },
+  openGraph: {
+    title: "About MineNote | Our Story",
+    description:
+      "Discover the story and vision behind MineNote.",
+    url: "/about",
+  },
+};
 
 export default function AboutPage() {
   return (

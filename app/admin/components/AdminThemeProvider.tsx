@@ -40,19 +40,21 @@ export default function AdminThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setThemeState] = useState<AdminTheme>("system");
+  const [theme, setThemeState] = useState<AdminTheme>(() => {
+    if (typeof window === "undefined") {
+      return "system";
+    }
 
-  useEffect(() => {
     const saved = localStorage.getItem("minenote-admin-theme");
 
-    const initialTheme: AdminTheme =
-      saved === "light" || saved === "dark" || saved === "system"
-        ? saved
-        : "system";
+    return saved === "light" || saved === "dark" || saved === "system"
+      ? saved
+      : "system";
+  });
 
-    setThemeState(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   useEffect(() => {
     if (theme === "system") {

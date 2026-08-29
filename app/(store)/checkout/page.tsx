@@ -170,10 +170,6 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleOnlinePaymentClick = () => {
-    if (!validateDetails()) return;
-  };
-
   if (cart.length === 0) {
     return (
       <>

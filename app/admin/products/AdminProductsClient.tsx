@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 type Product = {
@@ -29,7 +29,13 @@ export default function AdminProductsClient({ products: initialProducts }: Props
   const searchParams = useSearchParams();
 
   const [products, setProducts] = useState(initialProducts);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(() => {
+    const editId = searchParams.get("edit");
+
+    return initialProducts.some((product) => product.id === editId)
+      ? editId
+      : null;
+  });
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -49,18 +55,6 @@ export default function AdminProductsClient({ products: initialProducts }: Props
 
   const editingProduct =
     products.find((product) => product.id === editingId) ?? null;
-
-  useEffect(() => {
-    const editId = searchParams.get("edit");
-
-    if (!editId) return;
-
-    const product = products.find((item) => item.id === editId);
-
-    if (product) {
-      setEditingId(product.id);
-    }
-  }, [searchParams, products]);
 
   function updateEditing(field: keyof Product, value: string | number | boolean) {
     if (!editingId) return;

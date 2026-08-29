@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import FeaturedNotebooks from "@/app/components/FeaturedNotebooks";
 import NewArrivals from "@/app/components/NewArrivals";
@@ -9,6 +10,21 @@ import BrandStory from "@/app/components/BrandStory";
 import Testimonials from "@/app/components/Testimonials";
 import Newsletter from "@/app/components/Newsletter";
 import TrustBadges from "@/app/components/TrustBadges";
+
+export const metadata: Metadata = {
+  title: "MineNote | Premium Personalized Notebooks",
+  description:
+    "Discover premium MineNote notebooks designed for students, creators and dreamers. Find a notebook that matches your ideas, creativity and identity.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "MineNote | Premium Personalized Notebooks",
+    description:
+      "Premium notebooks designed for students, creators and dreamers.",
+    url: "/",
+  },
+};
 
 export default function Home() {
   return (

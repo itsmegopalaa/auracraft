@@ -29,9 +29,7 @@ export async function GET(
 
     const supabase = await createServerClient();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    await supabase.auth.getUser();
 
     let query = supabaseAdmin
       .from("orders")

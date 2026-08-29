@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import Footer from "@/app/components/Footer";
 import ProductsClient from "./ProductsClient";
 import { createClient } from "@/utils/supabase/server";
 import { getProductRatings } from "@/app/lib/product-rating";
+
+export const metadata: Metadata = {
+  title: "Shop Premium Notebooks | MineNote",
+  description:
+    "Explore the MineNote collection of premium notebooks with unique designs for students, creators and dreamers.",
+  alternates: {
+    canonical: "/products",
+  },
+  openGraph: {
+    title: "Shop Premium Notebooks | MineNote",
+    description:
+      "Explore premium MineNote notebooks and find your perfect design.",
+    url: "/products",
+  },
+};
 
 export default async function ProductsPage() {
   const supabase = await createClient();

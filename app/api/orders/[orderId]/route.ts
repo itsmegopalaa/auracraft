@@ -57,21 +57,17 @@ export async function GET(
       )
       .eq("order_id", orderId);
 
-    if (user) {
-      query = query.eq("customer_id", user.id);
-    } else {
-      if (!email) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Email address is required to track an order.",
-          },
-          { status: 400 }
-        );
-      }
-
-      query = query.ilike("email", email);
+    if (!email) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Email address is required to track an order.",
+        },
+        { status: 400 }
+      );
     }
+
+    query = query.ilike("email", email);
 
     const { data: order, error } = await query.maybeSingle();
 

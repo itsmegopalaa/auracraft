@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -27,6 +27,12 @@ export default function FulfillmentForm({
   const [url, setUrl] = useState(trackingUrl ?? "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setPartner(shippingPartner ?? "");
+    setTracking(trackingId ?? "");
+    setUrl(trackingUrl ?? "");
+  }, [shippingPartner, trackingId, trackingUrl]);
 
   async function saveFulfillment() {
     setLoading(true);

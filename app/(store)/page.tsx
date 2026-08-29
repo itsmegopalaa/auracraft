@@ -12,7 +12,7 @@ import Newsletter from "@/app/components/Newsletter";
 import TrustBadges from "@/app/components/TrustBadges";
 
 export const metadata: Metadata = {
-  title: "MineNote | Premium Personalized Notebooks",
+  title: "Premium Personalized Notebooks",
   description:
     "Discover premium MineNote notebooks designed for students, creators and dreamers. Find a notebook that matches your ideas, creativity and identity.",
   alternates: {

@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getProductRatings } from "@/app/lib/product-rating";
 
 export const metadata: Metadata = {
-  title: "Shop Premium Notebooks | MineNote",
+  title: "Shop Premium Notebooks",
   description:
     "Explore the MineNote collection of premium notebooks with unique designs for students, creators and dreamers.",
   alternates: {

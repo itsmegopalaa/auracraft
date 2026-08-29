@@ -30,9 +30,9 @@ export default function ReturnRefundPolicyPage() {
                 Order Cancellation
               </h2>
               <p className="mt-3 leading-8">
-                Cancellation requests should be made before the order enters
-                processing. Once an order has been processed or shipped,
-                cancellation may no longer be possible.
+                Cancellation requests may be made before an order enters
+                processing. Once an order has entered processing or has been
+                shipped, cancellation may no longer be possible.
               </p>
             </section>
 
@@ -41,10 +41,11 @@ export default function ReturnRefundPolicyPage() {
                 Damaged Products
               </h2>
               <p className="mt-3 leading-8">
-                If your notebook arrives damaged, please contact us promptly
-                with your order details and clear photographs or other
-                relevant evidence of the damage. After verification, we may
-                provide a replacement or refund, as appropriate.
+                If your notebook arrives damaged, please contact us within
+                48 hours of delivery with your order details and clear
+                photographs or video showing the damage. We will review the
+                claim and, after verification, may provide a replacement or
+                refund as appropriate.
               </p>
             </section>
 
@@ -53,10 +54,11 @@ export default function ReturnRefundPolicyPage() {
                 Incorrect Product
               </h2>
               <p className="mt-3 leading-8">
-                If you receive an item different from what you ordered,
-                contact us with your order details and photographs of the
-                received product. After verification, we may arrange a
-                replacement or refund, as appropriate.
+                If you receive an item different from what you ordered, please
+                contact us within 48 hours of delivery with your order details
+                and clear photographs or video of the received product. After
+                verification, we may arrange a replacement or refund as
+                appropriate.
               </p>
             </section>
 
@@ -65,8 +67,9 @@ export default function ReturnRefundPolicyPage() {
                 Change of Mind
               </h2>
               <p className="mt-3 leading-8">
-                We currently do not accept returns solely because a customer
-                has changed their mind or no longer wants the product.
+                We currently do not accept returns or refunds solely because a
+                customer has changed their mind or no longer wants the
+                product.
               </p>
             </section>
 
@@ -75,9 +78,23 @@ export default function ReturnRefundPolicyPage() {
                 Refund Processing
               </h2>
               <p className="mt-3 leading-8">
-                Where a refund is approved, the refund will be processed
-                through the applicable payment method or another appropriate
-                method communicated by MineNote.
+                Where a refund is approved, it is generally processed within
+                5–7 working days. For online payments, refunds may be processed
+                through the applicable payment method. For Cash on Delivery
+                orders, an approved refund may be processed through UPI or
+                bank transfer using details provided by the customer.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-white">
+                Claim Verification
+              </h2>
+              <p className="mt-3 leading-8">
+                Submitting a return or refund request does not automatically
+                guarantee approval. MineNote may review the order details,
+                photographs, video, and other relevant information before
+                determining the appropriate resolution.
               </p>
             </section>
 

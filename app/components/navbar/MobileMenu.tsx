@@ -78,11 +78,11 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         </Link>
 
         <Link
-          href="/track-order"
+          href="/account/orders"
           onClick={() => setMenuOpen(false)}
           className="flex items-center justify-between rounded-2xl border border-zinc-700 bg-zinc-900 px-5 py-4"
         >
-          <span>🔎 Track Order</span>
+          <span>📦 My Orders</span>
           <span>→</span>
         </Link>
 

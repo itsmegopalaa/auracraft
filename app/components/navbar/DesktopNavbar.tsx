@@ -71,10 +71,10 @@ export default function DesktopNavbar() {
       </Link>
 
       <Link
-        href="/track-order"
+        href="/account/orders"
         className="rounded-full border border-zinc-700 px-5 py-3 font-semibold text-white transition hover:border-yellow-400 hover:text-yellow-400"
       >
-        🔎 Track Order
+        📦 My Orders
       </Link>
 
       <Link

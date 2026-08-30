@@ -4,6 +4,7 @@ import { requireAdmin } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 import OrderStatusForm from "./OrderStatusForm";
 import FulfillmentForm from "./FulfillmentForm";
+import RefundForm from "./RefundForm";
 import Link from "next/link";
 
 type PageProps = {
@@ -178,6 +179,15 @@ export default async function AdminOrderDetailPage({
                   {order.razorpay_payment_id}
                 </p>
               )}
+
+              <RefundForm
+                orderId={order.order_id}
+                total={Number(order.total)}
+                paymentStatus={order.payment_status}
+                refundStatus={order.refund_status}
+                refundAmount={order.refund_amount}
+                refundId={order.refund_id}
+              />
             </div>
           </section>
 

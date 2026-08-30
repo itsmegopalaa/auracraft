@@ -47,7 +47,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   );
 
   return (
-    <div className="max-h-[calc(100vh-80px)] overflow-y-auto border-t border-zinc-800 bg-black/95 px-6 py-8 backdrop-blur-xl md:hidden">
+    <div className="max-h-[calc(100dvh-120px)] overflow-y-auto border-t border-zinc-800 px-4 py-5 md:hidden">
 
       <div className="flex flex-col gap-6 text-lg">
 

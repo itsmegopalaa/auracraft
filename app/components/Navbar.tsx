@@ -60,6 +60,13 @@ export default function Navbar() {
               onClick={(event) => {
                 event.stopPropagation();
                 setMenuOpen(false);
+
+                if (window.location.pathname === "/") {
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }
               }}
               className="inline-flex items-center justify-center"
               aria-label="MineNote Home"

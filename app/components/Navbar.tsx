@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import DesktopNavbar from "./navbar/DesktopNavbar";
 import MobileSearch from "./navbar/MobileSearch";
@@ -8,6 +8,17 @@ import MobileMenu from "./navbar/MobileMenu";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [menuOpen]);
 
   return (
     <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-black/95">
@@ -28,12 +39,12 @@ export default function Navbar() {
         </div>
 
         {/* Mobile */}
-        <div
-          className="relative md:hidden"
-          onClick={() => setMenuOpen(true)}
-        >
+        <div className="relative md:hidden">
 
-          <div className="relative flex min-h-12 items-center justify-center">
+          <div
+            className="relative flex min-h-12 items-center justify-center"
+            onClick={() => setMenuOpen((current) => !current)}
+          >
 
             {/* Search */}
             <div
@@ -51,6 +62,7 @@ export default function Navbar() {
                 setMenuOpen(false);
               }}
               className="inline-flex items-center justify-center"
+              aria-label="MineNote Home"
             >
               <h1 className="text-2xl font-extrabold tracking-wide text-yellow-400 sm:text-3xl">
                 MineNote

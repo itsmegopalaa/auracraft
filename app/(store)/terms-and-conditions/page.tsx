@@ -100,7 +100,7 @@ export default function TermsAndConditionsPage() {
                 successful order confirmation. Delivery timelines are
                 estimates and may vary because of courier operations, public
                 holidays, weather, incorrect or incomplete address
-                information, or circumstances outside MineNote's reasonable
+                information, or circumstances outside MineNote&apos;s reasonable
                 control. Please refer to our Shipping Policy for further
                 information.
               </p>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
@@ -122,12 +123,21 @@ export default async function AccountOrdersPage() {
             </p>
           </div>
 
-          <Link
-            href="/products"
-            className="w-fit rounded-full border border-zinc-700 px-5 py-3 text-sm font-semibold transition hover:border-yellow-400 hover:text-yellow-300"
-          >
-            Continue Shopping →
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/track-order"
+              className="rounded-full border border-zinc-700 px-5 py-3 text-sm font-semibold transition hover:border-yellow-400 hover:text-yellow-300"
+            >
+              🔎 Track as Guest
+            </Link>
+
+            <Link
+              href="/products"
+              className="w-fit rounded-full border border-zinc-700 px-5 py-3 text-sm font-semibold transition hover:border-yellow-400 hover:text-yellow-300"
+            >
+              Continue Shopping →
+            </Link>
+          </div>
         </div>
 
         {error ? (
@@ -185,7 +195,77 @@ export default async function AccountOrdersPage() {
                   </span>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                <div className="mt-6 rounded-2xl border border-zinc-800 bg-black p-5">
+                  <p className="text-sm font-semibold text-zinc-400">
+                    Products
+                  </p>
+
+                  <div className="mt-4 space-y-3">
+                    {(Array.isArray(order.items) ? order.items : []).map(
+                      (item, index) => {
+                        const itemRecord =
+                          typeof item === "object" &&
+                          item !== null
+                            ? (item as Record<string, unknown>)
+                            : {};
+
+                        const name =
+                          typeof itemRecord.name === "string"
+                            ? itemRecord.name
+                            : "MineNote Product";
+
+                        const image =
+                          typeof itemRecord.image === "string" &&
+                          itemRecord.image.length > 0
+                            ? itemRecord.image
+                            : "/images/notebooks/placeholder.png";
+
+                        const quantity =
+                          typeof itemRecord.quantity === "number"
+                            ? itemRecord.quantity
+                            : 1;
+
+                        const price =
+                          typeof itemRecord.price === "number"
+                            ? itemRecord.price
+                            : 0;
+
+                        return (
+                          <div
+                            key={`${order.order_id}-${name}-${index}`}
+                            className="flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-3"
+                          >
+                            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-zinc-900">
+                              <Image
+                                src={image}
+                                alt={name}
+                                fill
+                                sizes="80px"
+                                className="object-cover"
+                              />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate font-semibold text-white">
+                                {name}
+                              </p>
+
+                              <p className="mt-1 text-sm text-zinc-500">
+                                Quantity: {quantity}
+                              </p>
+
+                              <p className="mt-1 text-sm font-semibold text-yellow-400">
+                                ₹{price * quantity}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-3">
                   <div className="rounded-2xl bg-black p-5">
                     <p className="text-sm text-zinc-500">
                       Total

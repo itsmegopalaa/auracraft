@@ -241,7 +241,7 @@ export default async function AccountOrdersPage() {
                                 alt={name}
                                 fill
                                 sizes="80px"
-                                className="object-cover"
+                                className="object-cover transition duration-300 hover:scale-105"
                               />
                             </div>
 

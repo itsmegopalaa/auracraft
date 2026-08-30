@@ -47,7 +47,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   );
 
   return (
-    <div className="border-t border-zinc-800 bg-black/95 px-6 py-8 backdrop-blur-xl md:hidden">
+    <div className="max-h-[calc(100vh-80px)] overflow-y-auto border-t border-zinc-800 bg-black/95 px-6 py-8 backdrop-blur-xl md:hidden">
 
       <div className="flex flex-col gap-6 text-lg">
 
@@ -105,24 +105,41 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         </Link>
 
 
-        <div className="border-t border-zinc-800" />
+        <div className="border-t border-zinc-800 pt-6" />
 
+        <nav className="flex flex-col gap-2">
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
+            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
+          >
+            🏠 Home
+          </Link>
 
-        <Link href="/" onClick={() => setMenuOpen(false)}>
-          Home
-        </Link>
+          <Link
+            href="/products"
+            onClick={() => setMenuOpen(false)}
+            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
+          >
+            🛍️ Products
+          </Link>
 
-        <Link href="/products" onClick={() => setMenuOpen(false)}>
-          Products
-        </Link>
+          <Link
+            href="/about"
+            onClick={() => setMenuOpen(false)}
+            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
+          >
+            ℹ️ About
+          </Link>
 
-        <Link href="/about" onClick={() => setMenuOpen(false)}>
-          About
-        </Link>
-
-        <Link href="/contact" onClick={() => setMenuOpen(false)}>
-          Contact
-        </Link>
+          <Link
+            href="/contact"
+            onClick={() => setMenuOpen(false)}
+            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
+          >
+            ✉️ Contact
+          </Link>
+        </nav>
 
 
 

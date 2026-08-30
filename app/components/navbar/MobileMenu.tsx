@@ -105,41 +105,69 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         </Link>
 
 
-        <div className="border-t border-zinc-800 pt-6" />
+        <div className="mt-2 border-t border-zinc-800/80 pt-7">
+          <p className="mb-4 px-1 text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+            Explore MineNote
+          </p>
 
-        <nav className="flex flex-col gap-2">
-          <Link
-            href="/"
-            onClick={() => setMenuOpen(false)}
-            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
-          >
-            🏠 Home
-          </Link>
+          <nav className="flex flex-col gap-2">
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+              className="group flex items-center justify-between rounded-xl border border-transparent px-4 py-3.5 text-[16px] font-semibold text-zinc-100 transition-all duration-200 hover:border-zinc-700 hover:bg-zinc-900 hover:text-yellow-400"
+            >
+              <span className="flex items-center">
+                <span className="mr-3 text-lg">🏠</span>
+                Home
+              </span>
+              <span className="text-zinc-600 transition group-hover:text-yellow-400">
+                →
+              </span>
+            </Link>
 
-          <Link
-            href="/products"
-            onClick={() => setMenuOpen(false)}
-            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
-          >
-            🛍️ Products
-          </Link>
+            <Link
+              href="/products"
+              onClick={() => setMenuOpen(false)}
+              className="group flex items-center justify-between rounded-xl border border-transparent px-4 py-3.5 text-[16px] font-semibold text-zinc-100 transition-all duration-200 hover:border-zinc-700 hover:bg-zinc-900 hover:text-yellow-400"
+            >
+              <span className="flex items-center">
+                <span className="mr-3 text-lg">🛍️</span>
+                Products
+              </span>
+              <span className="text-zinc-600 transition group-hover:text-yellow-400">
+                →
+              </span>
+            </Link>
 
-          <Link
-            href="/about"
-            onClick={() => setMenuOpen(false)}
-            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
-          >
-            ℹ️ About
-          </Link>
+            <Link
+              href="/about"
+              onClick={() => setMenuOpen(false)}
+              className="group flex items-center justify-between rounded-xl border border-transparent px-4 py-3.5 text-[16px] font-semibold text-zinc-100 transition-all duration-200 hover:border-zinc-700 hover:bg-zinc-900 hover:text-yellow-400"
+            >
+              <span className="flex items-center">
+                <span className="mr-3 text-lg">ℹ️</span>
+                About
+              </span>
+              <span className="text-zinc-600 transition group-hover:text-yellow-400">
+                →
+              </span>
+            </Link>
 
-          <Link
-            href="/contact"
-            onClick={() => setMenuOpen(false)}
-            className="rounded-xl px-5 py-3 font-medium transition hover:bg-zinc-900 hover:text-yellow-400"
-          >
-            ✉️ Contact
-          </Link>
-        </nav>
+            <Link
+              href="/contact"
+              onClick={() => setMenuOpen(false)}
+              className="group flex items-center justify-between rounded-xl border border-transparent px-4 py-3.5 text-[16px] font-semibold text-zinc-100 transition-all duration-200 hover:border-zinc-700 hover:bg-zinc-900 hover:text-yellow-400"
+            >
+              <span className="flex items-center">
+                <span className="mr-3 text-lg">✉️</span>
+                Contact
+              </span>
+              <span className="text-zinc-600 transition group-hover:text-yellow-400">
+                →
+              </span>
+            </Link>
+          </nav>
+        </div>
 
 
 

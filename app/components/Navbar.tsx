@@ -28,33 +28,45 @@ export default function Navbar() {
         </div>
 
         {/* Mobile */}
-        <div className="relative md:hidden">
+        <div
+          className="relative md:hidden"
+          onClick={() => setMenuOpen(true)}
+        >
 
-          <div className="flex min-h-12 items-center justify-between gap-3">
+          <div className="relative flex min-h-12 items-center justify-center">
 
             {/* Search */}
-            <div className="flex h-12 w-12 shrink-0 items-center justify-start">
+            <div
+              className="absolute left-0 flex h-12 w-12 items-center justify-center"
+              onClick={(event) => event.stopPropagation()}
+            >
               <MobileSearch />
             </div>
 
-            {/* Logo */}
+            {/* Navbar Logo → Home */}
             <Link
               href="/"
-              className="min-w-0 flex-1 text-center"
-              onClick={() => setMenuOpen(false)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setMenuOpen(false);
+              }}
+              className="inline-flex items-center justify-center"
             >
-              <h1 className="truncate text-2xl font-extrabold tracking-wide text-yellow-400 sm:text-3xl">
+              <h1 className="text-2xl font-extrabold tracking-wide text-yellow-400 sm:text-3xl">
                 MineNote
               </h1>
             </Link>
 
-            {/* Menu button */}
+            {/* Hamburger */}
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((current) => !current)}
-              className="flex h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-xl text-3xl text-yellow-400 transition-transform active:scale-90"
+              onClick={(event) => {
+                event.stopPropagation();
+                setMenuOpen((current) => !current);
+              }}
+              className="absolute right-0 flex h-12 w-12 touch-manipulation items-center justify-center rounded-xl text-3xl text-yellow-400 transition-transform active:scale-90"
             >
               <span aria-hidden="true">
                 {menuOpen ? "✕" : "☰"}
@@ -74,6 +86,7 @@ export default function Navbar() {
                 ? "visible translate-y-0 opacity-100"
                 : "invisible -translate-y-2 opacity-0 pointer-events-none",
             ].join(" ")}
+            onClick={(event) => event.stopPropagation()}
           >
             <MobileMenu setMenuOpen={setMenuOpen} />
           </div>

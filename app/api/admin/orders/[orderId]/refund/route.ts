@@ -242,7 +242,9 @@ export async function POST(
         refund_status: "pending",
       })
       .eq("order_id", refundOrder.order_id)
-      .is("refund_status", null)
+      .or(
+        "refund_status.is.null,refund_status.eq.failed,refund_status.eq.partial"
+      )
       .select("order_id, refund_status")
       .maybeSingle();
 

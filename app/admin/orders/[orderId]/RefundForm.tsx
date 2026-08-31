@@ -29,7 +29,7 @@ export default function RefundForm({
     setError("");
 
     const confirmed = window.confirm(
-      `Refund ₹${Number(total).toLocaleString("en-IN")} for order ${orderId}?\n\nThis will create a REAL Razorpay refund.`
+      `Refund ₹${Number(total).toLocaleString("en-IN")} for order ${orderId}?\n\nThis will create a REAL Razorpay refund for the full order amount.`
     );
 
     if (!confirmed) return;
@@ -109,6 +109,40 @@ export default function RefundForm({
     );
   }
 
+  if (refundStatus === "failed") {
+    return (
+      <div className="mt-5 border-t border-zinc-100 pt-5 dark:border-zinc-800">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/20">
+          <p className="font-semibold text-red-800 dark:text-red-300">
+            Previous refund attempt failed
+          </p>
+
+          <p className="mt-1 text-sm text-red-700 dark:text-red-400">
+            Razorpay did not accept the previous refund. You can safely retry
+            after verifying the payment state.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleRefund}
+            disabled={loading}
+            className="mt-4 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading
+              ? "Processing refund..."
+              : `Retry refund ₹${Number(total).toLocaleString("en-IN")}`}
+          </button>
+
+          {error && (
+            <p className="mt-3 text-sm font-medium text-red-700 dark:text-red-400">
+              {error}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (paymentStatus !== "paid") {
     return null;
   }
@@ -122,7 +156,7 @@ export default function RefundForm({
 
         <p className="mt-1 text-sm text-red-700 dark:text-red-400">
           This will issue a real Razorpay refund of ₹
-          {Number(total).toLocaleString("en-IN")}.
+          {Number(total).toLocaleString("en-IN")} for the full order amount.
         </p>
 
         <button

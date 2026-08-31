@@ -54,7 +54,7 @@ AuraNotes by MineNote transforms ordinary notebooks into premium
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-gray-400 md:justify-start">
 
-            <span>⭐ 4.9/5 Rating</span>
+            <span>⭐ Rated by MineNote customers</span>
 
             <span className="h-2 w-2 rounded-full bg-yellow-400" />
 

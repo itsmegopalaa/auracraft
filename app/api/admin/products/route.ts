@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 export async function PATCH(request: Request) {
   try {
@@ -72,7 +72,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const { data, error } = await supabase
       .from("products")
@@ -198,7 +198,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const { data, error } = await supabase
       .from("products")

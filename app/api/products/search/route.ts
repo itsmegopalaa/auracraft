@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   const { data, error } = await supabase
     .from("products")

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 export async function PATCH(
   request: Request,
@@ -42,7 +42,7 @@ export async function PATCH(
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const updateData = body.is_read
       ? {

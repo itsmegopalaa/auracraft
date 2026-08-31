@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 type RouteContext = {
   params: Promise<{
@@ -21,7 +21,7 @@ export async function POST(
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const {
       data: { user },

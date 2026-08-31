@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { calculateOrder } from "@/app/lib/order-pricing";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const {
       data: { user },

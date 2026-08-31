@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 type RefundRequestBody = {
   amount?: unknown;
@@ -59,7 +59,7 @@ export async function POST(
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const { data: order, error: orderError } = await supabase
       .from("orders")

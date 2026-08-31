@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { createClient } from "@/utils/supabase/server";
+import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 function isValidUrl(value: string) {
   try {
@@ -86,7 +86,7 @@ export async function PATCH(
       );
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     const { data: existingOrder, error: existingOrderError } =
       await supabase

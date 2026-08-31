@@ -1,25 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { Resend } from "resend";
+import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import { calculateOrder } from "@/app/lib/order-pricing";
-import { verifyRazorpaySignature } from "@/app/lib/razorpay-verification";
+import { verifyRazorpayPayment } from "@/app/services/payments";
 import { createClient as createServerClient } from "@/utils/supabase/server";
+import { sendOrderConfirmationEmail } from "@/app/services/orders";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = createSupabaseAdminClient();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
 
 export async function POST(request: Request) {
   try {
@@ -120,201 +108,40 @@ export async function POST(request: Request) {
         );
       }
 
-      const verified = verifyRazorpaySignature({
-        orderId: String(razorpayOrderId),
-        paymentId: String(razorpayPaymentId),
-        signature: String(razorpaySignature),
-      });
+      try {
+        await verifyRazorpayPayment({
+          razorpayOrderId,
+          razorpayPaymentId,
+          razorpaySignature,
+          expectedAmount: Math.round(
+            calculatedOrder.total * 100
+          ),
+          customerId: user.id,
+          mineNoteOrderId: String(orderId),
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Razorpay payment could not be validated.";
 
-      if (!verified) {
-        return NextResponse.json(
-          {
-            error: "Razorpay payment could not be verified.",
-          },
-          { status: 400 }
-        );
-      }
-
-      const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
-      const razorpayKeySecret =
-        process.env.RAZORPAY_KEY_SECRET;
-
-      if (!razorpayKeyId || !razorpayKeySecret) {
-        console.error(
-          "RAZORPAY SERVER CREDENTIALS ARE NOT CONFIGURED."
-        );
-
-        return NextResponse.json(
-          {
-            error: "Payment gateway is not configured.",
-          },
-          { status: 500 }
-        );
-      }
-
-      const razorpayAuth = Buffer.from(
-        `${razorpayKeyId}:${razorpayKeySecret}`
-      ).toString("base64");
-
-      const razorpayOrderResponse = await fetch(
-        `https://api.razorpay.com/v1/orders/${encodeURIComponent(
-          String(razorpayOrderId)
-        )}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Basic ${razorpayAuth}`,
-          },
-          cache: "no-store",
-        }
-      );
-
-      const razorpayOrderData =
-        await razorpayOrderResponse.json();
-
-      if (!razorpayOrderResponse.ok) {
-        console.error(
-          "RAZORPAY ORDER LOOKUP ERROR:",
-          razorpayOrderData
-        );
+        const status =
+          message ===
+          "Payment order does not match this customer or order."
+            ? 403
+            : message ===
+                "Unable to validate the Razorpay order." ||
+              message ===
+                "Unable to validate the Razorpay payment."
+              ? 502
+              : message ===
+                  "Payment gateway is not configured."
+                ? 500
+                : 400;
 
         return NextResponse.json(
-          {
-            error:
-              "Unable to validate the Razorpay order.",
-          },
-          { status: 502 }
-        );
-      }
-
-      const expectedAmount =
-        Math.round(calculatedOrder.total * 100);
-
-      if (
-        razorpayOrderData.id !== String(razorpayOrderId) ||
-        razorpayOrderData.currency !== "INR" ||
-        Number(razorpayOrderData.amount) !== expectedAmount
-      ) {
-        console.error(
-          "RAZORPAY ORDER MISMATCH:",
-          {
-            expectedAmount,
-            razorpayAmount:
-              razorpayOrderData.amount,
-            currency:
-              razorpayOrderData.currency,
-          }
-        );
-
-        return NextResponse.json(
-          {
-            error:
-              "Payment amount does not match the order.",
-          },
-          { status: 400 }
-        );
-      }
-
-      /*
-       * Bind the Razorpay order to the authenticated
-       * MineNote customer and the exact MineNote order ID.
-       *
-       * These values were written server-side when the
-       * Razorpay order was created in /api/create-order.
-       */
-      const razorpayNotes =
-        razorpayOrderData.notes ?? {};
-
-      if (
-        razorpayNotes.customer_id !== user.id ||
-        razorpayNotes.minenote_order_id !== String(orderId)
-      ) {
-        console.error(
-          "RAZORPAY ORDER OWNERSHIP / ID MISMATCH:",
-          {
-            expectedCustomerId: user.id,
-            receivedCustomerId:
-              razorpayNotes.customer_id,
-            expectedMineNoteOrderId:
-              String(orderId),
-            receivedMineNoteOrderId:
-              razorpayNotes.minenote_order_id,
-            razorpayOrderId:
-              String(razorpayOrderId),
-          }
-        );
-
-        return NextResponse.json(
-          {
-            error:
-              "Payment order does not match this customer or order.",
-          },
-          { status: 403 }
-        );
-      }
-
-      const razorpayPaymentResponse = await fetch(
-        `https://api.razorpay.com/v1/payments/${encodeURIComponent(
-          String(razorpayPaymentId)
-        )}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Basic ${razorpayAuth}`,
-          },
-          cache: "no-store",
-        }
-      );
-
-      const razorpayPaymentData =
-        await razorpayPaymentResponse.json();
-
-      if (!razorpayPaymentResponse.ok) {
-        console.error(
-          "RAZORPAY PAYMENT LOOKUP ERROR:",
-          razorpayPaymentData
-        );
-
-        return NextResponse.json(
-          {
-            error:
-              "Unable to validate the Razorpay payment.",
-          },
-          { status: 502 }
-        );
-      }
-
-      if (
-        razorpayPaymentData.id !== String(razorpayPaymentId) ||
-        razorpayPaymentData.order_id !==
-          String(razorpayOrderId) ||
-        Number(razorpayPaymentData.amount) !==
-          expectedAmount ||
-        razorpayPaymentData.currency !== "INR" ||
-        razorpayPaymentData.status !== "captured"
-      ) {
-        console.error(
-          "RAZORPAY PAYMENT MISMATCH:",
-          {
-            paymentId:
-              razorpayPaymentData.id,
-            orderId:
-              razorpayPaymentData.order_id,
-            amount:
-              razorpayPaymentData.amount,
-            currency:
-              razorpayPaymentData.currency,
-            status:
-              razorpayPaymentData.status,
-          }
-        );
-
-        return NextResponse.json(
-          {
-            error:
-              "Razorpay payment could not be validated.",
-          },
-          { status: 400 }
+          { error: message },
+          { status }
         );
       }
 
@@ -457,82 +284,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const paymentLabel =
-      paymentMethod === "Razorpay"
-        ? "Paid online via Razorpay"
-        : "Cash on Delivery";
-
-    const safeName = escapeHtml(String(name).trim());
-    const safeAddress = escapeHtml(String(address).trim());
-    const safeCity = escapeHtml(String(city).trim());
-    const safeState = escapeHtml(String(state).trim());
-    const safePin = escapeHtml(String(pin).trim());
-    const safeItems = calculatedOrder.items.map((item) => ({
-      ...item,
-      safeName: escapeHtml(item.name),
-    }));
-
-    const { error: emailError } = await resend.emails.send({
-      from: "MineNote <orders@minenote.in>",
-      to: [String(email).trim()],
-      subject: `MineNote Order Confirmed — ${String(orderId)}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #18181b; max-width: 640px; margin: 0 auto; padding: 24px;">
-          <h1 style="margin-bottom: 8px;">Order Confirmed 🎉</h1>
-
-          <p>Hi ${safeName},</p>
-
-          <p>
-            Thank you for ordering from <strong>MineNote</strong>.
-            Your order has been successfully placed.
-          </p>
-
-          <div style="background: #f4f4f5; padding: 16px; border-radius: 12px; margin: 20px 0;">
-            <p style="margin: 4px 0;"><strong>Order ID:</strong> ${String(orderId)}</p>
-            <p style="margin: 4px 0;"><strong>Payment:</strong> ${paymentLabel}</p>
-            <p style="margin: 4px 0;"><strong>Status:</strong> ${orderStatus}</p>
-            <p style="margin: 4px 0;"><strong>Total:</strong> ₹${calculatedOrder.total}</p>
-            <p style="margin: 4px 0;"><strong>Delivery:</strong> 3-5 Working Days</p>
-          </div>
-
-          <h2>Items</h2>
-
-          <ul>
-            ${safeItems
-              .map(
-                (item) =>
-                  `<li>${item.safeName} × ${item.quantity} — ₹${item.price * item.quantity}</li>`
-              )
-              .join("")}
-          </ul>
-
-          <h2>Delivery Address</h2>
-
-          <p>
-            ${safeAddress}<br />
-            ${safeCity}, ${safeState}<br />
-            PIN: ${safePin}
-          </p>
-
-          <p style="margin-top: 28px;">
-            We’ll keep you updated about your order.
-          </p>
-
-          <p>
-            — Team MineNote ❤️
-          </p>
-        </div>
-      `,
-    });
-
-    if (emailError) {
-      console.error("RESEND ORDER EMAIL ERROR:", emailError);
-    }
+    const emailSent =
+      await sendOrderConfirmationEmail({
+        orderId: String(orderId),
+        name: String(name).trim(),
+        email: String(email).trim(),
+        address: String(address).trim(),
+        city: String(city).trim(),
+        state: String(state).trim(),
+        pin: String(pin).trim(),
+        paymentMethod: String(paymentMethod),
+        orderStatus,
+        total: calculatedOrder.total,
+        items: calculatedOrder.items,
+      });
 
     return NextResponse.json({
       success: true,
       order: data,
-      emailSent: !emailError,
+      emailSent,
     });
   } catch (error) {
     console.error("ORDER API ERROR:", error);

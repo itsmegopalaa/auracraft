@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createClient as createServerClient } from "@/utils/supabase/server";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,10 +25,6 @@ export async function GET(
 
     const url = new URL(request.url);
     const email = url.searchParams.get("email")?.trim().toLowerCase();
-
-    const supabase = await createServerClient();
-
-    await supabase.auth.getUser();
 
     let query = supabaseAdmin
       .from("orders")
@@ -65,7 +60,7 @@ export async function GET(
       );
     }
 
-    query = query.ilike("email", email);
+    query = query.eq("email", email);
 
     const { data: order, error } = await query.maybeSingle();
 

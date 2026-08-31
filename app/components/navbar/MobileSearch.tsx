@@ -3,5 +3,5 @@
 import SearchBox from "../search/SearchBox";
 
 export default function MobileSearch() {
-  return <SearchBox />;
+  return <SearchBox mobile />;
 }

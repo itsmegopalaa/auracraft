@@ -13,7 +13,7 @@ type SearchProduct = {
   category?: string | null;
 };
 
-export default function SearchBox() {
+export default function SearchBox({ mobile = false }: { mobile?: boolean }) {
   const router = useRouter();
 
   const [search, setSearch] = useState("");
@@ -147,17 +147,14 @@ export default function SearchBox() {
           />
 
           <div
-            className="
-              fixed left-1/2 top-20 z-[100]
-              w-[calc(100vw-2rem)]
-              max-w-2xl
-              -translate-x-1/2
-              overflow-hidden
-              rounded-3xl
-              border border-zinc-800
-              bg-zinc-950
-              shadow-2xl shadow-black/50
-            "
+            className={[
+              "fixed left-1/2 -translate-x-1/2",
+              mobile ? "top-[76px] z-[100]" : "top-20 z-[100]",
+              "w-[calc(100vw-2rem)] max-w-2xl",
+              "overflow-hidden rounded-3xl",
+              "border border-zinc-800",
+              "bg-zinc-950 shadow-2xl shadow-black/50",
+            ].join(" ")}
           >
             <div className="border-b border-zinc-800 p-4">
               <div className="flex items-center gap-3">

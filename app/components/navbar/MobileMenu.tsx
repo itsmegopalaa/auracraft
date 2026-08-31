@@ -62,7 +62,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href="/wishlist"
           onClick={closeMenu}
-          className="group rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-[15px] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
+          className="group rounded-2xl border border-white/[0.12] bg-white/[0.045] px-4 py-[15px] shadow-[0_10px_30px_rgba(0,0,0,0.22)] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[21px] font-light text-zinc-200">
@@ -76,7 +76,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
             )}
           </div>
 
-          <p className="mt-3 text-[13px] font-semibold text-zinc-100">
+          <p className="mt-3 text-[13px] font-semibold text-zinc-50">
             Wishlist
           </p>
         </Link>
@@ -84,7 +84,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href="/cart"
           onClick={closeMenu}
-          className="group rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-[15px] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
+          className="group rounded-2xl border border-white/[0.12] bg-white/[0.045] px-4 py-[15px] shadow-[0_10px_30px_rgba(0,0,0,0.22)] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[18px] text-zinc-200">
@@ -98,7 +98,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
             )}
           </div>
 
-          <p className="mt-3 text-[13px] font-semibold text-zinc-100">
+          <p className="mt-3 text-[13px] font-semibold text-zinc-50">
             Your Bag
           </p>
         </Link>
@@ -111,7 +111,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href="/products"
           onClick={closeMenu}
-          className="flex min-h-[56px] items-center justify-between rounded-2xl bg-yellow-400 px-5 text-[14px] font-bold text-black outline-none transition-all duration-200 hover:bg-yellow-300 focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
+          className="flex min-h-[58px] items-center justify-between rounded-2xl bg-yellow-400 px-5 text-[14px] font-bold text-black shadow-[0_10px_30px_rgba(234,179,8,0.12)] outline-none transition-all duration-200 hover:bg-yellow-300 hover:shadow-[0_12px_34px_rgba(234,179,8,0.18)] focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
         >
           <span>Shop the Collection</span>
           <span aria-hidden="true">→</span>
@@ -120,7 +120,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href="/account/orders"
           onClick={closeMenu}
-          className="group flex min-h-[56px] items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.025] px-5 outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
+          className="group flex min-h-[56px] items-center justify-between rounded-2xl border border-white/[0.11] bg-white/[0.045] px-5 shadow-[0_9px_28px_rgba(0,0,0,0.20)] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
             <span
@@ -152,7 +152,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href={isLoggedIn ? "/account" : "/login"}
           onClick={closeMenu}
-          className="flex min-h-[56px] items-center justify-between rounded-2xl border border-yellow-400/20 bg-yellow-400/[0.04] px-5 outline-none transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.07] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
+          className="flex min-h-[56px] items-center justify-between rounded-2xl border border-yellow-400/30 bg-yellow-400/[0.065] px-5 shadow-[0_9px_30px_rgba(0,0,0,0.22)] outline-none transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.07] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
         >
           <div className="min-w-0">
             <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-yellow-400">
@@ -172,25 +172,25 @@ export default function MobileMenu({ setMenuOpen }: Props) {
       </div>
 
       {/* Navigation */}
-      <div className="mt-6 border-t border-white/[0.12] pt-5">
+      <div className="mt-7 border-t border-white/[0.14] pt-6">
 
         <p className="mb-2.5 px-1 text-[9px] font-bold uppercase tracking-[0.24em] text-zinc-500">
           Explore
         </p>
 
-        <nav aria-label="Mobile navigation" className="space-y-0.5">
+        <nav aria-label="Mobile navigation" className="space-y-2">
 
           {navItems.map(([href, label]) => (
             <Link
               key={href}
               href={href}
               onClick={closeMenu}
-              className="group flex min-h-[50px] items-center justify-between rounded-xl border-b border-white/[0.12] px-4 text-[14px] font-medium text-zinc-300 outline-none transition-all duration-150 hover:bg-white/[0.04] hover:text-yellow-400 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-inset active:bg-white/[0.06] last:border-b-0"
+              className="group flex min-h-[50px] items-center justify-between rounded-xl border border-white/[0.10] bg-white/[0.035] px-4 text-[14px] font-medium text-zinc-200 shadow-[0_6px_22px_rgba(0,0,0,0.18)] outline-none transition-all duration-200 hover:border-yellow-400/35 hover:bg-white/[0.065] hover:text-yellow-400 focus-visible:border-yellow-400/50 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-inset active:scale-[0.99] active:bg-white/[0.06]"
             >
               <span>{label}</span>
 
               <span
-                className="text-zinc-600 transition-all duration-150 group-hover:translate-x-1 group-hover:text-yellow-400"
+                className="text-zinc-600 transition-all duration-200 group-hover:translate-x-1 group-hover:text-yellow-400"
                 aria-hidden="true"
               >
                 →

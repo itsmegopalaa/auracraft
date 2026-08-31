@@ -1,138 +1,153 @@
 import Link from "next/link";
 
+const exploreLinks = [
+  { href: "/", label: "Home" },
+  { href: "/products", label: "Products" },
+  { href: "/about", label: "Our Story" },
+  { href: "/contact", label: "Contact" },
+];
+
+const policyLinks = [
+  { href: "/shipping-policy", label: "Shipping Policy" },
+  { href: "/return-refund-policy", label: "Return & Refund" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-and-conditions", label: "Terms & Conditions" },
+];
+
 export default function Footer() {
   return (
-    <footer className="mt-24 border-t border-zinc-800 bg-black">
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-4">
+    <footer className="mt-24 border-t border-white/[0.08] bg-black">
+      <div className="mx-auto max-w-7xl px-6 py-16 sm:py-20">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-16">
 
-        <div>
-          <h2 className="text-3xl font-bold text-yellow-400">
-            MineNote
-          </h2>
+          {/* Brand */}
+          <div className="max-w-sm">
+            <Link
+              href="/"
+              className="inline-flex items-center outline-none"
+              aria-label="MineNote home"
+            >
+              <span className="text-3xl font-extrabold tracking-tight text-yellow-400">
+                MineNote
+              </span>
+            </Link>
 
-          <p className="mt-5 leading-7 text-gray-400">
-            Premium personalized notebooks crafted for students,
-            creators and dreamers. Designed to inspire every page
-            of your journey.
+            <p className="mt-5 text-sm leading-7 text-zinc-400">
+              Premium personalized notebooks crafted for students,
+              creators and dreamers. Designed to make every page feel
+              like your own.
+            </p>
+
+            <div className="mt-7 flex items-center gap-3">
+              <span
+                className="h-px w-8 bg-yellow-400/40"
+                aria-hidden="true"
+              />
+
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+                A brand by AuraCraft
+              </p>
+            </div>
+          </div>
+
+          {/* Explore */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Explore
+            </h3>
+
+            <ul className="mt-5 space-y-3">
+              {exploreLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="
+                      inline-flex min-h-9 items-center
+                      text-sm text-zinc-400
+                      outline-none transition-colors duration-200
+                      hover:text-yellow-400
+                      focus-visible:text-yellow-400
+                    "
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Policies */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Policies
+            </h3>
+
+            <ul className="mt-5 space-y-3">
+              {policyLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="
+                      inline-flex min-h-9 items-center
+                      text-sm text-zinc-400
+                      outline-none transition-colors duration-200
+                      hover:text-yellow-400
+                      focus-visible:text-yellow-400
+                    "
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Connect */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Connect
+            </h3>
+
+            <ul className="mt-5 space-y-3 text-sm text-zinc-400">
+              <li>
+                Instagram 📸
+              </li>
+
+              <li>
+                YouTube ▶️
+              </li>
+
+              <li>
+                LinkedIn 💼
+              </li>
+
+              <li>
+                <a
+                  href="mailto:orders@minenote.in"
+                  className="
+                    inline-flex min-h-9 items-center
+                    outline-none transition-colors duration-200
+                    hover:text-yellow-400
+                    focus-visible:text-yellow-400
+                  "
+                >
+                  orders@minenote.in
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom */}
+        <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.07] pt-7 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+          <p className="text-xs text-zinc-600">
+            © 2026 MineNote. All rights reserved.
           </p>
 
-          <p className="mt-5 text-sm text-gray-500">
-            A brand by AuraCraft
+          <p className="text-xs text-zinc-600">
+            Crafted with <span className="text-zinc-500">❤️</span> in India
           </p>
         </div>
-
-        <div>
-          <h3 className="mb-5 text-xl font-semibold">
-            Explore
-          </h3>
-
-          <ul className="space-y-3 text-gray-400">
-            <li>
-              <Link href="/" className="transition hover:text-yellow-400">
-                Home
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/products"
-                className="transition hover:text-yellow-400"
-              >
-                Products
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/about"
-                className="transition hover:text-yellow-400"
-              >
-                About
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/contact"
-                className="transition hover:text-yellow-400"
-              >
-                Contact
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="mb-5 text-xl font-semibold">
-            Policies
-          </h3>
-
-          <ul className="space-y-3 text-gray-400">
-            <li>
-              <Link
-                href="/shipping-policy"
-                className="transition hover:text-yellow-400"
-              >
-                Shipping Policy
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/return-refund-policy"
-                className="transition hover:text-yellow-400"
-              >
-                Return & Refund
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/privacy-policy"
-                className="transition hover:text-yellow-400"
-              >
-                Privacy Policy
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/terms-and-conditions"
-                className="transition hover:text-yellow-400"
-              >
-                Terms & Conditions
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="mb-5 text-xl font-semibold">
-            Connect
-          </h3>
-
-          <ul className="space-y-3 text-gray-400">
-            <li>
-              Instagram 📸
-            </li>
-
-            <li>
-              YouTube ▶️
-            </li>
-
-            <li>
-              LinkedIn 💼
-            </li>
-
-            <li>
-              orders@minenote.in
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="border-t border-zinc-800 py-6 text-center text-sm text-gray-500">
-        © 2026 MineNote • A brand by AuraCraft • Crafted with ❤️ in India
       </div>
     </footer>
   );

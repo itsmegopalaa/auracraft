@@ -1,40 +1,101 @@
 export default function Newsletter() {
   return (
-    <section className="py-24">
-      <div className="mx-auto max-w-5xl px-6 text-center">
+    <section className="relative overflow-hidden px-6 py-24">
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-400/[0.06] blur-3xl"
+        aria-hidden="true"
+      />
 
-        <p className="text-yellow-400 font-semibold tracking-wide">
-          Stay Inspired
-        </p>
+      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-white/[0.09] bg-zinc-950 px-6 py-14 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-10 md:px-16 md:py-16">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-yellow-400/40 to-transparent"
+          aria-hidden="true"
+        />
 
-        <h2 className="mt-4 text-4xl font-extrabold md:text-5xl">
-          Join the <span className="text-yellow-400">MineNote</span> Family
-        </h2>
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/[0.06] px-4 py-2">
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-yellow-400"
+              aria-hidden="true"
+            />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-yellow-300">
+              Stay Inspired
+            </span>
+          </div>
 
-        <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-gray-400">
-          Get new notebook launches, exclusive designs, special offers and
-          creative inspiration directly in your inbox.
-        </p>
+          <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+            Join the{" "}
+            <span className="text-yellow-400">MineNote</span> Family
+          </h2>
 
-        <form className="mx-auto mt-10 flex max-w-2xl flex-col gap-4 sm:flex-row">
-          <input
-            type="email"
-            placeholder="Enter your email address"
-            className="flex-1 rounded-full border border-zinc-700 bg-black px-6 py-4 text-white outline-none focus:border-yellow-400"
-          />
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+            Get new notebook launches, exclusive designs, special offers and
+            creative inspiration directly in your inbox.
+          </p>
 
-          <button
-            type="submit"
-            className="rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105 hover:bg-yellow-300"
-          >
-            Subscribe →
-          </button>
-        </form>
+          <form className="mx-auto mt-9 flex max-w-2xl flex-col gap-3 sm:flex-row">
+            <label htmlFor="newsletter-email" className="sr-only">
+              Email address
+            </label>
 
-        <p className="mt-5 text-xs text-gray-600">
-         No spam. Just MineNote updates and inspiration.
-        </p>
+            <input
+              id="newsletter-email"
+              type="email"
+              placeholder="Enter your email address"
+              className="
+                min-h-14 flex-1 rounded-full
+                border border-white/[0.10]
+                bg-black/60 px-6
+                text-sm text-white
+                placeholder:text-zinc-600
+                shadow-inner shadow-black/20
+                outline-none
+                transition-all duration-200
+                focus:border-yellow-400/60
+                focus:bg-black/80
+                focus:ring-2
+                focus:ring-yellow-400/10
+              "
+            />
 
+            <button
+              type="submit"
+              className="
+                min-h-14 rounded-full
+                bg-yellow-400 px-8
+                text-sm font-bold text-black
+                shadow-[0_8px_24px_rgba(250,204,21,0.14)]
+                transition-all duration-200
+                hover:bg-yellow-300
+                hover:shadow-[0_10px_30px_rgba(250,204,21,0.20)]
+                active:scale-[0.98]
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-yellow-400/70
+                focus-visible:ring-offset-2
+                focus-visible:ring-offset-zinc-950
+              "
+            >
+              Subscribe <span className="ml-1">→</span>
+            </button>
+          </form>
+
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <span
+              className="h-px w-8 bg-white/[0.08]"
+              aria-hidden="true"
+            />
+
+            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+              No spam · Just MineNote
+            </p>
+
+            <span
+              className="h-px w-8 bg-white/[0.08]"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

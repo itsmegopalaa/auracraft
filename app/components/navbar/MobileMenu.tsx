@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function MobileMenu({ setMenuOpen }: Props) {
+  const router = useRouter();
   const { cart } = useCart();
   const { wishlist } = useWishlist();
 
@@ -45,6 +47,26 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   );
 
   const closeMenu = () => setMenuOpen(false);
+
+  const handleHomeClick = (
+    event: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    event.preventDefault();
+
+    closeMenu();
+
+    if (window.location.pathname === "/") {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+
+      return;
+    }
+
+    router.push("/");
+  };
 
   const navItems = [
     ["/", "Home"],
@@ -184,7 +206,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
             <Link
               key={href}
               href={href}
-              onClick={closeMenu}
+              onClick={href === "/" ? handleHomeClick : closeMenu}
               className="group flex min-h-[50px] items-center justify-between rounded-xl border border-white/[0.10] bg-white/[0.035] px-4 text-[14px] font-medium text-zinc-200 shadow-[0_6px_22px_rgba(0,0,0,0.18)] outline-none transition-all duration-200 hover:border-yellow-400/35 hover:bg-white/[0.065] hover:text-yellow-400 focus-visible:border-yellow-400/50 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-inset active:scale-[0.99] active:bg-white/[0.06]"
             >
               <span>{label}</span>

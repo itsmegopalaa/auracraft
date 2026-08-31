@@ -43,41 +43,75 @@ export default function Home() {
       <WhyAuraCraft />
 
       {/* Notebook Showcase */}
-      <section className="max-w-7xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
+      <section className="relative overflow-hidden border-y border-white/[0.06]">
+        <div
+          className="pointer-events-none absolute -left-40 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-yellow-400/[0.035] blur-3xl"
+          aria-hidden="true"
+        />
 
-        <div>
-          <h2 className="text-5xl md:text-6xl font-extrabold leading-tight">
-            Your Notebook.
-            <br />
-            <span className="text-yellow-400">
-              Your Identity.
-            </span>
-          </h2>
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-24 sm:px-6 sm:py-28 md:grid-cols-[1.05fr_0.95fr] md:gap-16 lg:py-32">
 
-          <p className="mt-8 text-lg text-gray-400 leading-8">
-            AuraNotes transforms ordinary notebooks into premium creations
-            that reflect your personality, dreams, creativity and ambition.
-            Every page is designed to inspire your next big idea.
-          </p>
+          {/* Copy */}
+          <div className="max-w-2xl">
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.3em] text-yellow-400/80">
+              More than a notebook
+            </p>
 
-          <Link
-  href="/products"
-  className="mt-10 inline-block rounded-full bg-yellow-400 px-8 py-4 font-semibold text-black transition hover:scale-105"
->
-  Explore Collection →
-</Link>
+            <h2 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+              Your Notebook.
+              <br />
+              <span className="text-yellow-400">Your Identity.</span>
+            </h2>
+
+            <p className="mt-7 max-w-xl text-base leading-8 text-zinc-400 sm:text-lg">
+              AuraNotes turns an everyday notebook into something that feels
+              personal. Choose a design that reflects your personality,
+              creativity, and the ideas you want to bring to life.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+              <span>Personal</span>
+              <span className="text-yellow-400/60">•</span>
+              <span>Premium</span>
+              <span className="text-yellow-400/60">•</span>
+              <span>Made for Ideas</span>
+            </div>
+
+            <Link
+              href="/products"
+              className="mt-10 inline-flex min-h-12 items-center justify-center rounded-full bg-yellow-400 px-7 py-3.5 text-sm font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-[0_14px_36px_rgba(250,204,21,0.2)] active:scale-[0.98]"
+            >
+              Explore Collection
+              <span className="ml-2" aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          {/* Product showcase */}
+          <div className="relative flex min-h-[420px] items-center justify-center sm:min-h-[500px]">
+
+            <div
+              className="absolute h-72 w-72 rounded-full bg-yellow-400/[0.06] blur-3xl sm:h-96 sm:w-96"
+              aria-hidden="true"
+            />
+
+            <div className="relative rounded-[2rem] border border-white/[0.08] bg-white/[0.025] p-5 shadow-[0_25px_70px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:p-7">
+              <div className="absolute inset-3 rounded-[1.5rem] border border-yellow-400/[0.08]" aria-hidden="true" />
+
+              <Image
+                src="/images/notebook.png"
+                alt="AuraNotes Premium Notebook"
+                width={450}
+                height={600}
+                className="relative z-10 h-auto max-h-[500px] w-auto max-w-full object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)] transition-transform duration-500 hover:scale-[1.025]"
+              />
+            </div>
+
+            <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/[0.10] bg-black/70 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.22em] text-zinc-300 shadow-xl backdrop-blur-md sm:bottom-7">
+              Crafted for your journey
+            </div>
+          </div>
+
         </div>
-
-        <div className="flex justify-center">
-          <Image
-            src="/images/notebook.png"
-            alt="AuraNotes Notebook"
-            width={450}
-            height={600}
-            className="rounded-3xl shadow-2xl shadow-yellow-500/20 transition duration-500 hover:scale-105"
-          />
-        </div>
-
       </section>
 
       {/* New Arrivals */}

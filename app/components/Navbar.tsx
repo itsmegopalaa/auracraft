@@ -61,6 +61,11 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    // Keep homepage navigation warm so logo/Home taps feel instant.
+    router.prefetch("/");
+  }, [router]);
+
+  useEffect(() => {
     if (!menuOpen) return;
 
     const previousOverflow = document.body.style.overflow;

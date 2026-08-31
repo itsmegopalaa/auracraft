@@ -1,3 +1,5 @@
+import { getServerEnv } from "@/app/config";
+
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { requireAdminApi } from "@/app/lib/admin-auth";
@@ -171,7 +173,7 @@ export async function PATCH(
 
     if (status !== "placed") {
       const resendApiKey =
-        process.env.RESEND_API_KEY;
+        getServerEnv().resendApiKey;
 
       if (!resendApiKey) {
         console.error(

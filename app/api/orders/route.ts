@@ -221,11 +221,7 @@ export async function POST(request: Request) {
           );
         }
 
-        console.log(
-          "Returning existing MineNote order for repeated Razorpay request:",
-          existingPaymentOrder.order_id
-        );
-
+        
         return NextResponse.json({
           success: true,
           alreadyExists: true,

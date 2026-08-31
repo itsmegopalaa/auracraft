@@ -1,3 +1,5 @@
+import { getRazorpayAuth } from "./razorpay-auth";
+
 import { verifyRazorpaySignature } from "@/app/lib/razorpay-verification";
 
 interface VerifyRazorpayPaymentInput {
@@ -51,21 +53,7 @@ export async function verifyRazorpayPayment(
     );
   }
 
-  const razorpayKeyId =
-    process.env.RAZORPAY_KEY_ID;
-
-  const razorpayKeySecret =
-    process.env.RAZORPAY_KEY_SECRET;
-
-  if (!razorpayKeyId || !razorpayKeySecret) {
-    throw new Error(
-      "Payment gateway is not configured."
-    );
-  }
-
-  const auth = Buffer.from(
-    `${razorpayKeyId}:${razorpayKeySecret}`
-  ).toString("base64");
+  const auth = getRazorpayAuth();
 
   const orderResponse = await fetch(
     `https://api.razorpay.com/v1/orders/${encodeURIComponent(

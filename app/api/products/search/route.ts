@@ -1,3 +1,4 @@
+import { errorResponse } from "@/app/lib/api-response";
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
 
@@ -22,10 +23,7 @@ export async function GET(request: Request) {
   if (error) {
     console.error("Product search error:", error);
 
-    return NextResponse.json(
-      { error: "Unable to search products." },
-      { status: 500 }
-    );
+    return errorResponse("Unable to search products.", 500);
   }
 
   return NextResponse.json(data ?? []);

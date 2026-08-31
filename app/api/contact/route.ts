@@ -1,3 +1,5 @@
+import { getServerEnv } from "@/app/config";
+
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import { Resend } from "resend";
@@ -85,7 +87,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendApiKey = getServerEnv().resendApiKey;
 
     if (!resendApiKey) {
       console.error(

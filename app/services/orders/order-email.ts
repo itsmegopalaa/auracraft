@@ -1,3 +1,5 @@
+import { getServerEnv } from "@/app/config";
+
 import { Resend } from "resend";
 import type { OrderItem } from "@/app/types";
 import { getOrderEmailSubject } from "@/app/services/orders";
@@ -28,7 +30,7 @@ function escapeHtml(value: unknown): string {
 export async function sendOrderConfirmationEmail(
   input: SendOrderConfirmationEmailInput
 ): Promise<boolean> {
-  const resendApiKey = process.env.RESEND_API_KEY;
+  const resendApiKey = getServerEnv().resendApiKey;
 
   if (!resendApiKey) {
     console.error(

@@ -1,3 +1,4 @@
+import { getServerEnv } from "@/app/config";
 import crypto from "crypto";
 
 export function verifyRazorpaySignature({
@@ -9,7 +10,7 @@ export function verifyRazorpaySignature({
   paymentId: string;
   signature: string;
 }) {
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  const keySecret = getServerEnv().razorpayKeySecret;
 
   if (!keySecret) {
     throw new Error(

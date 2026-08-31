@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
+import { refundRazorpayPayment } from "@/app/services/payments";
 
 type RefundRequestBody = {
   amount?: unknown;
@@ -213,24 +214,6 @@ export async function POST(
       );
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    if (!keyId || !keySecret) {
-      console.error(
-        "RAZORPAY SERVER CREDENTIALS ARE NOT CONFIGURED."
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Razorpay server credentials are not configured.",
-        },
-        { status: 500 }
-      );
-    }
-
     /*
      * Mark the refund as pending before calling Razorpay.
      * This prevents a second admin request from blindly
@@ -274,38 +257,18 @@ export async function POST(
       );
     }
 
-    const razorpayAuth = Buffer.from(
-      `${keyId}:${keySecret}`
-    ).toString("base64");
+    let refundResult;
 
-    const refundResponse = await fetch(
-      `https://api.razorpay.com/v1/payments/${encodeURIComponent(
-        refundOrder.razorpay_payment_id
-      )}/refund`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${razorpayAuth}`,
-          "Content-Type": "application/json",
-          "X-Razorpay-Idempotency-Key": `minenote-refund-${refundOrder.order_id}-${refundAmount}`,
-        },
-        body: JSON.stringify({
-          amount: refundAmount * 100,
-          notes: {
-            minenote_order_id: refundOrder.order_id,
-          },
-        }),
-      }
-    );
-
-    const refundData = await refundResponse.json();
-
-    if (!refundResponse.ok) {
-      console.error("RAZORPAY REFUND ERROR:", {
-        status: refundResponse.status,
-        data: refundData,
+    try {
+      refundResult = await refundRazorpayPayment({
+        razorpayPaymentId:
+          refundOrder.razorpay_payment_id,
+        refundAmount,
+        mineNoteOrderId: refundOrder.order_id,
         orderId: refundOrder.order_id,
       });
+    } catch (error) {
+      console.error("RAZORPAY REFUND SERVICE ERROR:", error);
 
       await supabase
         .from("orders")
@@ -315,45 +278,28 @@ export async function POST(
         .eq("order_id", refundOrder.order_id)
         .eq("refund_status", "pending");
 
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            refundData?.error?.description ||
-            "Razorpay refund failed.",
-        },
-        { status: 502 }
-      );
-    }
-
-    const refundId = refundData?.id;
-
-    if (
-      typeof refundId !== "string" ||
-      refundId.trim().length === 0
-    ) {
-      console.error(
-        "RAZORPAY REFUND RESPONSE MISSING REFUND ID:",
-        refundData
-      );
-
-      await supabase
-        .from("orders")
-        .update({
-          refund_status: "failed",
-        })
-        .eq("order_id", refundOrder.order_id)
-        .eq("refund_status", "pending");
+      const status =
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        typeof error.status === "number"
+          ? error.status
+          : 502;
 
       return NextResponse.json(
         {
           success: false,
           error:
-            "Razorpay returned an invalid refund response.",
+            error instanceof Error
+              ? error.message
+              : "Razorpay refund failed.",
         },
-        { status: 502 }
+        { status: status >= 400 && status < 600 ? status : 502 }
       );
     }
+
+    const refundId = refundResult.id;
+    const refundData = refundResult.raw;
 
     const finalRefundStatus =
       refundAmount === totalAmount
@@ -423,7 +369,12 @@ export async function POST(
         id: refundId,
         amount: refundAmount,
         amountPaise: refundAmount * 100,
-        status: refundData.status ?? null,
+        status:
+          typeof refundData === "object" &&
+          refundData !== null &&
+          "status" in refundData
+            ? String(refundData.status ?? "")
+            : null,
       },
     });
   } catch (error) {

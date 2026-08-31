@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { calculateOrder } from "@/app/lib/order-pricing";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
+import { createRazorpayOrder } from "@/app/services/payments";
 
 export async function POST(request: Request) {
   try {
@@ -13,27 +14,14 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         {
-          error: "You must be signed in to make an online payment.",
+          error:
+            "You must be signed in to make an online payment.",
         },
         { status: 401 }
       );
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    if (!keyId || !keySecret) {
-      return NextResponse.json(
-        {
-          error:
-            "Razorpay server credentials are not configured.",
-        },
-        { status: 500 }
-      );
-    }
-
     const body = await request.json();
-
     const { items } = body;
 
     const mineNoteOrderId = `MN${Date.now()
@@ -56,7 +44,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const amount = Math.round(calculatedOrder.total * 100);
+    const amount = Math.round(
+      calculatedOrder.total * 100
+    );
+
     const safeReceipt = mineNoteOrderId;
 
     if (!Number.isInteger(amount) || amount < 100) {
@@ -66,57 +57,49 @@ export async function POST(request: Request) {
       );
     }
 
-    const auth = Buffer.from(
-      `${keyId}:${keySecret}`
-    ).toString("base64");
+    let razorpayOrder;
 
-    const razorpayResponse = await fetch(
-      "https://api.razorpay.com/v1/orders",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount,
-          currency: "INR",
-          receipt: safeReceipt,
-          notes: {
-            minenote_order_id: mineNoteOrderId,
-            customer_id: user.id,
-          },
-        }),
-      }
-    );
-
-    const razorpayData =
-      await razorpayResponse.json();
-
-    if (!razorpayResponse.ok) {
-      console.error("RAZORPAY API ERROR:", {
-        status: razorpayResponse.status,
-        code: razorpayData?.error?.code,
-        description:
-          razorpayData?.error?.description,
-        reason: razorpayData?.error?.reason,
-        source: razorpayData?.error?.source,
+    try {
+      razorpayOrder = await createRazorpayOrder({
+        amount,
+        receipt: safeReceipt,
+        customerId: user.id,
+        mineNoteOrderId,
       });
+    } catch (error) {
+      console.error(
+        "Razorpay create order service error:",
+        error
+      );
+
+      const status =
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        typeof error.status === "number"
+          ? error.status
+          : 502;
 
       return NextResponse.json(
         {
           error:
-            razorpayData?.error?.description ||
-            "Razorpay rejected the order.",
+            error instanceof Error
+              ? error.message
+              : "Unable to create Razorpay order.",
         },
-        { status: razorpayResponse.status }
+        {
+          status:
+            status >= 400 && status < 600
+              ? status
+              : 502,
+        }
       );
     }
 
     return NextResponse.json({
-      order_id: razorpayData.id,
-      amount: razorpayData.amount,
-      currency: razorpayData.currency,
+      order_id: razorpayOrder.order_id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
       items: calculatedOrder.items,
       total: calculatedOrder.total,
       mineNoteOrderId,

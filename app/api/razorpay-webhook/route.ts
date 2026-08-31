@@ -1,3 +1,5 @@
+import { getServerEnv } from "@/app/config";
+
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
@@ -42,7 +44,7 @@ function verifyWebhookSignature(
 
 export async function POST(request: Request) {
   try {
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const webhookSecret = getServerEnv().razorpayWebhookSecret;
 
     if (!webhookSecret) {
       console.error(
@@ -111,11 +113,7 @@ export async function POST(request: Request) {
 
     const event = payload.event;
 
-    console.log(
-      "RAZORPAY WEBHOOK EVENT:",
-      event
-    );
-
+    
     /*
      * We only need to change order/payment state for
      * these two payment events.
@@ -286,11 +284,7 @@ export async function POST(request: Request) {
        * overwrite paid_at on a repeated webhook.
        */
       if (existingOrder.payment_status === "paid") {
-        console.log(
-          "Razorpay payment already marked paid:",
-          razorpayOrderId
-        );
-
+        
         return NextResponse.json({
           received: true,
           handled: true,
@@ -331,15 +325,7 @@ export async function POST(request: Request) {
         );
       }
 
-      console.log(
-        "Razorpay payment captured and order marked paid:",
-        {
-          orderId: existingOrder.order_id,
-          razorpayOrderId,
-          razorpayPaymentId,
-        }
-      );
-
+      
       return NextResponse.json({
         received: true,
         handled: true,
@@ -360,11 +346,7 @@ export async function POST(request: Request) {
        * failed event.
        */
       if (existingOrder.payment_status === "paid") {
-        console.log(
-          "Ignoring failed payment event because order is already paid:",
-          razorpayOrderId
-        );
-
+        
         return NextResponse.json({
           received: true,
           handled: true,
@@ -398,15 +380,7 @@ export async function POST(request: Request) {
         );
       }
 
-      console.log(
-        "Razorpay payment failed:",
-        {
-          orderId: existingOrder.order_id,
-          razorpayOrderId,
-          razorpayPaymentId,
-        }
-      );
-
+      
       return NextResponse.json({
         received: true,
         handled: true,

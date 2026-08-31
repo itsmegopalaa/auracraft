@@ -1,3 +1,4 @@
+import { errorResponse } from "@/app/lib/api-response";
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
 
@@ -15,10 +16,7 @@ export async function POST(
     const { id: productId } = await params;
 
     if (!productId) {
-      return NextResponse.json(
-        { error: "Product ID is required." },
-        { status: 400 }
-      );
+      return errorResponse("Product ID is required.", 400);
     }
 
     const supabase = await createServerSupabaseClient();
@@ -28,10 +26,7 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "You must be signed in to review this product." },
-        { status: 401 }
-      );
+      return errorResponse("You must be signed in to review this product.", 401);
     }
 
     const body = await request.json();
@@ -44,10 +39,7 @@ export async function POST(
       rating < 1 ||
       rating > 5
     ) {
-      return NextResponse.json(
-        { error: "Rating must be between 1 and 5." },
-        { status: 400 }
-      );
+      return errorResponse("Rating must be between 1 and 5.", 400);
     }
 
     if (reviewText.length < 5 || reviewText.length > 2000) {
@@ -76,10 +68,7 @@ export async function POST(
     if (ordersError) {
       console.error("REVIEW ORDER LOOKUP ERROR:", ordersError);
 
-      return NextResponse.json(
-        { error: "Unable to verify your purchase." },
-        { status: 500 }
-      );
+      return errorResponse("Unable to verify your purchase.", 500);
     }
 
     const matchingOrder = (orders ?? []).find((order) => {
@@ -122,10 +111,7 @@ export async function POST(
         existingReviewError
       );
 
-      return NextResponse.json(
-        { error: "Unable to check existing review." },
-        { status: 500 }
-      );
+      return errorResponse("Unable to check existing review.", 500);
     }
 
     if (existingReview) {
@@ -166,10 +152,7 @@ export async function POST(
         );
       }
 
-      return NextResponse.json(
-        { error: "Unable to submit your review." },
-        { status: 500 }
-      );
+      return errorResponse("Unable to submit your review.", 500);
     }
 
     return NextResponse.json(

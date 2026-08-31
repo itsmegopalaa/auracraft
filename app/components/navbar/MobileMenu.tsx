@@ -172,7 +172,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
       </div>
 
       {/* Navigation */}
-      <div className="mt-5 border-t border-white/[0.12] pt-4">
+      <div className="mt-5 border-t border-white/[0.14] pt-4">
 
         <p className="mb-2 px-1 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500">
           Explore
@@ -185,7 +185,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
               key={href}
               href={href}
               onClick={closeMenu}
-              className="group flex min-h-[48px] items-center justify-between border-b border-white/[0.10] last:border-b-0 rounded-xl px-4 text-[14px] font-medium text-zinc-300 transition-all duration-150 hover:bg-white/[0.04] hover:text-yellow-400 active:bg-white/[0.06]"
+              className="group flex min-h-[48px] items-center justify-between rounded-xl border-b border-white/[0.12] px-4 text-[14px] font-medium text-zinc-300 transition-all duration-150 hover:bg-white/[0.04] hover:text-yellow-400 active:bg-white/[0.06] last:border-b-0"
             >
               <span>{label}</span>
 

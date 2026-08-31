@@ -2,6 +2,10 @@
 
 import SearchBox from "../search/SearchBox";
 
-export default function MobileSearch() {
-  return <SearchBox mobile />;
+type Props = {
+  onOpen?: () => void;
+};
+
+export default function MobileSearch({ onOpen }: Props) {
+  return <SearchBox mobile onOpen={onOpen} />;
 }

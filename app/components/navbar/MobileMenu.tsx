@@ -54,15 +54,15 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   ];
 
   return (
-    <div className="max-h-[calc(100dvh-64px)] overflow-y-auto px-4 pb-6 pt-4">
+    <div className="max-h-[calc(100dvh-64px)] overflow-y-auto px-4 pb-7 pt-5">
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-3">
 
         <Link
           href="/wishlist"
           onClick={closeMenu}
-          className="group rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-4 transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] active:scale-[0.98]"
+          className="group rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-[15px] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[21px] font-light text-zinc-200">
@@ -84,7 +84,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href="/cart"
           onClick={closeMenu}
-          className="group rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-4 transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] active:scale-[0.98]"
+          className="group rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-[15px] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[18px] text-zinc-200">
@@ -106,12 +106,12 @@ export default function MobileMenu({ setMenuOpen }: Props) {
       </div>
 
       {/* Main actions */}
-      <div className="mt-2.5 space-y-2.5">
+      <div className="mt-3 space-y-2.5">
 
         <Link
           href="/products"
           onClick={closeMenu}
-          className="flex min-h-[54px] items-center justify-between rounded-2xl bg-yellow-400 px-5 text-[14px] font-bold text-black transition-all duration-200 hover:bg-yellow-300 active:scale-[0.99]"
+          className="flex min-h-[56px] items-center justify-between rounded-2xl bg-yellow-400 px-5 text-[14px] font-bold text-black outline-none transition-all duration-200 hover:bg-yellow-300 focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
         >
           <span>Shop the Collection</span>
           <span aria-hidden="true">→</span>
@@ -120,7 +120,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href="/account/orders"
           onClick={closeMenu}
-          className="group flex min-h-[54px] items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.025] px-5 transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] active:scale-[0.99]"
+          className="group flex min-h-[56px] items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.025] px-5 outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
             <span
@@ -152,7 +152,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         <Link
           href={isLoggedIn ? "/account" : "/login"}
           onClick={closeMenu}
-          className="flex min-h-[54px] items-center justify-between rounded-2xl border border-yellow-400/20 bg-yellow-400/[0.04] px-5 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.07] active:scale-[0.99]"
+          className="flex min-h-[56px] items-center justify-between rounded-2xl border border-yellow-400/20 bg-yellow-400/[0.04] px-5 outline-none transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.07] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
         >
           <div className="min-w-0">
             <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-yellow-400">
@@ -172,9 +172,9 @@ export default function MobileMenu({ setMenuOpen }: Props) {
       </div>
 
       {/* Navigation */}
-      <div className="mt-5 border-t border-white/[0.14] pt-4">
+      <div className="mt-6 border-t border-white/[0.12] pt-5">
 
-        <p className="mb-2 px-1 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+        <p className="mb-2.5 px-1 text-[9px] font-bold uppercase tracking-[0.24em] text-zinc-500">
           Explore
         </p>
 
@@ -185,7 +185,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
               key={href}
               href={href}
               onClick={closeMenu}
-              className="group flex min-h-[48px] items-center justify-between rounded-xl border-b border-white/[0.12] px-4 text-[14px] font-medium text-zinc-300 transition-all duration-150 hover:bg-white/[0.04] hover:text-yellow-400 active:bg-white/[0.06] last:border-b-0"
+              className="group flex min-h-[50px] items-center justify-between rounded-xl border-b border-white/[0.12] px-4 text-[14px] font-medium text-zinc-300 outline-none transition-all duration-150 hover:bg-white/[0.04] hover:text-yellow-400 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-inset active:bg-white/[0.06] last:border-b-0"
             >
               <span>{label}</span>
 
@@ -201,7 +201,7 @@ export default function MobileMenu({ setMenuOpen }: Props) {
         </nav>
       </div>
 
-      <p className="mt-4 px-1 text-[10px] text-zinc-600">
+      <p className="mt-5 px-1 text-[10px] leading-relaxed text-zinc-600">
         Premium personalized notebooks by MineNote.
       </p>
 

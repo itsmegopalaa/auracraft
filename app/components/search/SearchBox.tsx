@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 
 type SearchProduct = {
   id: string;
@@ -18,17 +19,17 @@ type Props = {
 };
 
 export default function SearchBox({ mobile = false, onOpen }: Props) {
-  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const closeSearch = () => {
     setOpen(false);
-    setSearch("");
+    setQuery("");
     setResults([]);
     setLoading(false);
   };
@@ -49,9 +50,38 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
   }, [open]);
 
   useEffect(() => {
-    const query = search.trim();
+    if (!open) return;
 
-    if (!open || !query) {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeSearch();
+      }
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(target)
+      ) {
+        closeSearch();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const value = query.trim();
+
+    if (!open || !value) {
       return;
     }
 
@@ -62,8 +92,9 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
         setLoading(true);
 
         const response = await fetch(
-          `/api/products/search?q=${encodeURIComponent(query)}`,
+          `/api/products/search?q=${encodeURIComponent(value)}`,
           {
+            method: "GET",
             signal: controller.signal,
             headers: {
               Accept: "application/json",
@@ -103,55 +134,25 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [open, search]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeSearch();
-      }
-    };
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(target)
-      ) {
-        closeSearch();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("pointerdown", handlePointerDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, [open]);
+  }, [open, query]);
 
   return (
     <div
-      ref={searchRef}
       className="relative"
       data-search-box
       data-mobile-search={mobile ? "true" : "false"}
     >
-      {/* SEARCH BUTTON */}
+      {/* SEARCH TRIGGER */}
       <button
         type="button"
         onClick={openSearch}
         aria-label="Search products"
         aria-expanded={open}
         className="
-          flex h-11 w-11 items-center justify-center
+          flex h-10 w-10 items-center justify-center
           rounded-full
           border border-white/[0.10]
-          bg-white/[0.04]
+          bg-white/[0.035]
           text-zinc-300
           shadow-sm shadow-black/20
           transition-all duration-200
@@ -166,10 +167,10 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
-          className="h-[19px] w-[19px]"
+          className="h-[18px] w-[18px]"
           aria-hidden="true"
         >
-          <circle cx="10.8" cy="10.8" r="6.6" />
+          <circle cx="10.8" cy="10.8" r="6.5" />
           <path
             d="m16 16 4 4"
             strokeLinecap="round"
@@ -177,27 +178,35 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
         </svg>
       </button>
 
-      {/* SEARCH OVERLAY + PANEL */}
-      {open && (
-        <>
-          {/* Backdrop */}
+      {/* SEARCH MODAL */}
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999]"
+            role="presentation"
+          >
+          {/* BACKDROP */}
           <div
             className="
-              fixed inset-0 z-[90]
+              absolute inset-0
               bg-black/70
               backdrop-blur-md
             "
             aria-hidden="true"
           />
 
-          {/* Centered Search Panel */}
+          {/* SEARCH PANEL */}
           <div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-label="Product search"
             className="
-              fixed left-1/2 top-[72px]
-              z-[100]
+              absolute
+              left-1/2
+              top-[72px]
+              z-[10000]
               w-[calc(100vw-24px)]
               max-w-[680px]
               -translate-x-1/2
@@ -205,10 +214,10 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
               rounded-[24px]
               border border-white/[0.12]
               bg-zinc-950
-              shadow-[0_24px_80px_rgba(0,0,0,0.65)]
+              shadow-[0_24px_80px_rgba(0,0,0,0.75)]
             "
           >
-            {/* Search Header */}
+            {/* SEARCH INPUT */}
             <div
               className="
                 border-b border-white/[0.08]
@@ -223,39 +232,33 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                   rounded-2xl
                   border border-white/[0.10]
                   bg-black/50
-                  px-4
-                  py-2
+                  px-4 py-2
                   transition-colors
                   focus-within:border-yellow-400/50
                   focus-within:bg-black/70
                 "
               >
-                {/* Search icon */}
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.8"
-                  className="
-                    h-5 w-5 shrink-0
-                    text-zinc-500
-                  "
+                  className="h-5 w-5 shrink-0 text-zinc-500"
                   aria-hidden="true"
                 >
-                  <circle cx="10.8" cy="10.8" r="6.6" />
+                  <circle cx="10.8" cy="10.8" r="6.5" />
                   <path
                     d="m16 16 4 4"
                     strokeLinecap="round"
                   />
                 </svg>
 
-                {/* Input */}
                 <input
                   ref={inputRef}
                   type="search"
-                  value={search}
+                  value={query}
                   onChange={(event) => {
-                    setSearch(event.target.value);
+                    setQuery(event.target.value);
                   }}
                   placeholder="Search notebooks..."
                   autoComplete="off"
@@ -267,24 +270,23 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                     text-[16px]
                     font-medium
                     text-white
-                    placeholder:text-zinc-600
                     outline-none
+                    placeholder:text-zinc-600
                   "
                   aria-label="Search notebooks"
                 />
 
-                {/* Clear */}
-                {search && (
+                {query && (
                   <button
                     type="button"
                     onClick={() => {
-                      setSearch("");
+                      setQuery("");
                       setResults([]);
                       inputRef.current?.focus();
                     }}
+                    aria-label="Clear search"
                     className="
-                      flex h-8 w-8
-                      shrink-0
+                      flex h-8 w-8 shrink-0
                       items-center justify-center
                       rounded-full
                       text-zinc-500
@@ -292,19 +294,17 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                       hover:bg-white/[0.08]
                       hover:text-white
                     "
-                    aria-label="Clear search"
                   >
-                    <span className="text-sm">✕</span>
+                    <span aria-hidden="true">×</span>
                   </button>
                 )}
 
-                {/* Close */}
                 <button
                   type="button"
                   onClick={closeSearch}
+                  aria-label="Close search"
                   className="
-                    flex h-8 w-8
-                    shrink-0
+                    flex h-8 w-8 shrink-0
                     items-center justify-center
                     rounded-full
                     border border-white/[0.08]
@@ -314,9 +314,8 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                     hover:bg-white/[0.06]
                     hover:text-white
                   "
-                  aria-label="Close search"
                 >
-                  <span className="text-sm">✕</span>
+                  <span aria-hidden="true">×</span>
                 </button>
               </div>
             </div>
@@ -329,8 +328,8 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                 overscroll-contain
               "
             >
-              {/* Empty / Initial */}
-              {!search.trim() && (
+              {/* INITIAL */}
+              {!query.trim() && (
                 <div className="px-5 py-8 sm:px-6 sm:py-10">
                   <p
                     className="
@@ -345,145 +344,119 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                   </p>
 
                   <p className="mt-3 text-sm text-zinc-400">
-                    Find the notebook that matches your
-                    personality.
+                    Find the notebook that matches your personality.
                   </p>
                 </div>
               )}
 
-              {/* Loading */}
-              {search.trim() && loading && (
-                <div className="px-5 py-8 sm:px-6">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="
-                        h-4 w-4
-                        animate-spin
-                        rounded-full
-                        border-2
-                        border-zinc-700
-                        border-t-yellow-400
-                      "
-                    />
+              {/* LOADING */}
+              {query.trim() && loading && (
+                <div className="flex items-center gap-3 px-5 py-8 sm:px-6">
+                  <span
+                    className="
+                      h-4 w-4
+                      animate-spin
+                      rounded-full
+                      border-2
+                      border-zinc-700
+                      border-t-yellow-400
+                    "
+                  />
 
-                    <span className="text-sm text-zinc-400">
-                      Searching notebooks...
-                    </span>
-                  </div>
+                  <span className="text-sm text-zinc-400">
+                    Searching notebooks...
+                  </span>
                 </div>
               )}
 
-              {/* Results */}
-              {search.trim() &&
+              {/* RESULTS */}
+              {query.trim() &&
                 !loading &&
                 results.length > 0 && (
                   <div className="p-2 sm:p-3">
-                    <div className="space-y-1">
-                      {results.map((product) => (
-                        <Link
-                          key={product.id}
-                          href={`/products/${product.id}`}
-                          onClick={closeSearch}
+                    {results.map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/products/${product.id}`}
+                        onClick={closeSearch}
+                        className="
+                          group
+                          flex items-center gap-4
+                          rounded-2xl
+                          px-3 py-3
+                          transition-colors
+                          hover:bg-white/[0.045]
+                        "
+                      >
+                        <div
                           className="
-                            group
-                            flex items-center gap-3
-                            rounded-2xl
-                            p-3
-                            transition-colors
-                            hover:bg-white/[0.05]
-                            active:bg-white/[0.08]
+                            relative h-14 w-14 shrink-0
+                            overflow-hidden
+                            rounded-xl
+                            border border-white/[0.08]
+                            bg-zinc-900
                           "
                         >
-                          {/* Product image */}
-                          <div
-                            className="
-                              relative
-                              h-14 w-11
-                              shrink-0
-                              overflow-hidden
-                              rounded-xl
-                              bg-zinc-900
-                            "
-                          >
-                            {product.image ? (
-                              <Image
-                                src={product.image}
-                                alt=""
-                                fill
-                                sizes="44px"
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div
-                                className="
-                                  flex h-full
-                                  items-center
-                                  justify-center
-                                  text-xs
-                                  text-zinc-600
-                                "
-                              >
-                                📖
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Product info */}
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className="
-                                truncate
-                                text-sm
-                                font-semibold
-                                text-zinc-100
-                              "
-                            >
-                              {product.name}
-                            </p>
-
-                            <div
-                              className="
-                                mt-1
-                                flex items-center gap-2
-                                text-xs
-                              "
-                            >
-                              {product.category && (
-                                <span className="truncate text-zinc-500">
-                                  {product.category}
-                                </span>
-                              )}
-
-                              <span className="font-semibold text-yellow-400">
-                                ₹{product.price}
-                              </span>
+                          {product.image ? (
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xs text-zinc-600">
+                              —
                             </div>
-                          </div>
+                          )}
+                        </div>
 
-                          {/* Arrow */}
-                          <span
+                        <div className="min-w-0 flex-1">
+                          <p
                             className="
-                              shrink-0
-                              text-zinc-600
-                              transition-all
-                              group-hover:translate-x-1
+                              truncate text-sm font-semibold
+                              text-zinc-100
+                              transition-colors
                               group-hover:text-yellow-400
                             "
-                            aria-hidden="true"
                           >
-                            →
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
+                            {product.name}
+                          </p>
+
+                          {product.category && (
+                            <p className="mt-1 truncate text-xs text-zinc-500">
+                              {product.category}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="shrink-0 text-sm font-semibold text-zinc-300">
+                          ₹{product.price}
+                        </div>
+
+                        <span
+                          className="
+                            shrink-0
+                            text-zinc-600
+                            transition-all
+                            group-hover:translate-x-1
+                            group-hover:text-yellow-400
+                          "
+                          aria-hidden="true"
+                        >
+                          →
+                        </span>
+                      </Link>
+                    ))}
                   </div>
                 )}
 
-              {/* No results */}
-              {search.trim() &&
+              {/* NO RESULTS */}
+              {query.trim() &&
                 !loading &&
                 results.length === 0 && (
-                  <div className="px-5 py-8 text-center sm:px-6">
+                  <div className="px-6 py-10 text-center">
                     <p className="text-sm font-semibold text-zinc-200">
                       No notebook found
                     </p>
@@ -495,8 +468,9 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                 )}
             </div>
           </div>
-        </>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

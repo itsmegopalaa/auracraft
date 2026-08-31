@@ -61,19 +61,21 @@ export default function DesktopNavbar() {
   }, [supabase]);
 
   const controlClass =
-    "flex h-10 items-center justify-center rounded-full border border-white/[0.09] bg-white/[0.025] text-zinc-300 transition-all duration-200 hover:border-yellow-400/60 hover:bg-yellow-400/[0.06] hover:text-yellow-400";
+    "flex h-10 shrink-0 items-center justify-center rounded-full border border-white/[0.09] bg-white/[0.025] text-zinc-300 outline-none transition-all duration-200 hover:border-yellow-400/60 hover:bg-yellow-400/[0.06] hover:text-yellow-400 focus-visible:border-yellow-400 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
   return (
-    <div className="flex items-center justify-end gap-2.5">
+    <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 xl:gap-2.5">
 
       {/* Search */}
-      <SearchBox />
+      <div className="shrink-0">
+        <SearchBox />
+      </div>
 
       {/* Wishlist */}
       <Link
         href="/wishlist"
         aria-label={`Wishlist${wishlist.length ? ` (${wishlist.length})` : ""}`}
-        className={`${controlClass} gap-2 px-3.5 text-[13px] font-semibold`}
+        className={`${controlClass} gap-1.5 px-2.5 text-[12px] font-semibold xl:gap-2 xl:px-3.5 xl:text-[13px]`}
       >
         <Icon>♡</Icon>
 
@@ -88,7 +90,7 @@ export default function DesktopNavbar() {
       <Link
         href="/cart"
         aria-label={`Cart${totalItems ? ` (${totalItems})` : ""}`}
-        className={`${controlClass} gap-2 px-3.5 text-[13px] font-semibold`}
+        className={`${controlClass} gap-1.5 px-2.5 text-[12px] font-semibold xl:gap-2 xl:px-3.5 xl:text-[13px]`}
       >
         <Icon>🛒</Icon>
         <span>Bag</span>
@@ -103,7 +105,7 @@ export default function DesktopNavbar() {
       {/* Orders */}
       <Link
         href="/account/orders"
-        className={`${controlClass} gap-2 px-3.5 text-[13px] font-semibold`}
+        className={`${controlClass} gap-1.5 px-2.5 text-[12px] font-semibold xl:gap-2 xl:px-3.5 xl:text-[13px]`}
       >
         <Icon>
           <svg
@@ -131,7 +133,7 @@ export default function DesktopNavbar() {
       {/* Account */}
       <Link
         href={isLoggedIn ? "/account" : "/login"}
-        className={`${controlClass} max-w-[150px] gap-2 px-3.5 text-[13px] font-semibold`}
+        className={`${controlClass} min-w-0 max-w-[125px] gap-1.5 px-2.5 text-[12px] font-semibold xl:max-w-[150px] xl:gap-2 xl:px-3.5 xl:text-[13px]`}
       >
         <Icon>
           <svg
@@ -149,7 +151,7 @@ export default function DesktopNavbar() {
           </svg>
         </Icon>
 
-        <span className="max-w-[95px] truncate">
+        <span className="min-w-0 max-w-[68px] truncate xl:max-w-[95px]">
           {isLoggedIn ? userName || "Account" : "Account"}
         </span>
       </Link>
@@ -157,7 +159,7 @@ export default function DesktopNavbar() {
       {/* CTA */}
       <Link
         href="/products"
-        className="ml-1 flex h-10 items-center rounded-full bg-yellow-400 px-5 text-[13px] font-bold text-black shadow-lg shadow-yellow-500/[0.08] transition-all duration-200 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-xl hover:shadow-yellow-500/[0.14] active:translate-y-0"
+        className="ml-1 flex h-10 shrink-0 items-center rounded-full bg-yellow-400 px-3.5 text-[12px] font-bold text-black shadow-lg shadow-yellow-500/[0.08] transition-all duration-200 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-xl hover:shadow-yellow-500/[0.14] active:translate-y-0"
       >
         Shop Now
       </Link>

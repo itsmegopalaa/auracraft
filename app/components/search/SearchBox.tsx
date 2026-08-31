@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 type SearchProduct = {
   id: string;
@@ -18,26 +17,33 @@ type Props = {
   onOpen?: () => void;
 };
 
-export default function SearchBox({
-  mobile = false,
-  onOpen,
-}: Props) {
-  const router = useRouter();
-
+export default function SearchBox({ mobile = false, onOpen }: Props) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const closeSearch = () => {
+    setOpen(false);
+    setSearch("");
+    setResults([]);
+    setLoading(false);
+  };
+
+  const openSearch = () => {
+    onOpen?.();
+    setOpen(true);
+  };
 
   useEffect(() => {
     if (!open) return;
 
     const timer = window.setTimeout(() => {
       inputRef.current?.focus();
-    }, 80);
+    }, 50);
 
     return () => window.clearTimeout(timer);
   }, [open]);
@@ -45,7 +51,7 @@ export default function SearchBox({
   useEffect(() => {
     const query = search.trim();
 
-    if (!query) {
+    if (!open || !query) {
       return;
     }
 
@@ -59,16 +65,21 @@ export default function SearchBox({
           `/api/products/search?q=${encodeURIComponent(query)}`,
           {
             signal: controller.signal,
+            headers: {
+              Accept: "application/json",
+            },
           }
         );
 
         if (!response.ok) {
-          throw new Error("Search request failed.");
+          throw new Error(`Search failed: ${response.status}`);
         }
 
         const data = (await response.json()) as SearchProduct[];
 
-        setResults(data);
+        if (!controller.signal.aborted) {
+          setResults(Array.isArray(data) ? data : []);
+        }
       } catch (error) {
         if (
           error instanceof DOMException &&
@@ -77,93 +88,85 @@ export default function SearchBox({
           return;
         }
 
-        console.error("Search error:", error);
-        setResults([]);
+        if (!controller.signal.aborted) {
+          console.error("Search error:", error);
+          setResults([]);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
-    }, 250);
+    }, 300);
 
     return () => {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [search]);
+  }, [open, search]);
 
   useEffect(() => {
     if (!open) return;
 
-    function handlePointerDown(event: PointerEvent) {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeSearch();
+      }
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
 
       if (
-        containerRef.current &&
-        !containerRef.current.contains(target)
+        searchRef.current &&
+        !searchRef.current.contains(target)
       ) {
-        setOpen(false);
-        setSearch("");
-        setResults([]);
+        closeSearch();
       }
-    }
+    };
 
-    document.addEventListener(
-      "pointerdown",
-      handlePointerDown
-    );
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      document.removeEventListener(
-        "pointerdown",
-        handlePointerDown
-      );
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [open]);
 
-  function closeSearch() {
-    setOpen(false);
-    setSearch("");
-    setResults([]);
-  }
-
-  function handleOpen() {
-    onOpen?.();
-    setOpen(true);
-  }
-
-  function openProduct(productId: string) {
-    closeSearch();
-    router.push(`/products/${productId}`);
-  }
-
   return (
     <div
-      ref={containerRef}
+      ref={searchRef}
       className="relative"
-      onPointerDown={(event) => event.stopPropagation()}
+      data-search-box
+      data-mobile-search={mobile ? "true" : "false"}
     >
       {/* SEARCH BUTTON */}
       <button
         type="button"
-        onClick={handleOpen}
+        onClick={openSearch}
+        aria-label="Search products"
+        aria-expanded={open}
         className="
           flex h-11 w-11 items-center justify-center
-          rounded-full border border-zinc-800
-          bg-zinc-950 text-lg text-zinc-300
+          rounded-full
+          border border-white/[0.10]
+          bg-white/[0.04]
+          text-zinc-300
+          shadow-sm shadow-black/20
           transition-all duration-200
-          hover:border-yellow-400
-          hover:bg-yellow-400/10
+          hover:border-yellow-400/50
+          hover:bg-yellow-400/[0.06]
           hover:text-yellow-400
           active:scale-95
         "
-        aria-label="Search products"
-        aria-expanded={open}
       >
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
-          className="h-[18px] w-[18px]"
+          className="h-[19px] w-[19px]"
           aria-hidden="true"
         >
           <circle cx="10.8" cy="10.8" r="6.6" />
@@ -174,195 +177,323 @@ export default function SearchBox({
         </svg>
       </button>
 
+      {/* SEARCH OVERLAY + PANEL */}
       {open && (
         <>
-          {/* BACKDROP */}
-          <button
-            type="button"
-            aria-label="Close search"
-            onClick={closeSearch}
+          {/* Backdrop */}
+          <div
             className="
-              fixed inset-0
-              z-[90]
-              cursor-default
-              bg-black/60
-              backdrop-blur-sm
+              fixed inset-0 z-[90]
+              bg-black/70
+              backdrop-blur-md
             "
+            aria-hidden="true"
           />
 
-          {/* SEARCH PANEL */}
+          {/* Centered Search Panel */}
           <div
-            className={[
-              "fixed left-1/2 -translate-x-1/2",
-              mobile
-                ? "top-[76px] z-[100]"
-                : "top-20 z-[100]",
-              "w-[calc(100vw-2rem)] max-w-2xl",
-              "overflow-hidden rounded-3xl",
-              "border border-zinc-800",
-              "bg-zinc-950",
-              "shadow-2xl shadow-black/50",
-            ].join(" ")}
-            onPointerDown={(event) =>
-              event.stopPropagation()
-            }
+            role="dialog"
+            aria-modal="true"
+            aria-label="Product search"
+            className="
+              fixed left-1/2 top-[72px]
+              z-[100]
+              w-[calc(100vw-24px)]
+              max-w-[680px]
+              -translate-x-1/2
+              overflow-hidden
+              rounded-[24px]
+              border border-white/[0.12]
+              bg-zinc-950
+              shadow-[0_24px_80px_rgba(0,0,0,0.65)]
+            "
           >
-            {/* SEARCH INPUT */}
-            <div className="border-b border-zinc-800 p-4">
-              <div className="flex items-center gap-3">
-                <span
-                  className="text-lg text-zinc-500"
+            {/* Search Header */}
+            <div
+              className="
+                border-b border-white/[0.08]
+                bg-white/[0.025]
+                p-3
+                sm:p-4
+              "
+            >
+              <div
+                className="
+                  flex items-center gap-3
+                  rounded-2xl
+                  border border-white/[0.10]
+                  bg-black/50
+                  px-4
+                  py-2
+                  transition-colors
+                  focus-within:border-yellow-400/50
+                  focus-within:bg-black/70
+                "
+              >
+                {/* Search icon */}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="
+                    h-5 w-5 shrink-0
+                    text-zinc-500
+                  "
                   aria-hidden="true"
                 >
-                  🔍
-                </span>
+                  <circle cx="10.8" cy="10.8" r="6.6" />
+                  <path
+                    d="m16 16 4 4"
+                    strokeLinecap="round"
+                  />
+                </svg>
 
+                {/* Input */}
                 <input
                   ref={inputRef}
+                  type="search"
                   value={search}
-                  onChange={(event) =>
-                    setSearch(event.target.value)
-                  }
-                  onKeyDown={(event) => {
-                    if (
-                      event.key === "Enter" &&
-                      results.length > 0
-                    ) {
-                      openProduct(results[0].id);
-                    }
-
-                    if (event.key === "Escape") {
-                      closeSearch();
-                    }
+                  onChange={(event) => {
+                    setSearch(event.target.value);
                   }}
                   placeholder="Search notebooks..."
+                  autoComplete="off"
+                  spellCheck={false}
                   className="
                     min-w-0 flex-1
                     bg-transparent
                     py-2
-                    text-base
+                    text-[16px]
+                    font-medium
                     text-white
-                    placeholder:text-zinc-500
+                    placeholder:text-zinc-600
                     outline-none
                   "
+                  aria-label="Search notebooks"
                 />
 
+                {/* Clear */}
                 {search && (
                   <button
                     type="button"
                     onClick={() => {
                       setSearch("");
                       setResults([]);
+                      inputRef.current?.focus();
                     }}
                     className="
+                      flex h-8 w-8
                       shrink-0
-                      text-sm
+                      items-center justify-center
+                      rounded-full
                       text-zinc-500
-                      transition
+                      transition-colors
+                      hover:bg-white/[0.08]
                       hover:text-white
                     "
                     aria-label="Clear search"
                   >
-                    ✕
+                    <span className="text-sm">✕</span>
                   </button>
                 )}
+
+                {/* Close */}
+                <button
+                  type="button"
+                  onClick={closeSearch}
+                  className="
+                    flex h-8 w-8
+                    shrink-0
+                    items-center justify-center
+                    rounded-full
+                    border border-white/[0.08]
+                    text-zinc-500
+                    transition-all
+                    hover:border-white/[0.18]
+                    hover:bg-white/[0.06]
+                    hover:text-white
+                  "
+                  aria-label="Close search"
+                >
+                  <span className="text-sm">✕</span>
+                </button>
               </div>
             </div>
 
             {/* RESULTS */}
-            {search.trim() ? (
-              <div className="max-h-[60vh] overflow-y-auto p-3">
-                {loading ? (
-                  <div className="flex items-center gap-3 rounded-2xl px-4 py-5 text-sm text-zinc-400">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-yellow-400" />
-                    Searching notebooks...
+            <div
+              className="
+                max-h-[calc(100dvh-170px)]
+                overflow-y-auto
+                overscroll-contain
+              "
+            >
+              {/* Empty / Initial */}
+              {!search.trim() && (
+                <div className="px-5 py-8 sm:px-6 sm:py-10">
+                  <p
+                    className="
+                      text-[10px]
+                      font-bold
+                      uppercase
+                      tracking-[0.25em]
+                      text-yellow-400/80
+                    "
+                  >
+                    Quick Search
+                  </p>
+
+                  <p className="mt-3 text-sm text-zinc-400">
+                    Find the notebook that matches your
+                    personality.
+                  </p>
+                </div>
+              )}
+
+              {/* Loading */}
+              {search.trim() && loading && (
+                <div className="px-5 py-8 sm:px-6">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="
+                        h-4 w-4
+                        animate-spin
+                        rounded-full
+                        border-2
+                        border-zinc-700
+                        border-t-yellow-400
+                      "
+                    />
+
+                    <span className="text-sm text-zinc-400">
+                      Searching notebooks...
+                    </span>
                   </div>
-                ) : results.length > 0 ? (
-                  <div className="space-y-1">
-                    {results.map((product) => (
-                      <Link
-                        key={product.id}
-                        href={`/products/${product.id}`}
-                        onClick={closeSearch}
-                        className="
-                          group
-                          flex items-center gap-4
-                          rounded-2xl p-3
-                          transition-colors
-                          hover:bg-zinc-900
-                          active:bg-zinc-800
-                        "
-                      >
-                        <div className="relative h-14 w-11 shrink-0 overflow-hidden rounded-lg bg-zinc-900">
-                          {product.image ? (
-                            <Image
-                              src={product.image}
-                              alt=""
-                              fill
-                              sizes="44px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-xs text-zinc-600">
-                              📖
-                            </div>
-                          )}
-                        </div>
+                </div>
+              )}
 
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-semibold text-zinc-100">
-                            {product.name}
-                          </p>
-
-                          <div className="mt-1 flex items-center gap-2 text-xs">
-                            {product.category && (
-                              <span className="text-zinc-500">
-                                {product.category}
-                              </span>
-                            )}
-
-                            <span className="font-semibold text-yellow-400">
-                              ₹{product.price}
-                            </span>
-                          </div>
-                        </div>
-
-                        <span
+              {/* Results */}
+              {search.trim() &&
+                !loading &&
+                results.length > 0 && (
+                  <div className="p-2 sm:p-3">
+                    <div className="space-y-1">
+                      {results.map((product) => (
+                        <Link
+                          key={product.id}
+                          href={`/products/${product.id}`}
+                          onClick={closeSearch}
                           className="
-                            text-zinc-600
-                            transition
-                            group-hover:text-yellow-400
+                            group
+                            flex items-center gap-3
+                            rounded-2xl
+                            p-3
+                            transition-colors
+                            hover:bg-white/[0.05]
+                            active:bg-white/[0.08]
                           "
-                          aria-hidden="true"
                         >
-                          →
-                        </span>
-                      </Link>
-                    ))}
+                          {/* Product image */}
+                          <div
+                            className="
+                              relative
+                              h-14 w-11
+                              shrink-0
+                              overflow-hidden
+                              rounded-xl
+                              bg-zinc-900
+                            "
+                          >
+                            {product.image ? (
+                              <Image
+                                src={product.image}
+                                alt=""
+                                fill
+                                sizes="44px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div
+                                className="
+                                  flex h-full
+                                  items-center
+                                  justify-center
+                                  text-xs
+                                  text-zinc-600
+                                "
+                              >
+                                📖
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Product info */}
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className="
+                                truncate
+                                text-sm
+                                font-semibold
+                                text-zinc-100
+                              "
+                            >
+                              {product.name}
+                            </p>
+
+                            <div
+                              className="
+                                mt-1
+                                flex items-center gap-2
+                                text-xs
+                              "
+                            >
+                              {product.category && (
+                                <span className="truncate text-zinc-500">
+                                  {product.category}
+                                </span>
+                              )}
+
+                              <span className="font-semibold text-yellow-400">
+                                ₹{product.price}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Arrow */}
+                          <span
+                            className="
+                              shrink-0
+                              text-zinc-600
+                              transition-all
+                              group-hover:translate-x-1
+                              group-hover:text-yellow-400
+                            "
+                            aria-hidden="true"
+                          >
+                            →
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                ) : (
-                  <div className="px-4 py-6">
-                    <p className="font-semibold text-zinc-200">
+                )}
+
+              {/* No results */}
+              {search.trim() &&
+                !loading &&
+                results.length === 0 && (
+                  <div className="px-5 py-8 text-center sm:px-6">
+                    <p className="text-sm font-semibold text-zinc-200">
                       No notebook found
                     </p>
 
-                    <p className="mt-1 text-sm text-zinc-500">
+                    <p className="mt-1 text-xs text-zinc-500">
                       Try another name or category.
                     </p>
                   </div>
                 )}
-              </div>
-            ) : (
-              <div className="px-5 py-5">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-                  Quick Search
-                </p>
-
-                <p className="mt-3 text-sm text-zinc-400">
-                  Find the notebook that matches your personality.
-                </p>
-              </div>
-            )}
+            </div>
           </div>
         </>
       )}

@@ -100,7 +100,7 @@ md:justify-between
     alt={item.name}
     width={120}
     height={160}
-    className="h-28 w-21 shrink-0 rounded-2xl object-cover transition duration-300 hover:scale-[1.03] sm:h-32 sm:w-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+    className="h-28 w-20 shrink-0 rounded-2xl object-cover transition duration-300 hover:scale-[1.03] sm:h-32 sm:w-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
   />
 </Link>
 

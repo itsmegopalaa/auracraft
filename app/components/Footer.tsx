@@ -63,7 +63,7 @@ export default function Footer() {
                     href={link.href}
                     className="
                       inline-flex min-h-9 items-center
-                      text-sm text-zinc-300
+                      text-[15px] text-zinc-200
                       outline-none transition-colors duration-200
                       hover:text-yellow-400
                       focus-visible:text-yellow-400
@@ -89,7 +89,7 @@ export default function Footer() {
                     href={link.href}
                     className="
                       inline-flex min-h-9 items-center
-                      text-sm text-zinc-300
+                      text-[15px] text-zinc-200
                       outline-none transition-colors duration-200
                       hover:text-yellow-400
                       focus-visible:text-yellow-400
@@ -108,7 +108,7 @@ export default function Footer() {
               Connect
             </h3>
 
-            <ul className="mt-5 space-y-3 text-sm text-zinc-300">
+            <ul className="mt-5 space-y-3 text-[15px] text-zinc-200">
               <li>
                 Instagram 📸
               </li>
@@ -140,11 +140,11 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.10] pt-7 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-          <p className="text-sm text-zinc-300">
+          <p className="text-[15px] text-zinc-200">
             © 2026 MineNote. All rights reserved.
           </p>
 
-          <p className="text-sm text-zinc-300">
+          <p className="text-[15px] text-zinc-200">
             Crafted with <span className="text-zinc-300">❤️</span> in India
           </p>
         </div>

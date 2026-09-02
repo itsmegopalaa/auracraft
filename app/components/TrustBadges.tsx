@@ -40,7 +40,7 @@ export default function TrustBadges() {
             The MineNote <span className="text-yellow-400">standard.</span>
           </h2>
 
-          <p className="mt-4 text-sm leading-7 text-zinc-400 sm:text-base">
+          <p className="mt-4 text-[15px] leading-7 text-zinc-300 sm:text-base">
             Small details that make the experience feel as considered as the
             notebook itself.
           </p>
@@ -69,7 +69,7 @@ export default function TrustBadges() {
                 {point.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-7 text-zinc-400">
+              <p className="mt-3 text-[15px] leading-7 text-zinc-300">
                 {point.description}
               </p>
 

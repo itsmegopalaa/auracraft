@@ -17,7 +17,10 @@ const TRACK_ORDER_SELECT = `
   tracking_url,
   shipped_at,
   delivered_at,
-  created_at
+  created_at,
+  refund_status,
+  refund_amount,
+  refund_processed_at
 `;
 
 const ACCOUNT_ORDER_SELECT = `
@@ -34,7 +37,10 @@ const ACCOUNT_ORDER_SELECT = `
   tracking_url,
   shipped_at,
   delivered_at,
-  created_at
+  created_at,
+  refund_status,
+  refund_amount,
+  refund_processed_at
 `;
 
 export async function getOrderForTracking(

@@ -19,6 +19,9 @@ type Order = {
   shipped_at: string | null;
   delivered_at: string | null;
   created_at: string;
+  refund_status: string | null;
+  refund_amount: number | null;
+  refund_processed_at: string | null;
 };
 
 function formatDate(value: string | null) {
@@ -410,6 +413,42 @@ export default async function AccountOrdersPage() {
                           >
                             Track Shipment →
                           </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Refund */}
+                    {order.refund_status && (
+                      <div className="mt-4 rounded-2xl border border-emerald-400/10 bg-emerald-400/[0.04] p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">
+                              ↩️ Refund
+                            </p>
+
+                            <p className="mt-1 text-sm font-bold text-emerald-200">
+                              {order.refund_status === "processed"
+                                ? "Refund Processed"
+                                : order.refund_status}
+                            </p>
+                          </div>
+
+                          {order.refund_amount != null && (
+                            <p className="text-sm font-black text-emerald-300">
+                              ₹
+                              {Number(
+                                order.refund_amount
+                              ).toLocaleString("en-IN")}{" "}
+                              refunded
+                            </p>
+                          )}
+                        </div>
+
+                        {order.refund_processed_at && (
+                          <p className="mt-2 text-xs text-emerald-200/50">
+                            Processed on{" "}
+                            {formatDate(order.refund_processed_at)}
+                          </p>
                         )}
                       </div>
                     )}

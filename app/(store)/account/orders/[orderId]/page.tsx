@@ -43,6 +43,10 @@ type Order = {
   shipped_at: string | null;
   delivered_at: string | null;
   created_at: string;
+  refund_status: string | null;
+  refund_id: string | null;
+  refund_amount: number | null;
+  refund_processed_at: string | null;
 };
 
 const STATUS_STEPS = [
@@ -213,7 +217,11 @@ export default async function CustomerOrderDetailPage({
       tracking_url,
       shipped_at,
       delivered_at,
-      created_at
+      created_at,
+      refund_status,
+      refund_id,
+      refund_amount,
+      refund_processed_at
     `)
     .eq("order_id", orderId)
     .eq("customer_id", user.id)
@@ -532,6 +540,48 @@ export default async function CustomerOrderDetailPage({
               </h2>
 
               <div className="mt-6 space-y-3">
+                {typedOrder.refund_status && (
+                  <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.05] p-4 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/10 text-lg">
+                        ↩️
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">
+                          Refund Information
+                        </p>
+
+                        <p className="mt-1 font-bold text-emerald-200">
+                          {typedOrder.refund_status === "processed"
+                            ? "Refund Processed"
+                            : typedOrder.refund_status}
+                        </p>
+
+                        {typedOrder.refund_amount != null && (
+                          <p className="mt-1 text-sm text-emerald-200/70">
+                            ₹
+                            {Number(
+                              typedOrder.refund_amount
+                            ).toLocaleString("en-IN")}{" "}
+                            refunded
+                          </p>
+                        )}
+
+                        {typedOrder.refund_processed_at && (
+                          <p className="mt-2 text-xs text-emerald-200/50">
+                            Processed on{" "}
+                            {formatDate(
+                              typedOrder.refund_processed_at
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
                 <div className="rounded-2xl border border-white/[0.05] bg-black/70 p-4 sm:p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
                     Method

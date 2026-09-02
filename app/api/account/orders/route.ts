@@ -36,7 +36,10 @@ export async function GET() {
           tracking_url,
           shipped_at,
           delivered_at,
-          created_at
+          created_at,
+          refund_status,
+          refund_amount,
+          refund_processed_at
         `
       )
       .eq("customer_id", user.id)

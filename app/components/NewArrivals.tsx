@@ -53,7 +53,7 @@ export default async function NewArrivals() {
             </p>
           </div>
 
-          <span className="w-fit rounded-full border border-white/[0.09] bg-white/[0.025] px-3.5 py-2 text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500 sm:px-4 sm:tracking-[0.2em]">
+          <span className="w-fit rounded-full border border-white/[0.09] bg-white/[0.025] px-3.5 py-2 text-[12px] font-bold uppercase tracking-[0.14em] text-zinc-300 sm:px-4 sm:tracking-[0.16em]">
             New designs • Limited rotation
           </span>
         </div>

@@ -69,7 +69,7 @@ export default function Home() {
               creativity, and the ideas you want to bring to life.
             </p>
 
-            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 sm:mt-8 sm:gap-x-6 sm:text-[11px] sm:tracking-[0.18em]">
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-zinc-300 sm:mt-8 sm:gap-x-6 sm:text-[13px] sm:tracking-[0.16em]">
               <span>Personal</span>
               <span className="text-yellow-400/60">•</span>
               <span>Premium</span>

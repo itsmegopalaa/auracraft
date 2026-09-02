@@ -60,7 +60,7 @@ export default function TrustBadges() {
                   {point.icon}
                 </span>
 
-                <span className="pt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-600">
+                <span className="pt-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-zinc-300">
                   {point.eyebrow}
                 </span>
               </div>

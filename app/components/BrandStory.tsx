@@ -23,7 +23,7 @@ export default function BrandStory() {
                 {item.icon}
               </span>
 
-              <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-400 sm:text-[10px] sm:tracking-[0.16em] md:text-[11px]">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.11em] text-zinc-300 sm:text-[13px] sm:tracking-[0.14em] md:text-[13px]">
                 {item.label}
               </span>
             </div>

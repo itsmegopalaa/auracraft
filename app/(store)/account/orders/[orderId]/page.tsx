@@ -605,7 +605,7 @@ export default async function CustomerOrderDetailPage({
                   </p>
 
                   {typedOrder.paid_at && (
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-[12px] text-zinc-400">
                       Received {formatDate(typedOrder.paid_at)}
                     </p>
                   )}

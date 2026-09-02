@@ -65,7 +65,7 @@ export default function Testimonials() {
                     {testimonial.name}
                   </p>
 
-                  <p className="mt-0.5 text-xs text-zinc-500">
+                  <p className="mt-0.5 text-[13px] text-zinc-400">
                     {index === 0
                       ? "Customer experience"
                       : "MineNote community"}

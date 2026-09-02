@@ -283,7 +283,7 @@ export default async function ProductPage({
                 ₹{typedProduct.price}
               </p>
 
-              <p className="mt-2 text-xs uppercase tracking-[0.16em] text-zinc-600">
+              <p className="mt-2 text-[12px] uppercase tracking-[0.13em] text-zinc-400">
                 Premium MineNote notebook
               </p>
             </div>
@@ -295,7 +295,7 @@ export default async function ProductPage({
 
             {/* Product Specs */}
             <div className="mt-7 sm:mt-8">
-              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
                 Product details
               </p>
 
@@ -304,7 +304,7 @@ export default async function ProductPage({
                   <div className="text-lg" aria-hidden="true">
                     📄
                   </div>
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
                     Pages
                   </p>
                   <p className="mt-1 text-sm font-semibold text-white">
@@ -316,7 +316,7 @@ export default async function ProductPage({
                   <div className="text-lg" aria-hidden="true">
                     📃
                   </div>
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
                     Paper
                   </p>
                   <p className="mt-1 text-sm font-semibold text-white">
@@ -328,7 +328,7 @@ export default async function ProductPage({
                   <div className="text-lg" aria-hidden="true">
                     📐
                   </div>
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
                     Size
                   </p>
                   <p className="mt-1 text-sm font-semibold text-white">

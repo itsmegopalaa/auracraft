@@ -256,7 +256,7 @@ export default async function AccountOrdersPage() {
                           •
                         </span>
 
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-[13px] text-zinc-400">
                           {formatDate(order.created_at)}
                         </p>
                       </div>
@@ -350,7 +350,7 @@ export default async function AccountOrdersPage() {
                     {/* Info */}
                     <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3">
                       <div className="rounded-2xl border border-white/[0.04] bg-black p-4">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-600">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
                           Payment
                         </p>
 
@@ -360,13 +360,13 @@ export default async function AccountOrdersPage() {
                             : "Online Payment"}
                         </p>
 
-                        <p className="mt-1 text-xs capitalize text-zinc-600">
+                        <p className="mt-1 text-[12px] capitalize text-zinc-400">
                           {order.payment_status ?? "pending"}
                         </p>
                       </div>
 
                       <div className="rounded-2xl border border-white/[0.04] bg-black p-4">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-600">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
                           Delivery
                         </p>
 
@@ -376,7 +376,7 @@ export default async function AccountOrdersPage() {
                       </div>
 
                       <div className="rounded-2xl border border-white/[0.04] bg-black p-4">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-600">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
                           Shipment
                         </p>
 

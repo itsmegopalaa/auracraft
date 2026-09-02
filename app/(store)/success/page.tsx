@@ -542,7 +542,7 @@ export default function SuccessPage() {
                   </p>
 
                   {paidDate && (
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-[12px] text-zinc-400">
                       Paid on {paidDate}
                     </p>
                   )}

@@ -55,7 +55,7 @@ export default function Newsletter() {
           <div className="mt-5 flex items-center justify-center gap-2.5 sm:mt-6 sm:gap-3">
             <span className="h-px w-6 bg-white/[0.08] sm:w-8" />
 
-            <p className="text-[9px] font-medium uppercase tracking-[0.13em] text-zinc-600 sm:text-[10px] sm:tracking-[0.16em]">
+            <p className="text-[12px] font-medium uppercase tracking-[0.11em] text-zinc-400 sm:text-[13px] sm:tracking-[0.13em]">
               No spam · Just MineNote
             </p>
 

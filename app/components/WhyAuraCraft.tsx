@@ -75,7 +75,7 @@ export default function WhyAuraCraft() {
               <span
                 className="
                   absolute right-6 top-5
-                  text-[11px] font-bold tracking-[0.2em]
+                  text-[12px] font-bold tracking-[0.16em]
                   text-zinc-700
                   transition-colors duration-300
                   group-hover:text-yellow-400/30

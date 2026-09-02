@@ -333,7 +333,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                 <div className="px-5 py-8 sm:px-6 sm:py-10">
                   <p
                     className="
-                      text-[10px]
+                      text-[12px]
                       font-bold
                       uppercase
                       tracking-[0.25em]
@@ -425,7 +425,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                           </p>
 
                           {product.category && (
-                            <p className="mt-1 truncate text-xs text-zinc-500">
+                            <p className="mt-1 truncate text-[12px] text-zinc-400">
                               {product.category}
                             </p>
                           )}
@@ -461,7 +461,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                       No notebook found
                     </p>
 
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className="mt-1 text-[12px] text-zinc-400">
                       Try another name or category.
                     </p>
                   </div>

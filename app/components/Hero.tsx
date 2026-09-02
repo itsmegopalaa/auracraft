@@ -86,21 +86,21 @@ export default function Hero() {
           <div className="mx-auto mt-7 grid max-w-lg grid-cols-3 divide-x divide-white/[0.09] rounded-2xl border border-white/[0.07] bg-white/[0.025] px-1.5 py-3.5 backdrop-blur-sm sm:mt-8 sm:px-2 sm:py-4 md:mx-0">
             <div className="px-2 text-center md:text-left sm:px-3">
               <p className="text-[13px] font-bold text-white sm:text-sm">Premium</p>
-              <p className="mt-1 text-[9px] uppercase tracking-[0.13em] text-zinc-400 sm:text-[10px] sm:tracking-[0.14em]">
+              <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.11em] text-zinc-300 sm:text-[13px] sm:tracking-[0.12em]">
                 Quality
               </p>
             </div>
 
             <div className="px-2 text-center md:text-left sm:px-3">
               <p className="text-[13px] font-bold text-white sm:text-sm">Personal</p>
-              <p className="mt-1 text-[9px] uppercase tracking-[0.13em] text-zinc-400 sm:text-[10px] sm:tracking-[0.14em]">
+              <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.11em] text-zinc-300 sm:text-[13px] sm:tracking-[0.12em]">
                 By Design
               </p>
             </div>
 
             <div className="px-2 text-center md:text-left sm:px-3">
               <p className="text-[13px] font-bold text-white sm:text-sm">Fast</p>
-              <p className="mt-1 text-[9px] uppercase tracking-[0.13em] text-zinc-400 sm:text-[10px] sm:tracking-[0.14em]">
+              <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.11em] text-zinc-300 sm:text-[13px] sm:tracking-[0.12em]">
                 Delivery
               </p>
             </div>

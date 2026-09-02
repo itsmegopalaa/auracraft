@@ -49,7 +49,7 @@ export default function Hero() {
             </span>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-xl text-[14px] leading-7 text-zinc-400 sm:mt-6 sm:text-base sm:leading-8 md:mx-0 md:text-lg">
+          <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-zinc-300 sm:mt-6 sm:text-base sm:leading-8 md:mx-0 md:text-lg">
             AuraNotes by MineNote transforms ordinary notebooks into premium
             creations designed for students, creators and dreamers who want
             every page to feel like their own.

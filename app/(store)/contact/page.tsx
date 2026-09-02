@@ -70,7 +70,7 @@ export default function ContactPage() {
               ✨ Contact MineNote
             </p>
 
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-[15px] text-gray-300">
               MineNote — a brand by AuraCraft
             </p>
 

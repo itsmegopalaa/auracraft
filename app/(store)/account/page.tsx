@@ -31,7 +31,7 @@ export default async function AccountPage() {
 
         <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-2">
           <div className="rounded-3xl border border-yellow-400/20 bg-zinc-900 p-5 shadow-xl shadow-black/10 sm:p-6 md:p-7">
-            <p className="text-sm text-zinc-500">
+            <p className="text-[15px] text-zinc-400">
               Signed in as
             </p>
 
@@ -40,14 +40,14 @@ export default async function AccountPage() {
             </p>
 
             {user.email && (
-              <p className="mt-1 break-all text-sm text-zinc-500">
+              <p className="mt-1 break-all text-[15px] text-zinc-400">
                 {user.email}
               </p>
             )}
           </div>
 
           <div className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-5 shadow-xl shadow-black/10 sm:p-6 md:p-7">
-            <p className="text-sm text-zinc-500">
+            <p className="text-[15px] text-zinc-400">
               Account
             </p>
 

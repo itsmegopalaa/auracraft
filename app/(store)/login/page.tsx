@@ -124,7 +124,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-zinc-500 sm:mt-7">
+          <p className="mt-6 text-center text-[15px] text-zinc-400 sm:mt-7">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"

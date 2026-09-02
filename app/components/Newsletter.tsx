@@ -27,7 +27,7 @@ export default function Newsletter() {
             Join the <span className="text-yellow-400">MineNote</span> Family
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400 sm:mt-5 sm:text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-zinc-300 sm:mt-5 sm:text-lg">
             Get new notebook launches, exclusive designs, special offers and
             creative inspiration directly in your inbox.
           </p>

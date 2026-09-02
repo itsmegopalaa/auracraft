@@ -439,7 +439,7 @@ export default function SuccessPage() {
                         {item.name}
                       </p>
 
-                      <p className="mt-2 text-sm text-zinc-500">
+                      <p className="mt-2 text-[15px] text-zinc-300">
                         ₹{item.price} × {item.quantity}
                       </p>
                     </div>
@@ -527,7 +527,7 @@ export default function SuccessPage() {
                     {order.phone}
                   </p>
 
-                  <p className="mt-1 break-all text-sm text-zinc-500">
+                  <p className="mt-1 break-all text-[15px] text-zinc-400">
                     {order.email}
                   </p>
                 </div>

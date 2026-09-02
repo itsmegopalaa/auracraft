@@ -238,7 +238,7 @@ export default function TrackOrderPage() {
               <div className="rounded-3xl border border-yellow-400/30 bg-zinc-900 p-7 shadow-2xl md:p-9">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-[15px] text-gray-400">
                       Order ID
                     </p>
 
@@ -254,7 +254,7 @@ export default function TrackOrderPage() {
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
                   <div className="rounded-2xl bg-black p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-[15px] text-gray-400">
                       Customer
                     </p>
 
@@ -264,7 +264,7 @@ export default function TrackOrderPage() {
                   </div>
 
                   <div className="rounded-2xl bg-black p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-[15px] text-gray-400">
                       Payment
                     </p>
 
@@ -276,7 +276,7 @@ export default function TrackOrderPage() {
                   </div>
 
                   <div className="rounded-2xl bg-black p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-[15px] text-gray-400">
                       Total
                     </p>
 
@@ -287,7 +287,7 @@ export default function TrackOrderPage() {
                 </div>
 
                 {paidDate && (
-                  <p className="mt-5 text-sm text-gray-500">
+                  <p className="mt-5 text-[15px] text-gray-400">
                     Payment received on {paidDate}
                   </p>
                 )}
@@ -373,7 +373,7 @@ export default function TrackOrderPage() {
                   <div className="mt-6 grid gap-5 sm:grid-cols-2">
                     {order.shipping_partner && (
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-[15px] text-gray-400">
                           Shipping Partner
                         </p>
 
@@ -385,7 +385,7 @@ export default function TrackOrderPage() {
 
                     {order.tracking_id && (
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-[15px] text-gray-400">
                           Tracking ID
                         </p>
 
@@ -397,7 +397,7 @@ export default function TrackOrderPage() {
 
                     {shippedDate && (
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-[15px] text-gray-400">
                           Shipped
                         </p>
 
@@ -409,7 +409,7 @@ export default function TrackOrderPage() {
 
                     {deliveredDate && (
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-[15px] text-gray-400">
                           Delivered
                         </p>
 
@@ -450,7 +450,7 @@ export default function TrackOrderPage() {
                           {item.name}
                         </p>
 
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-[15px] text-gray-400">
                           ₹{item.price} × {item.quantity}
                         </p>
                       </div>

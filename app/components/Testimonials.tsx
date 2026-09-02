@@ -32,7 +32,7 @@ export default function Testimonials() {
             </span>
           </h2>
 
-          <p className="mt-4 text-sm leading-7 text-zinc-400 sm:mt-5 sm:text-base">
+          <p className="mt-4 text-[15px] leading-7 text-zinc-300 sm:mt-5 sm:text-base">
             Why MineNote feels different from an ordinary notebook.
           </p>
         </div>
@@ -90,7 +90,7 @@ export default function Testimonials() {
             <span className="h-px w-8 bg-yellow-400/20 sm:w-10" />
           </div>
 
-          <p className="mt-4 text-sm leading-7 text-zinc-500 sm:mt-5">
+          <p className="mt-4 text-[15px] leading-7 text-zinc-300 sm:mt-5">
             Every page is a place for something worth remembering.
           </p>
         </div>

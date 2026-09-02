@@ -301,7 +301,7 @@ export default async function AccountOrdersPage() {
                           {firstName}
                         </h3>
 
-                        <p className="mt-1 text-sm text-zinc-500">
+                        <p className="mt-1 text-[15px] text-zinc-400">
                           {itemCount}{" "}
                           {itemCount === 1 ? "item" : "items"}
                           {items.length > 1

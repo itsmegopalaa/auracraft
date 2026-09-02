@@ -510,7 +510,7 @@ export default async function CustomerOrderDetailPage({
                   ))}
                 </div>
               ) : (
-                <div className="mt-7 rounded-2xl bg-black p-6 text-sm text-zinc-500">
+                <div className="mt-7 rounded-2xl bg-black p-6 text-[15px] text-zinc-400">
                   No item details are available for this order.
                 </div>
               )}

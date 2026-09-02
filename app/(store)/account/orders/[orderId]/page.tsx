@@ -475,7 +475,7 @@ export default async function CustomerOrderDetailPage({
                       key={item.id}
                       className="flex gap-3 rounded-2xl border border-white/[0.06] bg-black p-3.5 sm:gap-5 sm:p-4"
                     >
-                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border border-white/[0.06] bg-zinc-950 sm:h-28 sm:w-24">
+                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-zinc-950 sm:h-28 sm:w-24">
                         <Image
                           src={item.image}
                           alt={item.name}

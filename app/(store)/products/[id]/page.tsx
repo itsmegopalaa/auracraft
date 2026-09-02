@@ -375,7 +375,7 @@ export default async function ProductPage({
               <span>•</span>
               <span>Carefully packed</span>
               <span>•</span>
-              <span>Made for ideas</span>
+              <span>Made for Ideas</span>
             </div>
           </div>
 

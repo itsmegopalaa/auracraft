@@ -16,7 +16,7 @@ const policyLinks = [
 
 export default function Footer() {
   return (
-    <footer className="mt-24 border-t border-white/[0.08] bg-black">
+    <footer className="mt-24 border-t border-white/[0.10] bg-black">
       <div className="mx-auto max-w-7xl px-6 py-16 sm:py-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-16">
 
@@ -44,7 +44,7 @@ export default function Footer() {
                 aria-hidden="true"
               />
 
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
                 A brand by AuraCraft
               </p>
             </div>
@@ -52,7 +52,7 @@ export default function Footer() {
 
           {/* Explore */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400">
               Explore
             </h3>
 
@@ -78,7 +78,7 @@ export default function Footer() {
 
           {/* Policies */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400">
               Policies
             </h3>
 
@@ -104,7 +104,7 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400">
               Connect
             </h3>
 
@@ -139,13 +139,13 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.07] pt-7 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-          <p className="text-xs text-zinc-600">
+        <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.10] pt-7 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+          <p className="text-sm text-zinc-400">
             © 2026 MineNote. All rights reserved.
           </p>
 
-          <p className="text-xs text-zinc-600">
-            Crafted with <span className="text-zinc-500">❤️</span> in India
+          <p className="text-sm text-zinc-400">
+            Crafted with <span className="text-zinc-400">❤️</span> in India
           </p>
         </div>
       </div>

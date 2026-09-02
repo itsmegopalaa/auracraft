@@ -61,7 +61,7 @@ export default function DesktopNavbar() {
   }, [supabase]);
 
   const controlClass =
-    "flex h-10 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.025] text-zinc-300 outline-none transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-400/50 hover:bg-yellow-400/[0.06] hover:text-yellow-400 focus-visible:border-yellow-400 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+    "flex h-10 shrink-0 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.025] text-zinc-300 outline-none transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-400/50 hover:bg-yellow-400/[0.06] hover:text-yellow-400 focus-visible:border-yellow-400 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
   return (
     <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 xl:gap-2.5">

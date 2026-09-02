@@ -53,7 +53,7 @@ export default function ProductCard({
     <article
       className="
         group relative overflow-hidden rounded-[1.75rem]
-        border border-white/[0.08] bg-zinc-900/90
+        border border-white/[0.10] bg-zinc-900/90
         shadow-[0_12px_40px_rgba(0,0,0,0.24)]
         transition-all duration-500
         hover:-translate-y-1.5

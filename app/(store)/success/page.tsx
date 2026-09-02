@@ -409,7 +409,7 @@ export default function SuccessPage() {
                     key={item.id}
                     className="group flex gap-3 rounded-2xl border border-white/[0.06] bg-black/60 p-3 transition-colors hover:border-yellow-400/20 sm:gap-4 sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   >
-                    <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-950 sm:h-28 sm:w-24">
+                    <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-zinc-950 sm:h-28 sm:w-24">
                       {item.image &&
                       !imageErrors[item.id] ? (
                         <Image

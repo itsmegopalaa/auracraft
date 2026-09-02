@@ -9,10 +9,10 @@ export default function MobileNavbar() {
   return (
     <div className="md:hidden px-1">
 
-      <div className="flex items-center justify-between rounded-2xl border border-white/[0.07] bg-zinc-950/80 px-4 min-h-10 py-2 backdrop-blur-xl">
+      <div className="flex items-center justify-between rounded-2xl border border-white/[0.10] bg-zinc-950/80 px-4 min-h-10 py-2 backdrop-blur-xl">
 
         {/* Search Icon */}
-        <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-xl text-zinc-200 transition hover:border-yellow-400/40 hover:text-yellow-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+        <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.03] text-xl text-zinc-200 transition hover:border-yellow-400/40 hover:text-yellow-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
           🔍
         </button>
 
@@ -28,7 +28,7 @@ export default function MobileNavbar() {
         {/* Menu Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-xl text-yellow-400 transition hover:border-yellow-400/40 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.03] text-xl text-yellow-400 transition hover:border-yellow-400/40 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           {menuOpen ? "✕" : "☰"}
         </button>

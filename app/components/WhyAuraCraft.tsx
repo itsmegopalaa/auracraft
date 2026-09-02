@@ -45,7 +45,7 @@ export default function WhyAuraCraft() {
             Why <span className="text-yellow-400">MineNote?</span>
           </h2>
 
-          <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base sm:leading-8">
+          <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-zinc-300 sm:text-base sm:leading-8">
             We believe your notebook should feel like more than something you
             write in. It should reflect your ideas, your personality, and the
             things you want to create.
@@ -105,7 +105,7 @@ export default function WhyAuraCraft() {
                 {feature.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-7 text-zinc-400">
+              <p className="mt-3 text-sm leading-7 text-zinc-300">
                 {feature.description}
               </p>
 

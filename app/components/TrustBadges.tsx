@@ -40,13 +40,13 @@ export default function TrustBadges() {
             The MineNote <span className="text-yellow-400">standard.</span>
           </h2>
 
-          <p className="mt-4 text-sm leading-7 text-zinc-500 sm:text-base">
+          <p className="mt-4 text-sm leading-7 text-zinc-400 sm:text-base">
             Small details that make the experience feel as considered as the
             notebook itself.
           </p>
         </div>
 
-        <div className="grid gap-4 overflow-hidden rounded-3xl border border-white/[0.08] md:grid-cols-3 md:gap-px md:bg-white/[0.08]">
+        <div className="grid gap-4 overflow-hidden rounded-3xl border border-white/[0.12] md:grid-cols-3 md:gap-px md:bg-white/[0.08]">
           {trustPoints.map((point) => (
             <article
               key={point.title}
@@ -54,7 +54,7 @@ export default function TrustBadges() {
             >
               <div className="flex items-start justify-between gap-4">
                 <span
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.035] text-lg shadow-[0_8px_25px_rgba(0,0,0,0.18)] transition-all duration-300 group-hover:border-yellow-400/25 group-hover:bg-yellow-400/[0.05]"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.12] bg-white/[0.035] text-lg shadow-[0_8px_25px_rgba(0,0,0,0.18)] transition-all duration-300 group-hover:border-yellow-400/25 group-hover:bg-yellow-400/[0.05]"
                   aria-hidden="true"
                 >
                   {point.icon}
@@ -69,7 +69,7 @@ export default function TrustBadges() {
                 {point.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-7 text-zinc-500">
+              <p className="mt-3 text-sm leading-7 text-zinc-400">
                 {point.description}
               </p>
 

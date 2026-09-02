@@ -45,7 +45,7 @@ export default async function FeaturedNotebooks() {
             Featured <span className="text-yellow-400">AuraNotes</span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-zinc-400 sm:mt-5 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-zinc-300 sm:mt-5 sm:text-base">
             Choose a notebook that matches your personality, your ideas,
             and the way you create.
           </p>

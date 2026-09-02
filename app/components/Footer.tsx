@@ -32,7 +32,7 @@ export default function Footer() {
               </span>
             </Link>
 
-            <p className="mt-5 text-sm leading-7 text-zinc-400">
+            <p className="mt-5 text-sm leading-7 text-zinc-300">
               Premium personalized notebooks crafted for students,
               creators and dreamers. Designed to make every page feel
               like your own.
@@ -44,7 +44,7 @@ export default function Footer() {
                 aria-hidden="true"
               />
 
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-300">
                 A brand by AuraCraft
               </p>
             </div>
@@ -52,7 +52,7 @@ export default function Footer() {
 
           {/* Explore */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-300">
               Explore
             </h3>
 
@@ -63,7 +63,7 @@ export default function Footer() {
                     href={link.href}
                     className="
                       inline-flex min-h-9 items-center
-                      text-sm text-zinc-400
+                      text-sm text-zinc-300
                       outline-none transition-colors duration-200
                       hover:text-yellow-400
                       focus-visible:text-yellow-400
@@ -78,7 +78,7 @@ export default function Footer() {
 
           {/* Policies */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-300">
               Policies
             </h3>
 
@@ -89,7 +89,7 @@ export default function Footer() {
                     href={link.href}
                     className="
                       inline-flex min-h-9 items-center
-                      text-sm text-zinc-400
+                      text-sm text-zinc-300
                       outline-none transition-colors duration-200
                       hover:text-yellow-400
                       focus-visible:text-yellow-400
@@ -104,11 +104,11 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-300">
               Connect
             </h3>
 
-            <ul className="mt-5 space-y-3 text-sm text-zinc-400">
+            <ul className="mt-5 space-y-3 text-sm text-zinc-300">
               <li>
                 Instagram 📸
               </li>
@@ -140,12 +140,12 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.10] pt-7 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-300">
             © 2026 MineNote. All rights reserved.
           </p>
 
-          <p className="text-sm text-zinc-400">
-            Crafted with <span className="text-zinc-400">❤️</span> in India
+          <p className="text-sm text-zinc-300">
+            Crafted with <span className="text-zinc-300">❤️</span> in India
           </p>
         </div>
       </div>

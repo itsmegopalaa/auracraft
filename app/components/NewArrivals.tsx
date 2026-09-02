@@ -47,7 +47,7 @@ export default async function NewArrivals() {
               New <span className="text-yellow-400">Arrivals</span>
             </h2>
 
-            <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400 sm:mt-5 sm:text-base sm:leading-8">
+            <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-300 sm:mt-5 sm:text-base sm:leading-8">
               Fresh AuraNotes designs, recently added for your ideas,
               creativity, and everyday moments.
             </p>

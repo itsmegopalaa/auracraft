@@ -134,23 +134,23 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-black/90 backdrop-blur-2xl">
+      <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-black/90 shadow-lg shadow-black/10 backdrop-blur-2xl">
         <nav aria-label="Main navigation">
           {/* EXACT SAME CONTAINER AS HOMEPAGE */}
           <div className="mx-auto max-w-7xl px-6">
 
             {/* DESKTOP */}
-            <div className="hidden h-[72px] items-center gap-8 lg:flex">
+            <div className="hidden h-[72px] items-center gap-7 xl:gap-8 lg:flex">
               <Link
                 href="/"
                 aria-label="MineNote Home"
                 onClick={handleHomeClick}
                 className="group shrink-0"
               >
-                <span className="relative inline-flex items-center text-[25px] font-extrabold tracking-[-0.055em] text-white transition-opacity group-hover:opacity-90 lg:text-[27px]">
+                <span className="relative inline-flex items-center text-[25px] font-black tracking-[-0.055em] text-white transition-all duration-200 group-hover:text-zinc-100 lg:text-[27px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
                   Mine<span className="text-yellow-400">Note</span>
 
-                  <span className="absolute -bottom-1 left-0 h-[2px] w-0 rounded-full bg-yellow-400 transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-1 left-0 h-[2px] w-0 rounded-full bg-yellow-400 transition-all duration-300 group-hover:w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black" />
                 </span>
               </Link>
 
@@ -173,7 +173,7 @@ export default function Navbar() {
                     openMenu();
                   }
                 }}
-                className="absolute inset-0 z-[50] cursor-pointer bg-transparent"
+                className="absolute inset-0 z-[50] cursor-pointer bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               />
 
               {/* HEADER CONTROLS */}
@@ -216,7 +216,7 @@ export default function Navbar() {
                   aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
                   aria-expanded={menuOpen}
                   aria-controls="mobile-navigation"
-                  className="pointer-events-auto absolute right-0 top-1/2 flex h-10 w-10 shrink-0 -translate-y-1/2 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.035] p-0 text-zinc-200 shadow-sm shadow-black/20 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.05] hover:text-yellow-400 active:scale-95"
+                  className="pointer-events-auto absolute right-0 top-1/2 flex h-10 w-10 shrink-0 -translate-y-1/2 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.035] p-0 text-zinc-200 shadow-sm shadow-black/20 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.05] hover:text-yellow-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   <span
                     className="flex h-5 w-5 items-center justify-center text-[20px] leading-none"
@@ -268,7 +268,7 @@ export default function Navbar() {
                 aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={menuOpen}
                 aria-controls="mobile-navigation"
-                className="absolute right-0 top-1/2 z-[70] flex h-10 w-10 shrink-0 -translate-y-1/2 touch-manipulation items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.035] text-zinc-200 shadow-sm shadow-black/20 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.05] hover:text-yellow-400 active:scale-95"
+                className="absolute right-0 top-1/2 z-[70] flex h-10 w-10 shrink-0 -translate-y-1/2 touch-manipulation items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.035] text-zinc-200 shadow-sm shadow-black/20 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.05] hover:text-yellow-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <span
                   className="flex h-5 w-5 items-center justify-center text-[20px] leading-none"
@@ -301,7 +301,7 @@ export default function Navbar() {
             role="dialog"
             aria-label="Mobile navigation menu"
             aria-modal="true"
-            className="fixed left-0 right-0 top-[64px] z-[60] overflow-hidden rounded-b-3xl border-x border-b border-white/[0.10] bg-zinc-950/98 shadow-2xl shadow-black/70 lg:hidden"
+            className="fixed left-0 right-0 top-[64px] z-[60] overflow-hidden rounded-b-[1.75rem] border-x border-b border-white/[0.10] bg-zinc-950/98 shadow-2xl shadow-black/70 backdrop-blur-xl lg:hidden"
           >
             <div className="mx-auto max-w-7xl px-6">
               <MobileMenu setMenuOpen={setMenuOpen} />

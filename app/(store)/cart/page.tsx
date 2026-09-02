@@ -28,24 +28,24 @@ item.quantity
   return (
   <>
 
-    <main className="min-h-screen bg-black text-white px-6 py-24">
-      <div className="max-w-5xl mx-auto">
+    <main className="min-h-screen overflow-x-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-5xl">
 
 
-        <h1 className="text-5xl font-bold mb-12">
+        <h1 className="mb-8 text-4xl font-black tracking-tight sm:mb-12 sm:text-5xl">
           Your <span className="text-yellow-400">Cart</span>
         </h1>
 
 
         {cart.length === 0 ? (
 
-  <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-12 text-center">
+  <div className="rounded-[2rem] border border-white/[0.08] bg-zinc-950 p-8 text-center shadow-2xl shadow-black/20 sm:p-12">
 
-    <div className="text-6xl mb-6">
+    <div className="mb-5 text-5xl sm:mb-6 sm:text-6xl">
       🛒
     </div>
 
-    <h2 className="text-3xl font-bold">
+    <h2 className="text-2xl font-black sm:text-3xl">
       Your cart is empty
     </h2>
 
@@ -55,7 +55,7 @@ item.quantity
 
     <Link
       href="/products"
-      className="inline-block mt-8 rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105"
+      className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-yellow-400 px-8 py-4 font-black text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
     >
       Explore Products →
     </Link>
@@ -73,24 +73,26 @@ item.quantity
               className="
 flex
 flex-col
-gap-6
-rounded-3xl
+gap-5
+rounded-[2rem]
 border
-border-zinc-800
-bg-zinc-900
-p-6
+border-white/[0.08]
+bg-zinc-950
+p-4
+shadow-xl
+shadow-black/10
 transition-all
 duration-300
-hover:-translate-y-1
-hover:border-yellow-400
+hover:border-yellow-400/25
+sm:p-6
 md:flex-row
 md:items-center
 md:justify-between
-"
+ focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
 
 
-                <div className="flex items-center gap-6">
+                <div className="flex min-w-0 items-center gap-4 sm:gap-6">
 
                  <Link href={`/products/${item.id}`}>
   <Image
@@ -98,7 +100,7 @@ md:justify-between
     alt={item.name}
     width={120}
     height={160}
-    className="h-32 w-24 rounded-xl object-cover transition hover:scale-105"
+    className="h-28 w-21 shrink-0 rounded-2xl object-cover transition duration-300 hover:scale-[1.03] sm:h-32 sm:w-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
   />
 </Link>
 
@@ -106,29 +108,31 @@ md:justify-between
                   <div>
 
                    <Link href={`/products/${item.id}`}>
-  <h2 className="text-2xl font-bold transition hover:text-yellow-400">
+  <h2 className="text-lg font-black leading-tight transition hover:text-yellow-400 sm:text-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
     {item.name}
   </h2>
 </Link>
 
 
-                    <p className="mt-2 text-yellow-400 text-xl">
+                    <p className="mt-2 text-lg font-bold text-yellow-400 sm:text-xl">
                      ₹{item.price}
                     </p>
 
 
-                    <div className="mt-4 flex items-center gap-4">
+                    <div className="mt-4 flex items-center gap-3 sm:gap-4">
 
                      <button
   onClick={() =>
     decreaseQuantity(item.id)
   }
   className="
-    h-10 w-10 rounded-full
-    bg-zinc-700
+    flex h-10 w-10 items-center justify-center rounded-full
+    bg-zinc-800
     text-xl font-bold
-    transition hover:bg-zinc-600
-  "
+    transition-all duration-200
+    hover:bg-zinc-700
+    active:scale-95
+   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 >
   -
 </button>
@@ -143,11 +147,13 @@ md:justify-between
     increaseQuantity(item.id)
   }
   className="
-    h-10 w-10 rounded-full
+    flex h-10 w-10 items-center justify-center rounded-full
     bg-yellow-400
-    text-xl font-bold text-black
-    transition hover:scale-110
-  "
+    text-xl font-black text-black
+    transition-all duration-200
+    hover:bg-yellow-300
+    active:scale-95
+   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 >
   +
 </button>
@@ -166,16 +172,18 @@ md:justify-between
                    setRemoveId(item.id)
                   }
                  className="
-  rounded-full
-  border border-red-500
-  px-6 py-3
-  font-semibold
+  w-full rounded-2xl
+  border border-red-500/30
+  px-5 py-3
+  text-sm font-bold
   text-red-400
-  transition
+  transition-all duration-200
+  hover:border-red-500
   hover:bg-red-500
   hover:text-white
-  hover:scale-105
-"
+  active:scale-[0.98]
+  md:w-auto
+ focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   Remove
                 </button>
@@ -187,9 +195,9 @@ md:justify-between
 
 
 
-           <div className="mt-10 rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+           <div className="mt-8 rounded-[2rem] border border-yellow-400/15 bg-zinc-950 p-6 shadow-2xl shadow-black/20 sm:mt-10 sm:p-8">
 
-  <h2 className="text-3xl font-bold">
+  <h2 className="text-2xl font-black sm:text-3xl">
     Order Summary
   </h2>
 
@@ -212,7 +220,7 @@ md:justify-between
 </div>
   <div className="my-6 border-t border-zinc-700"></div>
 
-  <div className="flex justify-between text-2xl font-bold">
+  <div className="flex items-end justify-between gap-4 text-2xl font-black">
     <span>Total</span>
     <span className="text-yellow-400">
       ₹{total}
@@ -220,14 +228,14 @@ md:justify-between
   </div>
 
  <Link href="/checkout">
-  <button className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-105">
+  <button className="mt-8 flex w-full items-center justify-center rounded-2xl bg-yellow-400 py-4 font-black text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
     Proceed to Checkout →
   </button>
 </Link>
 
 <Link
   href="/products"
-  className="mt-4 block w-full rounded-full border border-yellow-400 py-4 text-center font-bold text-yellow-400 transition hover:bg-yellow-400 hover:text-black"
+  className="mt-3 block w-full rounded-2xl border border-yellow-400/50 py-4 text-center font-bold text-yellow-400 transition-all duration-300 hover:border-yellow-400 hover:bg-yellow-400 hover:text-black sm:mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 >
   ← Continue Shopping
 </Link>

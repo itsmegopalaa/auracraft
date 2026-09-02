@@ -6,17 +6,6 @@ import type {
 
 export type ID = string;
 
-export interface Product {
-  id: ID;
-  name: string;
-  price: number;
-  stock: number;
-  image?: string | null;
-  description?: string | null;
-  slug?: string | null;
-  is_active?: boolean;
-}
-
 export interface OrderItem {
   id: ID;
   name: string;

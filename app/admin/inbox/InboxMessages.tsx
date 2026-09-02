@@ -66,23 +66,23 @@ export default function InboxMessages({ messages }: Props) {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <div className="mb-5 flex flex-wrap items-center gap-2.5 sm:mb-6 sm:gap-3">
+        <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-4 min-h-10 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {items.length} total
         </span>
 
-        <span className="rounded-full bg-yellow-100 px-3 py-1.5 text-sm font-semibold text-yellow-800">
+        <span className="rounded-full bg-yellow-100 px-4 min-h-10 py-1.5 text-sm font-semibold text-yellow-800">
           {unreadCount} unread
         </span>
       </div>
 
       {items.length > 0 ? (
-        <section className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="divide-y divide-zinc-100">
             {items.map((item) => (
               <article
                 key={item.id}
-                className={`p-5 transition ${
+                className={`p-4 transition sm:p-5 ${
                   item.is_read ? "bg-white dark:bg-zinc-900" : "bg-yellow-50/40"
                 }`}
               >
@@ -94,7 +94,7 @@ export default function InboxMessages({ messages }: Props) {
                       </h2>
 
                       {!item.is_read && (
-                        <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">
+                        <span className="rounded-full bg-yellow-100 px-3 min-h-10.5 py-1 text-xs font-semibold text-yellow-800">
                           New
                         </span>
                       )}
@@ -120,7 +120,7 @@ export default function InboxMessages({ messages }: Props) {
                       type="button"
                       onClick={() => toggleRead(item)}
                       disabled={loadingId === item.id}
-                      className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-10 rounded-xl border border-zinc-300 px-4 min-h-10 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
                       {loadingId === item.id
                         ? "Updating..."
@@ -147,7 +147,7 @@ export default function InboxMessages({ messages }: Props) {
           </div>
         </section>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center dark:border-zinc-700 dark:bg-zinc-900 sm:p-12">
           <div className="text-4xl">📭</div>
 
           <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">

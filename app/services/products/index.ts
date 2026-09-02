@@ -1,11 +1,11 @@
-import type { Product } from "@/app/types";
+import type { Product } from "@/app/types/products";
 
 export function isProductInStock(
   product: Product,
   quantity: number
 ): boolean {
   return (
-    product.is_active !== false &&
+    product.active !== false &&
     Number.isInteger(quantity) &&
     quantity > 0 &&
     product.stock >= quantity

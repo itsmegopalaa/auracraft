@@ -1,14 +1,11 @@
 import { getServerEnv } from "@/app/config";
-
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { createServerSupabaseClient } from "@/app/lib/supabase";
+import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import {
   isValidOrderStatus,
   canTransitionOrderStatus,
-} from "@/app/services/orders";
-import {
   shouldSetShippedAt,
   shouldSetDeliveredAt,
   getOrderEmailSubject,
@@ -60,18 +57,16 @@ export async function PATCH(
       );
     }
 
-    const supabase = await createServerSupabaseClient();
+    const supabase = createSupabaseAdminClient();
 
-    const {
-      data: existingOrder,
-      error: existingOrderError,
-    } = await supabase
-      .from("orders")
-      .select(
-        "order_id, name, email, payment_method, payment_status, order_status, total, delivery, shipped_at, delivered_at"
-      )
-      .eq("order_id", orderId)
-      .maybeSingle();
+    const { data: existingOrder, error: existingOrderError } =
+      await supabase
+        .from("orders")
+        .select(
+          "order_id, name, email, payment_method, payment_status, order_status, total, delivery, shipped_at, delivered_at"
+        )
+        .eq("order_id", orderId)
+        .maybeSingle();
 
     if (existingOrderError) {
       console.error(
@@ -82,7 +77,7 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: "Unable to load order.",
+          error: existingOrderError.message,
         },
         { status: 500 }
       );
@@ -103,8 +98,7 @@ export async function PATCH(
         success: true,
         order: existingOrder,
         emailSent: false,
-        message:
-          "Order status is already set to this value.",
+        message: "Order status is already set to this value.",
       });
     }
 
@@ -142,28 +136,47 @@ export async function PATCH(
         new Date().toISOString();
     }
 
-    const {
-      data: order,
-      error,
-    } = await supabase
+    const { error: updateError } = await supabase
       .from("orders")
       .update(updateData)
-      .eq("order_id", orderId)
-      .select(
-        "order_id, order_status, shipped_at, delivered_at"
-      )
-      .single();
+      .eq("order_id", orderId);
 
-    if (error) {
+    if (updateError) {
       console.error(
-        "ADMIN ORDER STATUS ERROR:",
-        error
+        "ADMIN ORDER STATUS UPDATE ERROR:",
+        updateError
       );
 
       return NextResponse.json(
         {
           success: false,
-          error: "Unable to update order status.",
+          error: updateError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    const {
+      data: verifiedOrder,
+      error: verifyError,
+    } = await supabase
+      .from("orders")
+      .select(
+        "order_id, order_status, shipped_at, delivered_at"
+      )
+      .eq("order_id", orderId)
+      .single();
+
+    if (verifyError || !verifiedOrder) {
+      console.error(
+        "ADMIN ORDER STATUS VERIFY ERROR:",
+        verifyError
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Status update could not be verified.",
         },
         { status: 500 }
       );
@@ -172,8 +185,7 @@ export async function PATCH(
     let emailSent = false;
 
     if (status !== "placed") {
-      const resendApiKey =
-        getServerEnv().resendApiKey;
+      const resendApiKey = getServerEnv().resendApiKey;
 
       if (!resendApiKey) {
         console.error(
@@ -185,41 +197,27 @@ export async function PATCH(
           existingOrder.email
         );
       } else {
-        const resend = new Resend(
-          resendApiKey
-        );
+        const resend = new Resend(resendApiKey);
 
-        const customerName =
-          escapeHtml(existingOrder.name);
-
-        const safeOrderId =
-          escapeHtml(existingOrder.order_id);
-
-        const safeStatus =
-          escapeHtml(status);
-
-        const safeDelivery =
-          escapeHtml(existingOrder.delivery);
+        const customerName = escapeHtml(existingOrder.name);
+        const safeOrderId = escapeHtml(existingOrder.order_id);
+        const safeStatus = escapeHtml(status);
+        const safeDelivery = escapeHtml(existingOrder.delivery);
 
         const paymentLabel =
-          existingOrder.payment_method ===
-          "Razorpay"
+          existingOrder.payment_method === "Razorpay"
             ? "Paid online via Razorpay"
             : "Cash on Delivery";
 
-        const subject =
-          getOrderEmailSubject(
-            status,
-            existingOrder.order_id
-          );
+        const subject = getOrderEmailSubject(
+          status,
+          existingOrder.order_id
+        );
 
         const { error: emailError } =
           await resend.emails.send({
-            from:
-              "MineNote <orders@minenote.in>",
-            to: [
-              existingOrder.email.trim(),
-            ],
+            from: "MineNote <orders@minenote.in>",
+            to: [existingOrder.email.trim()],
             subject,
             html: `
               <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #18181b; max-width: 640px; margin: 0 auto; padding: 24px;">
@@ -264,21 +262,13 @@ export async function PATCH(
 
                 ${
                   status === "shipped"
-                    ? `
-                      <p>
-                        Your order is now on its way. 📦
-                      </p>
-                    `
+                    ? `<p>Your order is now on its way. 📦</p>`
                     : ""
                 }
 
                 ${
                   status === "delivered"
-                    ? `
-                      <p>
-                        Thank you for choosing MineNote. ❤️
-                      </p>
-                    `
+                    ? `<p>Thank you for choosing MineNote. ❤️</p>`
                     : ""
                 }
 
@@ -302,7 +292,7 @@ export async function PATCH(
 
     return NextResponse.json({
       success: true,
-      order,
+      order: verifiedOrder,
       emailSent,
     });
   } catch (error) {

@@ -30,38 +30,33 @@ export default async function FeaturedNotebooks() {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Subtle section atmosphere */}
       <div
-        className="pointer-events-none absolute left-1/2 top-0 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-yellow-400/[0.035] blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-0 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-yellow-400/[0.035] blur-3xl sm:h-72 sm:w-[36rem]"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-7xl px-5 py-24 sm:px-6 sm:py-28 lg:py-32">
-
-        {/* Section heading */}
+      <div className="relative mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24 lg:py-28 xl:py-32">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-yellow-400/80">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-400/80 sm:mb-4 sm:tracking-[0.3em]">
             Curated for you
           </p>
 
-          <h2 className="text-4xl font-extrabold tracking-[-0.03em] text-white sm:text-5xl lg:text-6xl">
-            Featured{" "}
-            <span className="text-yellow-400">AuraNotes</span>
+          <h2 className="text-3xl font-extrabold tracking-[-0.03em] text-white sm:text-5xl lg:text-6xl">
+            Featured <span className="text-yellow-400">AuraNotes</span>
           </h2>
 
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-zinc-400 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-zinc-400 sm:mt-5 sm:text-base">
             Choose a notebook that matches your personality, your ideas,
             and the way you create.
           </p>
 
           <div
-            className="mx-auto mt-7 h-px w-12 bg-yellow-400/60"
+            className="mx-auto mt-6 h-px w-12 bg-yellow-400/60 sm:mt-7"
             aria-hidden="true"
           />
         </div>
 
-        {/* Products */}
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 sm:gap-7 lg:mt-16 lg:grid-cols-4 lg:gap-7">
+        <div className="mt-11 grid gap-5 sm:mt-13 sm:grid-cols-2 sm:gap-6 lg:mt-15 lg:grid-cols-4 lg:gap-7">
           {products?.map((product) => (
             <ProductCard
               key={product.id}
@@ -75,9 +70,7 @@ export default async function FeaturedNotebooks() {
                 product.rating ??
                 undefined
               }
-              reviewCount={
-                ratings[product.id]?.review_count ?? 0
-              }
+              reviewCount={ratings[product.id]?.review_count ?? 0}
               bestseller={product.bestseller}
             />
           ))}

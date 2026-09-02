@@ -3,23 +3,8 @@
 import Image from "next/image";
 
 import { useState } from "react";
+import type { Product } from "@/app/types/products";
 import { useSearchParams } from "next/navigation";
-
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  category: string | null;
-  image: string | null;
-  stock: number;
-  active: boolean;
-  theme: string | null;
-  badge: string | null;
-  featured: boolean;
-  created_at: string;
-  updated_at: string;
-};
 
 type Props = {
   products: Product[];
@@ -80,7 +65,19 @@ export default function AdminProductsClient({ products: initialProducts }: Props
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(editingProduct),
+        body: JSON.stringify({
+          id: editingProduct.id,
+          name: editingProduct.name,
+          price: editingProduct.price,
+          description: editingProduct.description,
+          category: editingProduct.category,
+          image: editingProduct.image,
+          stock: editingProduct.stock,
+          active: editingProduct.active,
+          theme: editingProduct.theme,
+          badge: editingProduct.badge,
+          featured: editingProduct.featured,
+        }),
       });
 
       const data = await response.json();
@@ -106,8 +103,8 @@ export default function AdminProductsClient({ products: initialProducts }: Props
   }
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 p-5">
+    <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             Product Catalog
@@ -136,7 +133,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
             });
             setAdding(true);
           }}
-          className="rounded-xl bg-yellow-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-300"
+          className="min-h-11 w-full rounded-xl bg-yellow-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-300 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           + Add Product
         </button>
@@ -149,7 +146,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
       )}
 
       {products.length === 0 ? (
-        <div className="p-12 text-center">
+        <div className="p-10 text-center sm:p-12">
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
             No products found
           </h3>
@@ -159,8 +156,8 @@ export default function AdminProductsClient({ products: initialProducts }: Props
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[950px] text-left">
+        <div className="overflow-x-auto overscroll-x-contain">
+          <table className="w-full min-w-[900px] text-left">
             <thead className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
               <tr>
                 <th className="px-5 py-4 text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
@@ -199,7 +196,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   key={product.id}
                   className="border-b border-zinc-100 dark:border-zinc-800 last:border-0"
                 >
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     <div className="flex items-center gap-4">
                       {product.image ? (
                         <Image
@@ -207,7 +204,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                           alt={product.name}
                           width={64}
                           height={64}
-                          className="h-16 w-16 rounded-xl object-cover"
+                          className="h-14 w-14 rounded-xl object-cover sm:h-16 sm:w-16"
                         />
                       ) : (
                         <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-400">
@@ -235,9 +232,9 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     {product.theme ?? "Default"}
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     {product.badge ? (
-                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                      <span className="rounded-full bg-yellow-100 px-4 min-h-10 py-1 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
                         {product.badge.replace("_", " ")}
                       </span>
                     ) : (
@@ -245,9 +242,9 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     )}
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     {product.featured ? (
-                      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                      <span className="rounded-full bg-green-100 px-4 min-h-10 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
                         ⭐ Yes
                       </span>
                     ) : (
@@ -259,7 +256,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     ₹{product.price.toLocaleString("en-IN")}
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     <span
                       className={
                         product.stock === 0
@@ -273,7 +270,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     <span
                       className={
                         product.active
@@ -285,14 +282,14 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     <button
                       type="button"
                       onClick={() => {
                         setError("");
                         setEditingId(product.id);
                       }}
-                      className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
+                      className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 min-h-10 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
                       Edit
                     </button>
@@ -305,8 +302,8 @@ export default function AdminProductsClient({ products: initialProducts }: Props
       )}
 
       {adding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-zinc-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center sm:p-6">
+          <div className="my-4 w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-zinc-900 sm:my-6 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -322,13 +319,13 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 type="button"
                 onClick={() => setAdding(false)}
                 disabled={saving}
-                className="rounded-lg px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
+                className="rounded-lg px-4 min-h-10 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <div className="mt-5 grid gap-4 sm:gap-5 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Product Name
@@ -343,7 +340,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     })
                   }
                   placeholder="e.g. Sakura Anime"
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -362,7 +359,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       price: Number(event.target.value),
                     })
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -381,7 +378,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       stock: Number(event.target.value),
                     })
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -399,7 +396,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     })
                   }
                   placeholder="e.g. Anime"
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -417,7 +414,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     })
                   }
                   placeholder="/images/product.jpg"
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -436,7 +433,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     })
                   }
                   placeholder="Describe the product..."
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -453,7 +450,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       theme: event.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 >
                   <option value="">Default</option>
                   <option value="anime">Anime</option>
@@ -478,7 +475,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       badge: event.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 >
                   <option value="">No badge</option>
                   <option value="best_seller">Best Seller</option>
@@ -488,7 +485,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 </select>
               </div>
 
-              <label className="flex items-center gap-3 md:col-span-2">
+              <label className="flex min-h-11 items-center gap-3 md:col-span-2">
                 <input
                   type="checkbox"
                   checked={newProduct.featured}
@@ -498,7 +495,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       featured: event.target.checked,
                     })
                   }
-                  className="h-4 w-4"
+                  className="h-5 w-5 shrink-0"
                 />
 
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -506,7 +503,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 </span>
               </label>
 
-              <label className="flex items-center gap-3 md:col-span-2">
+              <label className="flex min-h-11 items-center gap-3 md:col-span-2">
                 <input
                   type="checkbox"
                   checked={newProduct.active}
@@ -516,7 +513,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       active: event.target.checked,
                     })
                   }
-                  className="h-4 w-4"
+                  className="h-5 w-5 shrink-0"
                 />
 
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -525,12 +522,12 @@ export default function AdminProductsClient({ products: initialProducts }: Props
               </label>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800 pt-5">
+            <div className="mt-5 flex flex-col-reverse gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800 sm:flex-row sm:justify-end sm:pt-5">
               <button
                 type="button"
                 onClick={() => setAdding(false)}
                 disabled={saving}
-                className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-5 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 disabled:opacity-50"
+                className="min-h-12 w-full rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 disabled:opacity-50 sm:w-auto"
               >
                 Cancel
               </button>
@@ -575,7 +572,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     setSaving(false);
                   }
                 }}
-                className="rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-12 w-full rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {saving ? "Creating..." : "Create Product"}
               </button>
@@ -585,8 +582,8 @@ export default function AdminProductsClient({ products: initialProducts }: Props
       )}
 
       {editingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-zinc-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center sm:p-6">
+          <div className="my-4 w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-zinc-900 sm:my-6 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -601,13 +598,13 @@ export default function AdminProductsClient({ products: initialProducts }: Props
               <button
                 type="button"
                 onClick={() => setEditingId(null)}
-                className="rounded-lg px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
+                className="rounded-lg px-4 min-h-10 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <div className="mt-5 grid gap-4 sm:gap-5 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Product Name
@@ -618,7 +615,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("name", event.target.value)
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -634,7 +631,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("price", Number(event.target.value))
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -650,7 +647,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("stock", Number(event.target.value))
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -664,7 +661,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("category", event.target.value)
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -678,7 +675,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("image", event.target.value)
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -693,7 +690,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("description", event.target.value)
                   }
-                  className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 outline-none focus:border-yellow-400"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
@@ -707,7 +704,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("theme", event.target.value)
                   }
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 >
                   <option value="">Default</option>
                   <option value="anime">Anime</option>
@@ -729,7 +726,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   onChange={(event) =>
                     updateEditing("badge", event.target.value)
                   }
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 >
                   <option value="">No badge</option>
                   <option value="best_seller">Best Seller</option>
@@ -739,14 +736,14 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 </select>
               </div>
 
-              <label className="flex items-center gap-3 md:col-span-2">
+              <label className="flex min-h-11 items-center gap-3 md:col-span-2">
                 <input
                   type="checkbox"
                   checked={editingProduct.featured}
                   onChange={(event) =>
                     updateEditing("featured", event.target.checked)
                   }
-                  className="h-4 w-4"
+                  className="h-5 w-5 shrink-0"
                 />
 
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -754,14 +751,14 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 </span>
               </label>
 
-              <label className="flex items-center gap-3 md:col-span-2">
+              <label className="flex min-h-11 items-center gap-3 md:col-span-2">
                 <input
                   type="checkbox"
                   checked={editingProduct.active}
                   onChange={(event) =>
                     updateEditing("active", event.target.checked)
                   }
-                  className="h-4 w-4"
+                  className="h-5 w-5 shrink-0"
                 />
 
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -770,12 +767,12 @@ export default function AdminProductsClient({ products: initialProducts }: Props
               </label>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800 pt-5">
+            <div className="mt-5 flex flex-col-reverse gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800 sm:flex-row sm:justify-end sm:pt-5">
               <button
                 type="button"
                 onClick={() => setEditingId(null)}
                 disabled={saving}
-                className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-5 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 disabled:opacity-50"
+                className="min-h-12 w-full rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 disabled:opacity-50 sm:w-auto"
               >
                 Cancel
               </button>
@@ -784,7 +781,7 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 type="button"
                 onClick={saveProduct}
                 disabled={saving}
-                className="rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-12 w-full rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>

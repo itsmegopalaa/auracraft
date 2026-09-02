@@ -77,7 +77,7 @@ export default function FulfillmentForm({
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <div>
           <label
             htmlFor="shipping-partner"
@@ -93,7 +93,7 @@ export default function FulfillmentForm({
             onChange={(event) => setPartner(event.target.value)}
             placeholder="e.g. Delhivery"
             disabled={loading}
-            className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
+            className="mt-2 min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           />
         </div>
 
@@ -112,7 +112,7 @@ export default function FulfillmentForm({
             onChange={(event) => setTracking(event.target.value)}
             placeholder="e.g. 1234567890"
             disabled={loading}
-            className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
+            className="mt-2 min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           />
         </div>
       </div>
@@ -132,11 +132,11 @@ export default function FulfillmentForm({
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://..."
           disabled={loading}
-          className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 focus:border-yellow-400"
+          className="mt-2 min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </div>
 
-      <div className="mt-5 grid gap-3 text-sm md:grid-cols-2">
+      <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
         <div className="rounded-xl bg-zinc-50 dark:bg-zinc-950 p-4">
           <p className="font-medium text-zinc-700 dark:text-zinc-300">Shipped At</p>
           <p className="mt-1 text-zinc-500 dark:text-zinc-400">{formatDate(shippedAt)}</p>
@@ -153,7 +153,7 @@ export default function FulfillmentForm({
           type="button"
           onClick={saveFulfillment}
           disabled={loading}
-          className="rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-12 w-full rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           {loading ? "Saving..." : "Save Tracking Details"}
         </button>

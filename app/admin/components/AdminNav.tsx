@@ -139,8 +139,8 @@ export default function AdminNav({
 
   return (
     <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="mx-auto max-w-7xl px-6 md:px-8">
-        <div className="flex min-h-16 items-center justify-between gap-4">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="flex min-h-16 items-center justify-between gap-3 sm:gap-4">
           <Link
             href="/admin"
             onClick={closeMenu}
@@ -149,7 +149,7 @@ export default function AdminNav({
             MineNote Admin
           </Link>
 
-          <div className="hidden items-center gap-5 sm:flex">
+          <div className="hidden items-center gap-4 md:flex md:gap-5">
             {links.map((link) => (
               <Link
                 key={link.href}
@@ -171,9 +171,9 @@ export default function AdminNav({
             ))}
           </div>
 
-          <div className="flex flex-1 items-center justify-end gap-3">
-            <div className="relative w-full max-w-lg md:block">
-              <div className="flex overflow-hidden rounded-xl border border-zinc-300 bg-white transition focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-yellow-100 dark:border-zinc-700 dark:bg-zinc-800 dark:focus-within:ring-yellow-900/30">
+          <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+            <div className="relative hidden w-full max-w-lg md:block">
+              <div className="flex overflow-hidden rounded-xl border border-zinc-300 bg-white transition focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-yellow-100 dark:border-zinc-700 dark:bg-zinc-800 dark:focus-within:ring-yellow-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
                 <select
                   value={searchCategory}
                   onChange={(event) =>
@@ -186,7 +186,7 @@ export default function AdminNav({
                     )
                   }
                   aria-label="Search category"
-                  className="border-r border-zinc-200 bg-transparent px-3 py-2.5 text-xs font-medium text-zinc-700 outline-none dark:border-zinc-700 dark:text-zinc-300"
+                  className="border-r border-zinc-200 bg-transparent px-4 min-h-10 py-2.5 text-xs font-medium text-zinc-700 outline-none dark:border-zinc-700 dark:text-zinc-300"
                 >
                   <option value="all">All</option>
                   <option value="products">Products</option>
@@ -211,11 +211,11 @@ export default function AdminNav({
                 />
 
                 {searching ? (
-                  <span className="flex items-center px-3 text-xs text-zinc-400">
+                  <span className="flex items-center px-4 min-h-10 text-xs text-zinc-400">
                     …
                   </span>
                 ) : (
-                  <span className="pointer-events-none flex items-center px-3 text-zinc-400">
+                  <span className="pointer-events-none flex items-center px-4 min-h-10 text-zinc-400">
                     🔎
                   </span>
                 )}
@@ -227,14 +227,14 @@ export default function AdminNav({
                   searchResults.products.length === 0 &&
                   searchResults.inbox.length === 0 &&
                   !searching ? (
-                    <p className="px-3 py-4 text-sm text-zinc-500">
+                    <p className="px-4 min-h-10 py-4 text-sm text-zinc-500">
                       No results found.
                     </p>
                   ) : (
                     <>
                       {searchResults.orders.length > 0 && (
                         <div>
-                          <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          <p className="px-4 min-h-10 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
                             Orders
                           </p>
 
@@ -243,7 +243,7 @@ export default function AdminNav({
                               key={order.id}
                               href={`/admin/orders/${order.order_id}`}
                               onClick={() => setSearchQuery("")}
-                              className="block rounded-xl px-3 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="block rounded-xl px-4 min-h-10 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                             >
                               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                                 {order.order_id}
@@ -258,7 +258,7 @@ export default function AdminNav({
 
                       {searchResults.products.length > 0 && (
                         <div className="mt-2 border-t border-zinc-100 pt-2 dark:border-zinc-800">
-                          <p className="px-3 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          <p className="px-4 min-h-10 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
                             Products
                           </p>
 
@@ -267,7 +267,7 @@ export default function AdminNav({
                               key={product.id}
                               href={`/admin/products?edit=${product.id}`}
                               onClick={() => setSearchQuery("")}
-                              className="block rounded-xl px-3 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="block rounded-xl px-4 min-h-10 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                             >
                               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                                 {product.name}
@@ -282,7 +282,7 @@ export default function AdminNav({
 
                       {searchResults.inbox.length > 0 && (
                         <div className="mt-2 border-t border-zinc-100 pt-2 dark:border-zinc-800">
-                          <p className="px-3 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          <p className="px-4 min-h-10 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
                             Inbox
                           </p>
 
@@ -291,7 +291,7 @@ export default function AdminNav({
                               key={message.id}
                               href="/admin/inbox"
                               onClick={() => setSearchQuery("")}
-                              className="block rounded-xl px-3 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="block rounded-xl px-4 min-h-10 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                             >
                               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                                 {message.name}
@@ -311,7 +311,7 @@ export default function AdminNav({
 
             <AdminThemeSwitcher />
 
-            <span className="hidden text-xs text-zinc-500 dark:text-zinc-400 lg:block">
+            <span className="hidden text-xs text-zinc-500 dark:text-zinc-400 xl:block">
               {userEmail}
             </span>
 
@@ -319,7 +319,7 @@ export default function AdminNav({
               type="button"
               onClick={handleSignOut}
               disabled={loading}
-              className="hidden rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 sm:block"
+              className="hidden rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 sm:block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               {loading ? "Signing out..." : "Sign out"}
             </button>
@@ -329,7 +329,7 @@ export default function AdminNav({
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((current) => !current)}
-              className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 sm:hidden"
+              className="min-h-10 rounded-xl border border-zinc-300 px-4 min-h-10 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               {menuOpen ? "✕" : "☰"}
             </button>
@@ -337,7 +337,7 @@ export default function AdminNav({
         </div>
 
         {menuOpen && (
-          <div className="border-t border-zinc-100 dark:border-zinc-800 py-4 dark:border-zinc-800 sm:hidden">
+          <div className="border-t border-zinc-100 py-4 dark:border-zinc-800 md:hidden">
             <div className="space-y-1">
               {links.map((link) => (
                 <Link
@@ -370,7 +370,7 @@ export default function AdminNav({
                 type="button"
                 onClick={handleSignOut}
                 disabled={loading}
-                className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 {loading ? "Signing out..." : "Sign out"}
               </button>

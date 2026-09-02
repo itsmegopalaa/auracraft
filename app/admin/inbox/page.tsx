@@ -15,13 +15,13 @@ export default async function AdminInboxPage() {
   return (
     <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
 
-      <div className="mx-auto max-w-7xl p-6 md:p-8">
-        <header className="border-b border-zinc-200 dark:border-zinc-800 pb-6">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-7 md:px-8 md:py-8">
+        <header className="border-b border-zinc-200 pb-5 dark:border-zinc-800 sm:pb-6">
           <p className="text-sm font-medium text-yellow-600">
             MineNote Admin
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h1 className="mt-1 text-xl font-bold sm:text-2xl sm:text-3xl text-zinc-900 dark:text-zinc-100">
             Inbox
           </h1>
 
@@ -31,7 +31,7 @@ export default async function AdminInboxPage() {
         </header>
 
         {error ? (
-          <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6">
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 sm:mt-8 sm:p-6">
             <h2 className="font-semibold text-red-800">
               Unable to load messages
             </h2>
@@ -41,7 +41,7 @@ export default async function AdminInboxPage() {
             </pre>
           </div>
         ) : (
-          <div className="mt-8">
+          <div className="mt-6 sm:mt-8">
             <InboxMessages messages={messages ?? []} />
           </div>
         )}

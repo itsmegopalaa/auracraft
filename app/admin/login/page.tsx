@@ -36,9 +36,9 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-6">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-white">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-8 sm:px-6">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl sm:p-8">
+        <h1 className="text-xl font-bold text-white sm:text-2xl">
           MineNote Admin
         </h1>
 
@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
           Sign in to manage orders.
         </p>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-5">
+        <form onSubmit={handleLogin} className="mt-7 space-y-4 sm:mt-8 sm:space-y-5">
           <div>
             <label
               htmlFor="email"
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-yellow-400"
+              className="min-h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-yellow-400"
             />
           </div>
 
@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
               Password
             </label>
 
-            <div className="relative">
+            <div className="relative max-w-full">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
                   showPassword ? "Hide password" : "Show password"
                 }
                 title={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2.5 text-zinc-400 transition hover:bg-zinc-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-yellow-400 px-4 py-3 font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-12 w-full rounded-xl bg-yellow-400 px-4 py-3 font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>

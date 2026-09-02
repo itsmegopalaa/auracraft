@@ -28,6 +28,10 @@ export default function OrderStatusForm({
   const [message, setMessage] = useState("");
 
   async function updateStatus() {
+    if (status === currentStatus) {
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -53,9 +57,24 @@ export default function OrderStatusForm({
         );
       }
 
-      setMessage("Order status updated successfully.");
+      const savedStatus =
+        result.order?.order_status;
+
+      if (!savedStatus) {
+        throw new Error(
+          "Order status update returned an invalid response."
+        );
+      }
+
+      setStatus(savedStatus);
+      setMessage(
+        `Order status updated to ${savedStatus}.`
+      );
+
       router.refresh();
     } catch (error) {
+      setStatus(currentStatus);
+
       setMessage(
         error instanceof Error
           ? error.message
@@ -75,17 +94,20 @@ export default function OrderStatusForm({
         Update status
       </label>
 
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
         <select
           id="order-status"
           value={status}
-          onChange={(event) => setStatus(event.target.value)}
+          onChange={(event) =>
+            setStatus(event.target.value)
+          }
           disabled={loading}
-          className="rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-yellow-400"
+          className="min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 sm:flex-1"
         >
           {statuses.map((item) => (
             <option key={item} value={item}>
-              {item.charAt(0).toUpperCase() + item.slice(1)}
+              {item.charAt(0).toUpperCase() +
+                item.slice(1)}
             </option>
           ))}
         </select>
@@ -93,10 +115,15 @@ export default function OrderStatusForm({
         <button
           type="button"
           onClick={updateStatus}
-          disabled={loading || status === currentStatus}
-          className="rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={
+            loading ||
+            status === currentStatus
+          }
+          className="min-h-12 w-full rounded-xl bg-yellow-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
-          {loading ? "Updating..." : "Update Status"}
+          {loading
+            ? "Updating..."
+            : "Update Status"}
         </button>
       </div>
 

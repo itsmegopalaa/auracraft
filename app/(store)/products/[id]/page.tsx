@@ -1,7 +1,7 @@
 import ProductGallery from "@/app/components/products/ProductGallery";
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import type { Product } from "@/app/lib/products";
+import type { Product } from "@/app/types/products";
 import { getProductRating, getProductRatings } from "@/app/lib/product-rating";
 import Footer from "@/app/components/Footer";
 import AddToCartButton from "./AddToCartButton";
@@ -206,12 +206,12 @@ export default async function ProductPage({
         }}
       />
 
-      <main className="min-h-screen bg-black px-6 py-24 text-white">
-        <section className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
+      <main className="min-h-screen overflow-x-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24">
+        <section className="mx-auto grid max-w-7xl items-start gap-10 md:grid-cols-2 lg:gap-16">
           {/* Gallery */}
-          <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-zinc-950 p-4 shadow-2xl shadow-black/20 sm:p-6 lg:p-8">
             {typedProduct.bestseller && (
-              <span className="absolute left-6 top-6 z-10 rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-black">
+              <span className="absolute left-5 top-5 z-10 rounded-full bg-yellow-400 px-4 min-h-10 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-lg shadow-yellow-400/10 sm:left-6 sm:top-6 sm:px-4 sm:py-2 sm:text-sm">
                 🔥 BEST SELLER
               </span>
             )}
@@ -223,97 +223,171 @@ export default async function ProductPage({
           </div>
 
           {/* Product Details */}
-          <div>
-            <span className="inline-block rounded-full bg-zinc-800 px-5 py-2 text-yellow-400">
-              {typedProduct.category}
-            </span>
+          <div className="flex flex-col">
+            {/* Category */}
+            <div>
+              <span className="inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/[0.07] px-4 min-h-10 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400 sm:px-4 sm:py-2 sm:text-[10px]">
+                {typedProduct.category}
+              </span>
+            </div>
 
-            <h1 className="mt-6 text-5xl font-extrabold md:text-6xl">
+            {/* Title */}
+            <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.045em] text-white sm:mt-6 sm:text-5xl lg:text-6xl">
               {typedProduct.name}
             </h1>
 
-            <div className="mt-5 flex items-center gap-3">
-              <p className="text-2xl text-yellow-400">
-                ⭐ {productRating?.effective_rating?.toFixed(1) ?? typedProduct.rating ?? "—"}
-              </p>
-
-              {productRating && productRating.review_count > 0 && (
-                <span className="text-sm text-gray-400">
-                  ({productRating.review_count}{" "}
-                  {productRating.review_count === 1 ? "review" : "reviews"})
+            {/* Rating + availability */}
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg text-yellow-400">
+                  ★
                 </span>
-              )}
+
+                <span className="font-semibold text-white">
+                  {productRating?.effective_rating?.toFixed(1) ??
+                    typedProduct.rating ??
+                    "—"}
+                </span>
+
+                {productRating && productRating.review_count > 0 && (
+                  <span className="text-sm text-zinc-500">
+                    ({productRating.review_count}{" "}
+                    {productRating.review_count === 1
+                      ? "review"
+                      : "reviews"})
+                  </span>
+                )}
+              </div>
+
+              <span
+                className="hidden h-1 w-1 rounded-full bg-zinc-700 sm:block"
+                aria-hidden="true"
+              />
+
+              <span
+                className={
+                  typedProduct.stock > 0
+                    ? "text-sm font-medium text-emerald-400"
+                    : "text-sm font-medium text-red-400"
+                }
+              >
+                {typedProduct.stock > 0
+                  ? "● In stock"
+                  : "● Currently unavailable"}
+              </span>
             </div>
 
-            <p className="mt-6 text-4xl font-extrabold text-yellow-400">
-              ₹{typedProduct.price}
-            </p>
+            {/* Price */}
+            <div className="mt-6 border-y border-white/[0.07] py-5 sm:mt-7 sm:py-6">
+              <p className="text-3xl font-black tracking-tight text-yellow-400 sm:text-4xl">
+                ₹{typedProduct.price}
+              </p>
 
-            <p className="mt-8 text-lg leading-8 text-gray-400">
+              <p className="mt-2 text-xs uppercase tracking-[0.16em] text-zinc-600">
+                Premium MineNote notebook
+              </p>
+            </div>
+
+            {/* Description */}
+            <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400 sm:mt-7 sm:text-lg sm:leading-8">
               {typedProduct.description}
             </p>
 
             {/* Product Specs */}
-            <div className="mt-8 grid grid-cols-3 gap-4">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 text-center">
-                <div>📄</div>
-                <p className="text-sm text-gray-400">
-                  Pages
-                </p>
-                <b>{typedProduct.pages}</b>
-              </div>
+            <div className="mt-7 sm:mt-8">
+              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">
+                Product details
+              </p>
 
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 text-center">
-                <div>📃</div>
-                <p className="text-sm text-gray-400">
-                  Paper
-                </p>
-                <b>{typedProduct.paper}</b>
-              </div>
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-yellow-400/25 hover:bg-yellow-400/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+                  <div className="text-lg" aria-hidden="true">
+                    📄
+                  </div>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                    Pages
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-white">
+                    {typedProduct.pages}
+                  </p>
+                </div>
 
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 text-center">
-                <div>📐</div>
-                <p className="text-sm text-gray-400">
-                  Size
-                </p>
-                <b>{typedProduct.size}</b>
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-yellow-400/25 hover:bg-yellow-400/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+                  <div className="text-lg" aria-hidden="true">
+                    📃
+                  </div>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                    Paper
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-white">
+                    {typedProduct.paper}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-yellow-400/25 hover:bg-yellow-400/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+                  <div className="text-lg" aria-hidden="true">
+                    📐
+                  </div>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+                    Size
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-white">
+                    {typedProduct.size}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Shopping Actions */}
-            <div className="mt-8 flex flex-col gap-4">
+            <div className="mt-7 sm:mt-8">
               <AddToCartButton
                 product={{
                   id: String(typedProduct.id),
                   name: typedProduct.name,
                   price: typedProduct.price,
-                  image: typedProduct.image ?? "/images/notebooks/placeholder.png",
+                  image:
+                    typedProduct.image ??
+                    "/images/notebooks/placeholder.png",
                 }}
               />
 
-              <WishlistButton
-                product={{
-                  id: String(typedProduct.id),
-                  name: typedProduct.name,
-                  price: typedProduct.price,
-                  image: typedProduct.image ?? "/images/notebooks/placeholder.png",
-                }}
-              />
+              <div className="mt-3">
+                <WishlistButton
+                  product={{
+                    id: String(typedProduct.id),
+                    name: typedProduct.name,
+                    price: typedProduct.price,
+                    image:
+                      typedProduct.image ??
+                      "/images/notebooks/placeholder.png",
+                  }}
+                />
+              </div>
 
               <ShareButton
                 productName={typedProduct.name}
               />
             </div>
+
+            {/* Small reassurance */}
+            <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-[9px] font-bold uppercase tracking-[0.13em] text-zinc-600 sm:mt-6 sm:text-[10px]">
+              <span>Secure checkout</span>
+              <span>•</span>
+              <span>Carefully packed</span>
+              <span>•</span>
+              <span>Made for ideas</span>
+            </div>
           </div>
+
         </section>
 
         {/* Trust */}
-        <section className="mx-auto mt-24 max-w-7xl">
+        <section className="mx-auto mt-16 max-w-7xl sm:mt-20 lg:mt-24">
           <TrustBadges />
         </section>
 
         {/* Reviews */}
-        <section className="mx-auto mt-24 max-w-7xl">
+        <section className="mx-auto mt-16 max-w-7xl sm:mt-20 lg:mt-24">
           <ProductReviews
             productId={typedProduct.id}
             initialReviews={initialReviews}
@@ -321,8 +395,8 @@ export default async function ProductPage({
         </section>
 
         {/* Related Products */}
-        <section className="mx-auto mt-24 max-w-7xl">
-          <h2 className="mb-8 text-4xl font-extrabold">
+        <section className="mx-auto mt-16 max-w-7xl sm:mt-20 lg:mt-24">
+          <h2 className="mb-7 text-3xl font-black tracking-tight sm:mb-8 sm:text-4xl">
             You may also{" "}
             <span className="text-yellow-400">
               like

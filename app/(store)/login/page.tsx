@@ -37,26 +37,26 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black px-6 py-16 text-white">
+    <main className="flex min-h-screen items-center justify-center bg-black px-4 py-10 text-white sm:px-6 sm:py-14 md:py-16">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center sm:mb-8">
           <Link
             href="/"
-            className="text-3xl font-extrabold text-yellow-400"
+            className="text-3xl font-black tracking-tight text-yellow-400"
           >
             MineNote
           </Link>
 
-          <h1 className="mt-8 text-3xl font-bold">
+          <h1 className="mt-6 text-2xl font-black tracking-tight sm:mt-8 sm:text-3xl">
             Welcome Back 👋
           </h1>
 
-          <p className="mt-3 text-zinc-400">
+          <p className="mx-auto mt-2.5 max-w-sm text-sm leading-6 text-zinc-500 sm:mt-3">
             Sign in to manage your MineNote orders.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-7 shadow-2xl md:p-9">
+        <div className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-5 shadow-2xl shadow-black/30 sm:p-7 md:p-9">
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 text-white outline-none focus:border-yellow-400"
+                className="w-full rounded-2xl border border-zinc-700 bg-black px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 placeholder="you@example.com"
               />
             </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 pr-14 text-white outline-none focus:border-yellow-400"
+                  className="w-full rounded-2xl border border-zinc-700 bg-black px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   placeholder="Your password"
                 />
 
@@ -102,7 +102,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-zinc-400 transition hover:text-yellow-400"
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-xl text-zinc-400 transition hover:bg-yellow-400/5 hover:text-yellow-400 sm:right-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   {showPassword ? "🙈" : "👁️"}
                 </button>
@@ -118,13 +118,13 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               {loading ? "Signing In..." : "Sign In →"}
             </button>
           </form>
 
-          <p className="mt-7 text-center text-sm text-zinc-400">
+          <p className="mt-6 text-center text-sm text-zinc-500 sm:mt-7">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"

@@ -129,7 +129,7 @@ export default function CheckoutPage() {
         orderId,
         paymentMethod: "COD",
         paymentStatus: "pending",
-       orderStatus: "placed",
+        orderStatus: "placed",
       });
 
       const order = {
@@ -160,6 +160,7 @@ export default function CheckoutPage() {
       }, 700);
     } catch (error) {
       console.error("COD ORDER ERROR:", error);
+
       toast.error(
         error instanceof Error
           ? error.message
@@ -173,22 +174,25 @@ export default function CheckoutPage() {
   if (cart.length === 0) {
     return (
       <>
+        <main className="flex min-h-screen items-center justify-center bg-black px-4 py-16 text-white sm:px-6 sm:py-24">
+          <div className="w-full max-w-md rounded-[2rem] border border-white/[0.08] bg-zinc-950/90 p-6 text-center shadow-2xl shadow-black/30 sm:p-10">
+            <div className="mb-5 text-5xl sm:mb-6 sm:text-6xl">🛒</div>
 
-        <main className="flex min-h-screen items-center justify-center bg-black px-6 text-white">
-          <div className="max-w-md rounded-3xl border border-zinc-800 bg-zinc-900 p-10 text-center">
-            <div className="mb-6 text-6xl">🛒</div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-400">
+              Checkout
+            </p>
 
-            <h1 className="text-3xl font-bold">
+            <h1 className="mt-3 text-3xl font-black">
               Your cart is empty
             </h1>
 
-            <p className="mt-4 text-gray-400">
-              Add some premium notebooks before proceeding to checkout.
+            <p className="mt-4 leading-7 text-zinc-500">
+              Add a few MineNote notebooks before continuing to checkout.
             </p>
 
             <Link
               href="/products"
-              className="mt-8 inline-block rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105"
+              className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-yellow-400 px-6 py-3.5 font-black text-black transition-all hover:-translate-y-0.5 hover:bg-yellow-300 sm:mt-8 sm:px-8 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               Explore Products →
             </Link>
@@ -202,39 +206,90 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <main className="min-h-screen overflow-x-hidden bg-black px-4 py-14 text-white sm:px-6 sm:py-20 md:py-24">
+        <div className="mx-auto w-full max-w-6xl">
+          {/* Header */}
+          <header className="mb-8 max-w-3xl sm:mb-10">
+            <div className="mb-4 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.18em] text-yellow-400 sm:mb-5 sm:text-xs sm:tracking-[0.2em]">
+              <span className="h-px w-8 bg-yellow-400" />
+              Secure Checkout
+            </div>
 
-      <main className="min-h-screen bg-black px-6 py-24 text-white">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="mb-4 text-5xl font-extrabold md:text-6xl">
-            Complete Your{" "}
-            <span className="text-yellow-400">Order</span>
-          </h1>
+            <h1 className="text-3xl font-black tracking-tight sm:text-5xl md:text-6xl">
+              Complete Your{" "}
+              <span className="text-yellow-400">Order</span>
+            </h1>
 
-          <p className="mb-12 text-lg text-gray-400">
-            Premium notebooks delivered to your doorstep ✨
-          </p>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 sm:mt-4 sm:text-lg sm:leading-7">
+              Enter your delivery details and choose how you&apos;d like to
+              pay. Your MineNote order is just a few steps away. ✨
+            </p>
 
-          <div className="grid gap-10 md:grid-cols-2">
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
-              <h2 className="mb-8 text-3xl font-bold">
-                Delivery Details 📦
-              </h2>
+            {/* Checkout progress */}
+            <div className="mt-7 flex w-full max-w-full items-center justify-between gap-2 overflow-hidden text-[11px] font-semibold text-zinc-600 sm:mt-8 sm:justify-start sm:gap-3 sm:text-sm">
+              <span className="flex items-center gap-2 text-yellow-400">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yellow-400 font-black text-black">
+                  1
+                </span>
+                Details
+              </span>
 
-              <div className="space-y-5">
+              <span className="h-px min-w-5 flex-1 bg-zinc-800 sm:w-14 sm:min-w-0 sm:flex-none" />
+
+              <span className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-700">
+                  2
+                </span>
+                Payment
+              </span>
+
+              <span className="h-px min-w-5 flex-1 bg-zinc-800 sm:w-14 sm:min-w-0 sm:flex-none" />
+
+              <span className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-700">
+                  3
+                </span>
+                Confirmation
+              </span>
+            </div>
+          </header>
+
+          <div className="grid items-start gap-6 sm:gap-8 lg:grid-cols-[1.08fr_0.92fr]">
+            {/* Delivery details */}
+            <section className="rounded-[1.5rem] border border-white/[0.08] bg-zinc-950/80 p-5 shadow-2xl shadow-black/20 sm:rounded-[2rem] sm:p-8">
+              <div className="mb-6 sm:mb-8">
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                  Step 1
+                </p>
+
+                <h2 className="text-xl font-black sm:text-3xl">
+                  Delivery Details 📦
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-zinc-500">
+                  Where should we send your MineNote?
+                </p>
+              </div>
+
+              <div className="space-y-3.5 sm:space-y-4">
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Full Name"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
+                  autoComplete="name"
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <input
-                  type="text"
+                  type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone Number"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  maxLength={10}
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <input
@@ -242,7 +297,8 @@ export default function CheckoutPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email Address"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
+                  autoComplete="email"
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <textarea
@@ -250,208 +306,314 @@ export default function CheckoutPage() {
                   rows={5}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
+                  autoComplete="street-address"
+                  className="min-h-28 w-full resize-none rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="City"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
-                />
+                <div className="grid gap-3.5 sm:gap-4 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="City"
+                    autoComplete="address-level2"
+                    className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  />
 
-                <input
-                  type="text"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="State"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
-                />
+                  <input
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="State"
+                    autoComplete="address-level1"
+                    className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  />
+                </div>
 
                 <input
                   type="text"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   placeholder="PIN Code"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black p-4 outline-none focus:border-yellow-400"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  maxLength={6}
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
-              </div>
-            </div>
 
-            <div className="rounded-3xl border border-yellow-400/30 bg-zinc-900 p-8">
-              <h2 className="mb-8 text-3xl font-bold">
-                Order Summary 🛒
-              </h2>
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg">📦</span>
 
-              <div className="space-y-5">
-                {cart.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between gap-4 text-gray-300"
-                  >
-                    <span>
-                      {item.name} × {item.quantity}
-                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-zinc-200">
+                        Estimated delivery
+                      </p>
 
-                    <span className="font-semibold text-white">
-                      ₹{item.price * item.quantity}
-                    </span>
+                      <p className="mt-1 text-xs leading-5 text-zinc-500">
+                        3–5 working days • Carefully packed by MineNote
+                      </p>
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
+            </section>
 
-              <div className="my-8 border-t border-zinc-700" />
+            {/* Order summary */}
+            <aside className="lg:sticky lg:top-8">
+              <div className="rounded-[1.5rem] border border-yellow-400/20 bg-zinc-950/90 p-5 shadow-2xl shadow-black/20 sm:rounded-[2rem] sm:p-8">
+                <div className="mb-6 sm:mb-8">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                    Your Order
+                  </p>
 
-              <div className="flex justify-between text-3xl font-bold">
-                <span>Total</span>
+                  <h2 className="text-xl font-black sm:text-3xl">
+                    Order Summary 🛒
+                  </h2>
+                </div>
 
-                <span className="text-yellow-400">
-                  ₹{total}
-                </span>
-              </div>
-
-              <div className="mt-8">
-                <h3 className="mb-5 text-2xl font-bold">
-                  Payment Method
-                </h3>
-
-                <div className="space-y-4">
-                  {[
-                    {
-                      id: "COD",
-                      label: "💵 Cash on Delivery",
-                    },
-                    {
-                      id: "ONLINE",
-                      label: "💳 UPI / Credit / Debit Card",
-                    },
-                  ].map((method) => (
-                    <label
-                      key={method.id}
-                      className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-4 transition ${
-                        payment === method.id
-                          ? "border-yellow-400 bg-zinc-900"
-                          : "border-zinc-700 bg-black hover:border-yellow-400"
-                      }`}
+                {/* Items */}
+                <div className="space-y-3.5 sm:space-y-4">
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start justify-between gap-4"
                     >
-                      <input
-                        type="radio"
-                        name="payment"
-                        value={method.id}
-                        checked={payment === method.id}
-                        onChange={() => setPayment(method.id)}
-                      />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-zinc-200">
+                          {item.name}
+                        </p>
 
-                      <span className="font-semibold">
-                        {method.label}
+                        <p className="mt-1 text-sm text-zinc-600">
+                          Quantity × {item.quantity}
+                        </p>
+                      </div>
+
+                      <span className="shrink-0 font-bold text-white">
+                        ₹{item.price * item.quantity}
                       </span>
-                    </label>
+                    </div>
                   ))}
                 </div>
 
-                <div className="mt-6 text-center text-sm text-gray-400">
-                  🔒 Secure checkout • Payment verified by Razorpay
+                <div className="my-6 border-t border-white/[0.08] sm:my-7" />
+
+                {/* Price breakdown */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between text-zinc-500">
+                    <span>Subtotal</span>
+                    <span className="text-zinc-300">₹{total}</span>
+                  </div>
+
+                  <div className="flex justify-between text-zinc-500">
+                    <span>Delivery</span>
+                    <span className="font-semibold text-emerald-400">
+                      FREE
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-zinc-500">
+                    <span>Premium Packaging</span>
+                    <span className="font-semibold text-emerald-400">
+                      FREE
+                    </span>
+                  </div>
                 </div>
 
-                {payment === "COD" ? (
-                  <button
-                    type="button"
-                    onClick={handlePlaceOrder}
-                    disabled={loading}
-                    className="mt-8 w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {loading
-                      ? "Saving Order..."
-                      : "Place Order →"}
-                  </button>
-                ) : (
-                  <div
-                    onClickCapture={(event) => {
-                      if (!validateDetails()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                      }
-                    }}
-                  >
-                    <RazorpayCheckout
-                      amount={total}
-                      name={name}
-                      email={email}
-                      phone={phone}
-                      items={cart}
-                      onSuccess={async (
-                        paymentResponse,
-                        mineNoteOrderId
-                      ) => {
-  try {
-    setLoading(true);
+                <div className="my-6 border-t border-white/[0.08] sm:my-7" />
 
-    const orderId = mineNoteOrderId;
+                {/* Total */}
+                <div className="flex items-end justify-between gap-4">
+                  <span className="text-lg font-bold text-white">
+                    Total
+                  </span>
 
-    const savedOrder = await saveOrderToDatabase({
-      orderId,
-      paymentMethod: "Razorpay",
-      paymentStatus: "paid",
-      orderStatus: "confirmed",
-      razorpayPaymentId:
-        paymentResponse.razorpay_payment_id,
-      razorpaySignature:
-        paymentResponse.razorpay_signature,
-      razorpayOrderId:
-        paymentResponse.razorpay_order_id,
-    });
+                  <span className="text-2xl font-black text-yellow-400 sm:text-3xl">
+                    ₹{total}
+                  </span>
+                </div>
 
-    const order = {
-      orderId,
-      name,
-      phone,
-      email,
-      address,
-      city,
-      state,
-      pin,
-      payment: "Razorpay",
-      items: cart,
-      total,
-      delivery: "3-5 Working Days",
-      databaseOrderId: savedOrder.id,
-      razorpayPaymentId:
-        paymentResponse.razorpay_payment_id,
-      razorpayOrderId:
-        paymentResponse.razorpay_order_id,
-    };
+                {/* Payment */}
+                <div className="mt-8 sm:mt-9">
+                  <div className="mb-5">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                      Step 2
+                    </p>
 
-    localStorage.setItem(
-      "auracraft_last_order",
-      JSON.stringify(order)
-    );
-
-    toast.success(
-      "Payment successful! Order confirmed."
-    );
-
-    router.push("/success");
-  } catch (error) {
-    console.error(
-      "ONLINE ORDER SAVE ERROR:",
-      error
-    );
-
-    toast.error(
-      error instanceof Error
-        ? error.message
-        : "Payment succeeded but order saving failed."
-    );
-  } finally {
-    setLoading(false);
-  }
-}}
-                    />
+                    <h3 className="text-2xl font-black">
+                      Payment Method
+                    </h3>
                   </div>
-                )}
+
+                  <div className="space-y-2.5 sm:space-y-3">
+                    {[
+                      {
+                        id: "COD",
+                        icon: "💵",
+                        label: "Cash on Delivery",
+                        description: "Pay when your order arrives",
+                      },
+                      {
+                        id: "ONLINE",
+                        icon: "💳",
+                        label: "UPI / Card",
+                        description: "Secure payment via Razorpay",
+                      },
+                    ].map((method) => {
+                      const selected = payment === method.id;
+
+                      return (
+                        <label
+                          key={method.id}
+                          className={`flex min-h-[72px] cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-all ${
+                            selected
+                              ? "border-yellow-400/70 bg-yellow-400/[0.06] shadow-lg shadow-yellow-400/[0.04]"
+                              : "border-white/[0.08] bg-black/60 hover:border-yellow-400/40"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="payment"
+                            value={method.id}
+                            checked={selected}
+                            onChange={() => setPayment(method.id)}
+                            className="h-4 w-4 accent-yellow-400"
+                          />
+
+                          <span className="text-xl">
+                            {method.icon}
+                          </span>
+
+                          <span className="min-w-0">
+                            <span className="block font-bold text-zinc-200">
+                              {method.label}
+                            </span>
+
+                            <span className="mt-1 block text-xs text-zinc-600">
+                              {method.description}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {/* Trust */}
+                  <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 sm:mt-5">
+                    <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500">
+                      <span>🔒</span>
+                      <span>Secure checkout</span>
+                      <span className="text-zinc-700">•</span>
+                      <span>Protected payment</span>
+                    </div>
+
+                    <p className="mt-2 text-center text-[11px] leading-5 text-zinc-700">
+                      Online payments are securely processed and verified
+                      through Razorpay.
+                    </p>
+                  </div>
+
+                  {/* Checkout action */}
+                  {payment === "COD" ? (
+                    <button
+                      type="button"
+                      onClick={handlePlaceOrder}
+                      disabled={loading}
+                      className="mt-5 min-h-12 w-full rounded-2xl bg-yellow-400 py-3.5 font-black text-black shadow-xl shadow-yellow-400/10 transition-all hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-yellow-400/20 disabled:cursor-not-allowed disabled:opacity-50 sm:mt-6 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    >
+                      {loading
+                        ? "Saving Order..."
+                        : "Place Order →"}
+                    </button>
+                  ) : (
+                    <div
+                      onClickCapture={(event) => {
+                        if (!validateDetails()) {
+                          event.preventDefault();
+                          event.stopPropagation();
+                        }
+                      }}
+                    >
+                      <RazorpayCheckout
+                        amount={total}
+                        name={name}
+                        email={email}
+                        phone={phone}
+                        items={cart}
+                        onSuccess={async (
+                          paymentResponse,
+                          mineNoteOrderId
+                        ) => {
+                          try {
+                            setLoading(true);
+
+                            const orderId = mineNoteOrderId;
+
+                            const savedOrder =
+                              await saveOrderToDatabase({
+                                orderId,
+                                paymentMethod: "Razorpay",
+                                paymentStatus: "paid",
+                                orderStatus: "confirmed",
+                                razorpayPaymentId:
+                                  paymentResponse.razorpay_payment_id,
+                                razorpaySignature:
+                                  paymentResponse.razorpay_signature,
+                                razorpayOrderId:
+                                  paymentResponse.razorpay_order_id,
+                              });
+
+                            const order = {
+                              orderId,
+                              name,
+                              phone,
+                              email,
+                              address,
+                              city,
+                              state,
+                              pin,
+                              payment: "Razorpay",
+                              items: cart,
+                              total,
+                              delivery: "3-5 Working Days",
+                              databaseOrderId: savedOrder.id,
+                              razorpayPaymentId:
+                                paymentResponse.razorpay_payment_id,
+                              razorpayOrderId:
+                                paymentResponse.razorpay_order_id,
+                            };
+
+                            localStorage.setItem(
+                              "auracraft_last_order",
+                              JSON.stringify(order)
+                            );
+
+                            toast.success(
+                              "Payment successful! Order confirmed."
+                            );
+
+                            router.push("/success");
+                          } catch (error) {
+                            console.error(
+                              "ONLINE ORDER SAVE ERROR:",
+                              error
+                            );
+
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "Payment succeeded but order saving failed."
+                            );
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </aside>
           </div>
         </div>
       </main>

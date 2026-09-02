@@ -5,46 +5,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSignup(event: FormEvent<HTMLFormElement>) {
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
-    setMessage("");
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-        },
-      },
     });
 
     if (error) {
@@ -53,60 +32,32 @@ export default function SignupPage() {
       return;
     }
 
-    if (data.session) {
-      router.replace("/account");
-      router.refresh();
-      return;
-    }
-
-    setMessage(
-      "Account created. Please check your email to confirm your account before signing in."
-    );
-    setLoading(false);
+    router.replace("/account");
+    router.refresh();
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black px-6 py-16 text-white">
+    <main className="flex min-h-screen items-center justify-center bg-black px-4 py-10 text-white sm:px-6 sm:py-14 md:py-16">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center sm:mb-8">
           <Link
             href="/"
-            className="text-3xl font-extrabold text-yellow-400"
+            className="text-3xl font-black tracking-tight text-yellow-400"
           >
             MineNote
           </Link>
 
-          <h1 className="mt-8 text-3xl font-bold">
-            Create Your Account 👤
+          <h1 className="mt-6 text-2xl font-black tracking-tight sm:mt-8 sm:text-3xl">
+            Welcome Back 👋
           </h1>
 
-          <p className="mt-3 text-zinc-400">
-            Create an account to manage your MineNote orders.
+          <p className="mx-auto mt-2.5 max-w-sm text-sm leading-6 text-zinc-500 sm:mt-3">
+            Sign in to manage your MineNote orders.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-7 shadow-2xl md:p-9">
-          <form onSubmit={handleSignup} className="space-y-5">
-            <div>
-              <label
-                htmlFor="fullName"
-                className="mb-2 block text-sm font-semibold text-zinc-300"
-              >
-                Full Name
-              </label>
-
-              <input
-                id="fullName"
-                type="text"
-                required
-                autoComplete="name"
-                value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
-                className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 text-white outline-none focus:border-yellow-400"
-                placeholder="Your full name"
-              />
-            </div>
-
+        <div className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-5 shadow-2xl shadow-black/30 sm:p-7 md:p-9">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label
                 htmlFor="email"
@@ -122,7 +73,7 @@ export default function SignupPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 text-white outline-none focus:border-yellow-400"
+                className="w-full rounded-2xl border border-zinc-700 bg-black px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 placeholder="you@example.com"
               />
             </div>
@@ -140,59 +91,20 @@ export default function SignupPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 pr-14 text-white outline-none focus:border-yellow-400"
-                  placeholder="Minimum 6 characters"
+                  className="w-full rounded-2xl border border-zinc-700 bg-black px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  placeholder="Your password"
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-zinc-400 transition hover:text-yellow-400"
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-xl text-zinc-400 transition hover:bg-yellow-400/5 hover:text-yellow-400 sm:right-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   {showPassword ? "🙈" : "👁️"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="mb-2 block text-sm font-semibold text-zinc-300"
-              >
-                Confirm Password
-              </label>
-
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  required
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(event) =>
-                    setConfirmPassword(event.target.value)
-                  }
-                  className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 pr-14 text-white outline-none focus:border-yellow-400"
-                  placeholder="Enter password again"
-                />
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowConfirmPassword((value) => !value)
-                  }
-                  aria-label={
-                    showConfirmPassword
-                      ? "Hide confirm password"
-                      : "Show confirm password"
-                  }
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-zinc-400 transition hover:text-yellow-400"
-                >
-                  {showConfirmPassword ? "🙈" : "👁️"}
                 </button>
               </div>
             </div>
@@ -203,28 +115,22 @@ export default function SignupPage() {
               </div>
             )}
 
-            {message && (
-              <div className="rounded-2xl border border-yellow-400/30 bg-yellow-950/20 p-4 text-sm text-yellow-200">
-                {message}
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
-              {loading ? "Creating Account..." : "Create Account →"}
+              {loading ? "Signing In..." : "Sign In →"}
             </button>
           </form>
 
-          <p className="mt-7 text-center text-sm text-zinc-400">
-            Already have an account?{" "}
+          <p className="mt-6 text-center text-sm text-zinc-500 sm:mt-7">
+            Don&apos;t have an account?{" "}
             <Link
-              href="/login"
+              href="/signup"
               className="font-semibold text-yellow-400 hover:underline"
             >
-              Sign in
+              Create one
             </Link>
           </p>
         </div>

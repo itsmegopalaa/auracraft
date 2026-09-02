@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import ProductCard from "@/app/components/ProductCard";
-import type { Product } from "@/app/lib/products";
+import type { Product } from "@/app/types/products";
 
 type Props = {
   products: Product[];
@@ -29,13 +29,12 @@ export default function ProductsClient({ products }: Props) {
 
   const filteredProducts = useMemo(() => {
     const filtered = products.filter((product) => {
-      const searchText = search.toLowerCase();
+      const searchText = search.toLowerCase().trim();
 
       const matchesSearch =
+        searchText === "" ||
         product.name.toLowerCase().includes(searchText) ||
-        product.description
-          ?.toLowerCase()
-          .includes(searchText);
+        product.description?.toLowerCase().includes(searchText);
 
       const matchesCategory =
         category === "All" ||
@@ -59,7 +58,7 @@ export default function ProductsClient({ products }: Props) {
           (product.rating ?? 0) >= 3);
 
       return (
-        Boolean(matchesSearch) &&
+        matchesSearch &&
         matchesCategory &&
         matchesPrice &&
         matchesRating
@@ -76,16 +75,10 @@ export default function ProductsClient({ products }: Props) {
       }
 
       if (sort === "Rating") {
-        return (
-          (b.rating ?? 0) -
-          (a.rating ?? 0)
-        );
+        return (b.rating ?? 0) - (a.rating ?? 0);
       }
 
-      return (
-        Number(b.featured) -
-        Number(a.featured)
-      );
+      return Number(b.featured) - Number(a.featured);
     });
   }, [
     products,
@@ -105,7 +98,7 @@ export default function ProductsClient({ products }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7 sm:space-y-8">
       <input
         type="text"
         placeholder="🔍 Search notebooks..."
@@ -113,7 +106,7 @@ export default function ProductsClient({ products }: Props) {
         onChange={(e) =>
           setSearch(e.target.value)
         }
-        className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-3.5 text-white outline-none transition focus:border-yellow-400 md:px-5 md:py-4"
+        className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-4 text-sm text-white shadow-lg shadow-black/10 outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-yellow-400/60 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
       />
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide md:flex-wrap md:overflow-visible">
@@ -123,10 +116,10 @@ export default function ProductsClient({ products }: Props) {
             onClick={() =>
               setCategory(item)
             }
-            className={`whitespace-nowrap rounded-full px-5 py-2 font-medium transition ${
+            className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-sm font-bold transition-all duration-200 active:scale-[0.98] ${
               category === item
-                ? "bg-yellow-400 text-black"
-                : "border border-zinc-700 text-gray-300 hover:border-yellow-400"
+                ? "border-yellow-400 bg-yellow-400 text-black shadow-lg shadow-yellow-400/10"
+                : "border-white/[0.08] bg-zinc-950 text-zinc-400 hover:border-yellow-400/40 hover:text-white"
             }`}
           >
             {item}
@@ -140,7 +133,7 @@ export default function ProductsClient({ products }: Props) {
           onChange={(e) =>
             setSort(e.target.value)
           }
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-yellow-400"
+          className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all duration-200 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           <option>Featured</option>
           <option>Price: Low → High</option>
@@ -153,7 +146,7 @@ export default function ProductsClient({ products }: Props) {
           onChange={(e) =>
             setPriceFilter(e.target.value)
           }
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-yellow-400"
+          className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all duration-200 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           <option>All</option>
           <option>Under ₹500</option>
@@ -166,7 +159,7 @@ export default function ProductsClient({ products }: Props) {
           onChange={(e) =>
             setRatingFilter(e.target.value)
           }
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-yellow-400"
+          className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all duration-200 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           <option>All</option>
           <option>4★+</option>
@@ -175,7 +168,7 @@ export default function ProductsClient({ products }: Props) {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="w-fit rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm text-gray-400">
+        <p className="w-fit rounded-full border border-white/[0.07] bg-zinc-950 px-4 py-2 text-xs font-semibold text-zinc-500 sm:text-sm">
           Showing{" "}
           <span className="text-yellow-400">
             {filteredProducts.length}
@@ -190,7 +183,7 @@ export default function ProductsClient({ products }: Props) {
           ratingFilter !== "All") && (
           <button
             onClick={clearFilters}
-            className="w-fit text-sm font-medium text-yellow-400 transition hover:text-yellow-300"
+            className="w-fit rounded-full px-4 min-h-10 py-2 text-sm font-bold text-yellow-400 transition-all hover:bg-yellow-400/10 hover:text-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             Clear filters ✕
           </button>
@@ -198,7 +191,7 @@ export default function ProductsClient({ products }: Props) {
       </div>
 
       {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -208,12 +201,13 @@ export default function ProductsClient({ products }: Props) {
               price={product.price}
               category={product.category ?? undefined}
               rating={product.rating ?? undefined}
+              reviewCount={product.review_count ?? 0}
               bestseller={product.bestseller}
             />
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-16 text-center">
+        <div className="rounded-[2rem] border border-white/[0.08] bg-zinc-950 px-6 py-16 text-center shadow-2xl shadow-black/10 sm:px-10">
           <div className="text-4xl">🔍</div>
 
           <h3 className="mt-4 text-xl font-semibold text-white">
@@ -226,7 +220,7 @@ export default function ProductsClient({ products }: Props) {
 
           <button
             onClick={clearFilters}
-            className="mt-5 rounded-full bg-yellow-400 px-5 py-2.5 font-semibold text-black transition hover:bg-yellow-300"
+            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-yellow-400 px-6 py-3 font-black text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             Clear filters
           </button>

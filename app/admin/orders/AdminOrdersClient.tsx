@@ -82,8 +82,8 @@ export default function AdminOrdersClient({ orders }: Props) {
 
   return (
     <>
-      <section className="mb-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <section className="mb-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mb-6 sm:p-5">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <label
               htmlFor="order-search"
@@ -98,7 +98,7 @@ export default function AdminOrdersClient({ orders }: Props) {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Order ID, name, email or phone..."
-              className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
+              className="min-h-12 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 dark:border-zinc-700 dark:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             />
           </div>
 
@@ -168,7 +168,7 @@ export default function AdminOrdersClient({ orders }: Props) {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex flex-col gap-3 border-t border-zinc-100 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Showing{" "}
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -185,7 +185,7 @@ export default function AdminOrdersClient({ orders }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="w-fit rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:bg-zinc-800"
+              className="min-h-11 w-full rounded-xl border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 sm:w-fit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               Clear filters
             </button>
@@ -194,8 +194,8 @@ export default function AdminOrdersClient({ orders }: Props) {
       </section>
 
       {filteredOrders.length > 0 ? (
-        <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-          <table className="w-full min-w-[1000px] text-left">
+        <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <table className="w-full min-w-[900px] text-left">
             <thead className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
               <tr>
                 <th className="px-5 py-4 text-sm font-semibold">
@@ -272,7 +272,7 @@ export default function AdminOrdersClient({ orders }: Props) {
                   </td>
 
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium capitalize text-zinc-700 dark:text-zinc-300">
+                    <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-4 min-h-10 py-1 text-xs font-medium capitalize text-zinc-700 dark:text-zinc-300">
                       {order.order_status}
                     </span>
                   </td>
@@ -286,7 +286,7 @@ export default function AdminOrdersClient({ orders }: Props) {
           </table>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center dark:border-zinc-700 dark:bg-zinc-900 sm:p-12">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {hasFilters ? "No matching orders" : "No orders yet"}
           </h2>

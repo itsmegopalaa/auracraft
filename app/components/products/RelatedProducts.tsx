@@ -1,7 +1,7 @@
 "use client";
 
 import ProductCard from "../ProductCard";
-import type { Product } from "../../lib/products";
+import type { Product } from "@/app/types/products";
 
 type Props = {
   currentId: string;
@@ -22,7 +22,7 @@ export default function RelatedProducts({
 
   return (
     <section>
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
         {related.map((product) => (
           <ProductCard
             key={product.id}

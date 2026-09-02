@@ -37,13 +37,13 @@ export default async function AdminOrderDetailPage({
     });
 
     return (
-      <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 md:p-8">
+      <main className="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 sm:py-8 md:px-8">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-2xl">
             MineNote Admin
           </h1>
 
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6">
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 sm:p-6">
             <h2 className="font-semibold text-red-800">
               Unable to load order
             </h2>
@@ -71,9 +71,9 @@ export default async function AdminOrderDetailPage({
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 md:p-8">
+    <main className="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 sm:py-8 md:px-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link
             href="/admin/orders"
             className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:text-zinc-100"
@@ -83,7 +83,7 @@ export default async function AdminOrderDetailPage({
 
           <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+              <h1 className="text-xl font-bold sm:text-2xl text-zinc-900 dark:text-zinc-100 sm:text-3xl">
                 {order.order_id}
               </h1>
 
@@ -98,8 +98,8 @@ export default async function AdminOrderDetailPage({
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Customer
             </h2>
@@ -122,7 +122,7 @@ export default async function AdminOrderDetailPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Shipping Address
             </h2>
@@ -141,7 +141,7 @@ export default async function AdminOrderDetailPage({
             </p>
           </section>
 
-          <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Payment
             </h2>
@@ -191,12 +191,12 @@ export default async function AdminOrderDetailPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Order Status
             </h2>
 
-            <p className="mt-5 text-2xl font-bold capitalize text-zinc-900 dark:text-zinc-100">
+            <p className="mt-5 text-xl font-bold capitalize text-zinc-900 dark:text-zinc-100 sm:text-2xl">
               {order.order_status}
             </p>
 
@@ -209,7 +209,7 @@ export default async function AdminOrderDetailPage({
           </section>
         </div>
 
-        <section className="mt-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+        <section className="mt-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mt-6 sm:p-6">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Fulfillment
@@ -232,7 +232,7 @@ export default async function AdminOrderDetailPage({
           </div>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+        <section className="mt-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mt-6 sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Ordered Items
@@ -258,9 +258,9 @@ export default async function AdminOrderDetailPage({
                 return (
                   <div
                     key={item.id}
-                    className="flex gap-4 py-5 first:pt-0 last:pb-0"
+                    className="flex gap-3 py-4 first:pt-0 last:pb-0 sm:gap-4 sm:py-5"
                   >
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 sm:h-20 sm:w-20">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -296,12 +296,12 @@ export default async function AdminOrderDetailPage({
             )}
           </div>
 
-          <div className="mt-6 flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 pt-5">
+          <div className="mt-5 flex items-center justify-between gap-4 border-t border-zinc-200 pt-4 dark:border-zinc-800 sm:mt-6 sm:pt-5">
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
               Order Total
             </span>
 
-            <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-2xl">
               ₹{Number(order.total).toLocaleString("en-IN")}
             </span>
           </div>

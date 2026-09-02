@@ -49,7 +49,7 @@ export default function Home() {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-24 sm:px-6 sm:py-28 md:grid-cols-[1.05fr_0.95fr] md:gap-16 lg:py-32">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 py-20 sm:px-6 sm:py-24 md:grid-cols-[1.05fr_0.95fr] md:gap-12 lg:gap-16 lg:py-28 xl:py-32">
 
           {/* Copy */}
           <div className="max-w-2xl">
@@ -57,19 +57,19 @@ export default function Home() {
               More than a notebook
             </p>
 
-            <h2 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+            <h2 className="text-3xl font-extrabold leading-[1.05] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
               Your Notebook.
               <br />
               <span className="text-yellow-400">Your Identity.</span>
             </h2>
 
-            <p className="mt-7 max-w-xl text-base leading-8 text-zinc-400 sm:text-lg">
+            <p className="mt-5 max-w-xl text-sm leading-7 text-zinc-400 sm:mt-7 sm:text-lg sm:leading-8">
               AuraNotes turns an everyday notebook into something that feels
               personal. Choose a design that reflects your personality,
               creativity, and the ideas you want to bring to life.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 sm:mt-8 sm:gap-x-6 sm:text-[11px] sm:tracking-[0.18em]">
               <span>Personal</span>
               <span className="text-yellow-400/60">•</span>
               <span>Premium</span>
@@ -79,7 +79,7 @@ export default function Home() {
 
             <Link
               href="/products"
-              className="mt-10 inline-flex min-h-12 items-center justify-center rounded-full bg-yellow-400 px-7 py-3.5 text-sm font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-[0_14px_36px_rgba(250,204,21,0.2)] active:scale-[0.98]"
+              className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-yellow-400 px-7 py-3.5 text-sm font-bold sm:mt-10 text-black shadow-[0_10px_30px_rgba(250,204,21,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-[0_14px_36px_rgba(250,204,21,0.2)] active:scale-[0.98]"
             >
               Explore Collection
               <span className="ml-2" aria-hidden="true">→</span>
@@ -87,14 +87,14 @@ export default function Home() {
           </div>
 
           {/* Product showcase */}
-          <div className="relative flex min-h-[420px] items-center justify-center sm:min-h-[500px]">
+          <div className="relative flex min-h-[340px] items-center justify-center sm:min-h-[450px] md:min-h-[500px]">
 
             <div
               className="absolute h-72 w-72 rounded-full bg-yellow-400/[0.06] blur-3xl sm:h-96 sm:w-96"
               aria-hidden="true"
             />
 
-            <div className="relative rounded-[2rem] border border-white/[0.08] bg-white/[0.025] p-5 shadow-[0_25px_70px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:p-7">
+            <div className="relative max-w-[88%] rounded-[1.75rem] border border-white/[0.08] bg-white/[0.025] p-4 shadow-[0_25px_70px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:max-w-none sm:rounded-[2rem] sm:p-7">
               <div className="absolute inset-3 rounded-[1.5rem] border border-yellow-400/[0.08]" aria-hidden="true" />
 
               <Image
@@ -102,11 +102,11 @@ export default function Home() {
                 alt="AuraNotes Premium Notebook"
                 width={450}
                 height={600}
-                className="relative z-10 h-auto max-h-[500px] w-auto max-w-full object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)] transition-transform duration-500 hover:scale-[1.025]"
+                className="relative z-10 h-auto max-h-[380px] w-auto max-w-full object-contain sm:max-h-[500px] drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)] transition-transform duration-500 hover:scale-[1.025]"
               />
             </div>
 
-            <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/[0.10] bg-black/70 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.22em] text-zinc-300 shadow-xl backdrop-blur-md sm:bottom-7">
+            <div className="absolute bottom-2 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/[0.10] bg-black/70 px-3.5 py-2 text-[9px] font-bold uppercase tracking-[0.18em] sm:px-4 sm:tracking-[0.22em] text-zinc-300 shadow-xl backdrop-blur-md sm:bottom-7">
               Crafted for your journey
             </div>
           </div>

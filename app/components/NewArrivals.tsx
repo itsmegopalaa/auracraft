@@ -32,33 +32,33 @@ export default async function NewArrivals() {
   return (
     <section className="relative overflow-hidden border-y border-white/[0.06]">
       <div
-        className="pointer-events-none absolute right-[-10rem] top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-yellow-400/[0.025] blur-3xl"
+        className="pointer-events-none absolute right-[-10rem] top-1/2 h-80 w-80 -translate-y-1/2 rounded-full bg-yellow-400/[0.025] blur-3xl sm:h-96 sm:w-96"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-7xl px-5 py-24 sm:px-6 sm:py-28">
-        <div className="mb-12 flex flex-col gap-5 sm:mb-14 md:flex-row md:items-end md:justify-between">
+      <div className="relative mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24 lg:py-28">
+        <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-yellow-400/80">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-400/80 sm:mb-4 sm:tracking-[0.3em]">
               Just dropped
             </p>
 
-            <h2 className="text-4xl font-extrabold tracking-[-0.035em] text-white sm:text-5xl lg:text-6xl">
+            <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-white sm:text-5xl lg:text-6xl">
               New <span className="text-yellow-400">Arrivals</span>
             </h2>
 
-            <p className="mt-5 max-w-xl text-sm leading-7 text-zinc-400 sm:text-base sm:leading-8">
+            <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400 sm:mt-5 sm:text-base sm:leading-8">
               Fresh AuraNotes designs, recently added for your ideas,
               creativity, and everyday moments.
             </p>
           </div>
 
-          <span className="w-fit rounded-full border border-white/[0.09] bg-white/[0.025] px-4 py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+          <span className="w-fit rounded-full border border-white/[0.09] bg-white/[0.025] px-3.5 py-2 text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500 sm:px-4 sm:tracking-[0.2em]">
             New designs • Limited rotation
           </span>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-7">
           {products?.map((product) => (
             <ProductCard
               key={product.id}
@@ -72,9 +72,7 @@ export default async function NewArrivals() {
                 product.rating ??
                 undefined
               }
-              reviewCount={
-                ratings[product.id]?.review_count ?? 0
-              }
+              reviewCount={ratings[product.id]?.review_count ?? 0}
               bestseller={product.bestseller}
             />
           ))}

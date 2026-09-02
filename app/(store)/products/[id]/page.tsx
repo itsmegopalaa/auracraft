@@ -211,7 +211,7 @@ export default async function ProductPage({
           {/* Gallery */}
           <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-zinc-950 p-4 shadow-2xl shadow-black/20 sm:p-6 lg:p-8">
             {typedProduct.bestseller && (
-              <span className="absolute left-5 top-5 z-10 rounded-full bg-yellow-400 px-4 min-h-10 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-lg shadow-yellow-400/10 sm:left-6 sm:top-6 sm:px-4 sm:py-2 sm:text-sm">
+              <span className="pointer-events-none absolute left-4 top-4 z-30 inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-yellow-200/70 bg-yellow-400 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-xl shadow-yellow-400/20 sm:left-6 sm:top-6 sm:px-5 sm:py-2.5 sm:text-sm">
                 🔥 BEST SELLER
               </span>
             )}

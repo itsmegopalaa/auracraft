@@ -226,7 +226,7 @@ export default function CheckoutPage() {
             </p>
 
             {/* Checkout progress */}
-            <div className="mt-7 flex w-full max-w-full items-center justify-between gap-2 overflow-hidden text-[11px] font-semibold text-zinc-600 sm:mt-8 sm:justify-start sm:gap-3 sm:text-sm">
+            <div className="mt-7 flex w-full max-w-full items-center justify-between gap-2 overflow-hidden text-[11px] font-semibold text-zinc-400 sm:mt-8 sm:justify-start sm:gap-3 sm:text-sm">
               <span className="flex items-center gap-2 text-yellow-400">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yellow-400 font-black text-black">
                   1
@@ -234,19 +234,19 @@ export default function CheckoutPage() {
                 Details
               </span>
 
-              <span className="h-px min-w-5 flex-1 bg-zinc-800 sm:w-14 sm:min-w-0 sm:flex-none" />
+              <span className="h-px min-w-5 flex-1 bg-zinc-600 sm:w-14 sm:min-w-0 sm:flex-none" />
 
               <span className="flex items-center gap-2">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-700">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-500">
                   2
                 </span>
                 Payment
               </span>
 
-              <span className="h-px min-w-5 flex-1 bg-zinc-800 sm:w-14 sm:min-w-0 sm:flex-none" />
+              <span className="h-px min-w-5 flex-1 bg-zinc-600 sm:w-14 sm:min-w-0 sm:flex-none" />
 
               <span className="flex items-center gap-2">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-700">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-500">
                   3
                 </span>
                 Confirmation
@@ -256,9 +256,9 @@ export default function CheckoutPage() {
 
           <div className="grid items-start gap-6 sm:gap-8 lg:grid-cols-[1.08fr_0.92fr]">
             {/* Delivery details */}
-            <section className="rounded-[1.5rem] border border-white/[0.08] bg-zinc-950/80 p-5 shadow-2xl shadow-black/20 sm:rounded-[2rem] sm:p-8">
+            <section className="rounded-[1.5rem] border border-white/[0.14] bg-zinc-900/80 p-5 shadow-2xl shadow-black/40 ring-1 ring-white/[0.03] sm:rounded-[2rem] sm:p-8">
               <div className="mb-6 sm:mb-8">
-                <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
                   Step 1
                 </p>
 
@@ -266,7 +266,7 @@ export default function CheckoutPage() {
                   Delivery Details 📦
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-zinc-500">
+                <p className="mt-2 text-sm leading-6 text-zinc-300">
                   Where should we send your MineNote?
                 </p>
               </div>
@@ -278,7 +278,7 @@ export default function CheckoutPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Full Name"
                   autoComplete="name"
-                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <input
@@ -289,7 +289,7 @@ export default function CheckoutPage() {
                   inputMode="numeric"
                   autoComplete="tel"
                   maxLength={10}
-                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <input
@@ -298,7 +298,7 @@ export default function CheckoutPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email Address"
                   autoComplete="email"
-                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <textarea
@@ -307,7 +307,7 @@ export default function CheckoutPage() {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   autoComplete="street-address"
-                  className="min-h-28 w-full resize-none rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="min-h-28 w-full resize-none rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
                 <div className="grid gap-3.5 sm:gap-4 sm:grid-cols-2">
@@ -317,7 +317,7 @@ export default function CheckoutPage() {
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="City"
                     autoComplete="address-level2"
-                    className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    className="w-full min-h-12 rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   />
 
                   <input
@@ -326,7 +326,7 @@ export default function CheckoutPage() {
                     onChange={(e) => setState(e.target.value)}
                     placeholder="State"
                     autoComplete="address-level1"
-                    className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    className="w-full min-h-12 rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   />
                 </div>
 
@@ -338,10 +338,10 @@ export default function CheckoutPage() {
                   inputMode="numeric"
                   autoComplete="postal-code"
                   maxLength={6}
-                  className="w-full min-h-12 rounded-2xl border border-white/[0.08] bg-black/70 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="w-full min-h-12 rounded-2xl border border-white/[0.16] bg-zinc-950 px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-400 focus:border-yellow-400/80 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/20 sm:px-5 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 />
 
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 sm:p-5">
+                <div className="rounded-2xl border border-white/[0.12] bg-zinc-950 p-4 shadow-inner shadow-white/[0.02] sm:p-5">
                   <div className="flex items-start gap-3">
                     <span className="text-lg">📦</span>
 
@@ -350,7 +350,7 @@ export default function CheckoutPage() {
                         Estimated delivery
                       </p>
 
-                      <p className="mt-1 text-xs leading-5 text-zinc-500">
+                      <p className="mt-1 text-xs leading-5 text-zinc-300">
                         3–5 working days • Carefully packed by MineNote
                       </p>
                     </div>
@@ -361,9 +361,9 @@ export default function CheckoutPage() {
 
             {/* Order summary */}
             <aside className="lg:sticky lg:top-8">
-              <div className="rounded-[1.5rem] border border-yellow-400/20 bg-zinc-950/90 p-5 shadow-2xl shadow-black/20 sm:rounded-[2rem] sm:p-8">
+              <div className="rounded-[1.5rem] border border-yellow-400/30 bg-zinc-900 p-5 shadow-2xl shadow-black/50 ring-1 ring-white/[0.04] sm:rounded-[2rem] sm:p-8">
                 <div className="mb-6 sm:mb-8">
-                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
                     Your Order
                   </p>
 
@@ -384,7 +384,7 @@ export default function CheckoutPage() {
                           {item.name}
                         </p>
 
-                        <p className="mt-1 text-sm text-zinc-600">
+                        <p className="mt-1 text-sm text-zinc-400">
                           Quantity × {item.quantity}
                         </p>
                       </div>
@@ -396,23 +396,23 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                <div className="my-6 border-t border-white/[0.08] sm:my-7" />
+                <div className="my-6 border-t border-white/[0.14] sm:my-7" />
 
                 {/* Price breakdown */}
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between text-zinc-500">
+                  <div className="flex justify-between text-zinc-300">
                     <span>Subtotal</span>
-                    <span className="text-zinc-300">₹{total}</span>
+                    <span className="font-semibold text-zinc-100">₹{total}</span>
                   </div>
 
-                  <div className="flex justify-between text-zinc-500">
+                  <div className="flex justify-between text-zinc-300">
                     <span>Delivery</span>
                     <span className="font-semibold text-emerald-400">
                       FREE
                     </span>
                   </div>
 
-                  <div className="flex justify-between text-zinc-500">
+                  <div className="flex justify-between text-zinc-300">
                     <span>Premium Packaging</span>
                     <span className="font-semibold text-emerald-400">
                       FREE
@@ -420,7 +420,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="my-6 border-t border-white/[0.08] sm:my-7" />
+                <div className="my-6 border-t border-white/[0.14] sm:my-7" />
 
                 {/* Total */}
                 <div className="flex items-end justify-between gap-4">
@@ -436,7 +436,7 @@ export default function CheckoutPage() {
                 {/* Payment */}
                 <div className="mt-8 sm:mt-9">
                   <div className="mb-5">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
                       Step 2
                     </p>
 
@@ -468,7 +468,7 @@ export default function CheckoutPage() {
                           className={`flex min-h-[72px] cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-all ${
                             selected
                               ? "border-yellow-400/70 bg-yellow-400/[0.06] shadow-lg shadow-yellow-400/[0.04]"
-                              : "border-white/[0.08] bg-black/60 hover:border-yellow-400/40"
+                              : "border-white/[0.14] bg-zinc-950 hover:border-yellow-400/60 hover:bg-zinc-800"
                           }`}
                         >
                           <input
@@ -489,7 +489,7 @@ export default function CheckoutPage() {
                               {method.label}
                             </span>
 
-                            <span className="mt-1 block text-xs text-zinc-600">
+                            <span className="mt-1 block text-xs text-zinc-400">
                               {method.description}
                             </span>
                           </span>
@@ -499,15 +499,15 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Trust */}
-                  <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 sm:mt-5">
-                    <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500">
+                  <div className="mt-4 rounded-2xl border border-white/[0.12] bg-zinc-950 p-4 sm:mt-5">
+                    <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-200">
                       <span>🔒</span>
                       <span>Secure checkout</span>
                       <span className="text-zinc-700">•</span>
                       <span>Protected payment</span>
                     </div>
 
-                    <p className="mt-2 text-center text-[11px] leading-5 text-zinc-700">
+                    <p className="mt-2 text-center text-[11px] leading-5 text-zinc-400">
                       Online payments are securely processed and verified
                       through Razorpay.
                     </p>

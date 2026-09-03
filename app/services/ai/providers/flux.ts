@@ -1,25 +1,18 @@
-import type {
-  AiCoverGenerationRequest,
-  AiCoverGenerationResult,
-  AiProvider,
-} from "../types";
+import { createHttpAiProvider } from "./http";
 
-export const fluxProvider: AiProvider = {
+const endpoint =
+  process.env.FLUX_API_ENDPOINT?.trim() ?? "";
+
+const apiKey =
+  process.env.FLUX_API_KEY?.trim() || undefined;
+
+const model =
+  process.env.FLUX_MODEL?.trim() || "FLUX.1-schnell";
+
+export const fluxProvider = createHttpAiProvider({
   id: "flux",
   name: "FLUX",
-
-  capabilities: {
-    supportsFrontBack: true,
-    supportsNegativePrompt: true,
-    supportsImageToImage: true,
-    supportsReferenceImages: true,
-  },
-
-  async generateCover(
-    _request: AiCoverGenerationRequest
-  ): Promise<AiCoverGenerationResult> {
-    throw new Error(
-      "FLUX provider is not configured yet."
-    );
-  },
-};
+  endpoint,
+  apiKey,
+  model,
+});

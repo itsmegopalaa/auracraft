@@ -1,25 +1,18 @@
-import type {
-  AiCoverGenerationRequest,
-  AiCoverGenerationResult,
-  AiProvider,
-} from "../types";
+import { createHttpAiProvider } from "./http";
 
-export const openAiProvider: AiProvider = {
+const endpoint =
+  process.env.OPENAI_IMAGE_ENDPOINT?.trim() ?? "";
+
+const apiKey =
+  process.env.OPENAI_API_KEY?.trim() || undefined;
+
+const model =
+  process.env.OPENAI_IMAGE_MODEL?.trim() || "image-generation";
+
+export const openAiProvider = createHttpAiProvider({
   id: "openai",
   name: "OpenAI",
-
-  capabilities: {
-    supportsFrontBack: true,
-    supportsNegativePrompt: false,
-    supportsImageToImage: true,
-    supportsReferenceImages: true,
-  },
-
-  async generateCover(
-    _request: AiCoverGenerationRequest
-  ): Promise<AiCoverGenerationResult> {
-    throw new Error(
-      "OpenAI image provider is not configured."
-    );
-  },
-};
+  endpoint,
+  apiKey,
+  model,
+});

@@ -1,25 +1,18 @@
-import type {
-  AiCoverGenerationRequest,
-  AiCoverGenerationResult,
-  AiProvider,
-} from "../types";
+import { createHttpAiProvider } from "./http";
 
-export const customAiProvider: AiProvider = {
+const endpoint =
+  process.env.CUSTOM_AI_API_ENDPOINT?.trim() ?? "";
+
+const apiKey =
+  process.env.CUSTOM_AI_API_KEY?.trim() || undefined;
+
+const model =
+  process.env.CUSTOM_AI_MODEL?.trim() || "custom";
+
+export const customAiProvider = createHttpAiProvider({
   id: "custom",
   name: "Custom / Self-hosted",
-
-  capabilities: {
-    supportsFrontBack: true,
-    supportsNegativePrompt: true,
-    supportsImageToImage: true,
-    supportsReferenceImages: true,
-  },
-
-  async generateCover(
-    _request: AiCoverGenerationRequest
-  ): Promise<AiCoverGenerationResult> {
-    throw new Error(
-      "Custom AI provider is not configured."
-    );
-  },
-};
+  endpoint,
+  apiKey,
+  model,
+});

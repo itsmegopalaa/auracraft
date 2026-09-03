@@ -1,25 +1,18 @@
-import type {
-  AiCoverGenerationRequest,
-  AiCoverGenerationResult,
-  AiProvider,
-} from "../types";
+import { createHttpAiProvider } from "./http";
 
-export const replicateProvider: AiProvider = {
+const endpoint =
+  process.env.REPLICATE_API_ENDPOINT?.trim() ?? "";
+
+const apiKey =
+  process.env.REPLICATE_API_TOKEN?.trim() || undefined;
+
+const model =
+  process.env.REPLICATE_MODEL?.trim() || "flux";
+
+export const replicateProvider = createHttpAiProvider({
   id: "replicate",
   name: "Replicate",
-
-  capabilities: {
-    supportsFrontBack: true,
-    supportsNegativePrompt: true,
-    supportsImageToImage: true,
-    supportsReferenceImages: true,
-  },
-
-  async generateCover(
-    _request: AiCoverGenerationRequest
-  ): Promise<AiCoverGenerationResult> {
-    throw new Error(
-      "Replicate provider is not configured."
-    );
-  },
-};
+  endpoint,
+  apiKey,
+  model,
+});

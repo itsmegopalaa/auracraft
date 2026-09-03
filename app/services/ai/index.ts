@@ -102,3 +102,6 @@ export async function generateCustomCover(
 export * from "./types";
 export * from "./provider";
 export * from "./registry";
+export * from "./generation-service";
+export * from "./generation-limits";
+export * from "./errors";

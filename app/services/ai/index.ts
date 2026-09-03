@@ -105,3 +105,4 @@ export * from "./registry";
 export * from "./generation-service";
 export * from "./generation-limits";
 export * from "./errors";
+export * from "./persistence";

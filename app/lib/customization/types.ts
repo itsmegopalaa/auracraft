@@ -101,7 +101,7 @@ export type CustomCoverGeneration = {
 export type CustomCoverCustomization = {
   id?: string;
   customerId?: string;
-  productId: number;
+  productId: string;
   templateId?: string;
   creationMethod: CustomCoverCreationMethod;
   status: CustomCoverStatus;

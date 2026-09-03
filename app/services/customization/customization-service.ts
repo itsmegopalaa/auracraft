@@ -11,7 +11,7 @@ import type {
 } from "@/app/lib/customization";
 
 export type CreateCustomizationInput = {
-  productId: number;
+  productId: string;
   creationMethod: CustomCoverCreationMethod;
   customerId?: string;
   templateId?: string;

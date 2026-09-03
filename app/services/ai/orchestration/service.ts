@@ -21,28 +21,15 @@ function getErrorMessage(error: unknown): string {
   return "AI generation failed.";
 }
 
-function getAssetId(
-  result: AiCoverGenerationResult,
-  side: "front" | "back"
-): string | null {
-  const asset = result.assets.find(
-    (item) => item.side === side
-  );
-
-  /*
-   * Asset IDs are intentionally null at this stage.
-   * Provider assets currently expose URLs, while the
-   * persistent custom_cover_assets records are created
-   * by the asset-ingestion/storage layer in the next step.
-   */
-  return asset ? null : null;
-}
-
 export async function orchestrateAiGeneration(
   dependencies: AiGenerationOrchestrationDependencies,
   request: AiCoverGenerationRequest
 ) {
-  const { supabase, generate } = dependencies;
+  const {
+    supabase,
+    generate,
+    ingestAssets,
+  } = dependencies;
 
   const generationId = crypto.randomUUID();
 
@@ -109,15 +96,21 @@ export async function orchestrateAiGeneration(
       };
     }
 
-    const frontAssetId = getAssetId(
-      result,
-      "front"
+    const ingested = await ingestAssets(
+      supabase,
+      {
+        customerId: request.customerId,
+        customizationId: request.customizationId,
+        generationId,
+        assets: result.assets,
+      }
     );
 
-    const backAssetId = getAssetId(
-      result,
-      "back"
-    );
+    const frontAssetId =
+      ingested.frontAssetId;
+
+    const backAssetId =
+      ingested.backAssetId;
 
     await completeAiGenerationRecord(
       supabase,

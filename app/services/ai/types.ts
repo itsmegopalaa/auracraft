@@ -12,6 +12,7 @@ export type AiGenerationStatus =
   | "failed";
 
 export type AiCoverGenerationRequest = {
+  customerId: string;
   customizationId: string;
   prompt: string;
   negativePrompt?: string;

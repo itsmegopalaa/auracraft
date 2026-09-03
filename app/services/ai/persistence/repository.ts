@@ -113,7 +113,7 @@ export async function createCustomCoverAssetRecord(
       storage_path: input.storagePath,
       width: input.width ?? null,
       height: input.height ?? null,
-      mime_type: input.mimeType ?? null,
+      mime_type: input.mimeType,
       file_size: input.fileSize ?? null,
       metadata: input.metadata ?? {},
     })
@@ -127,6 +127,23 @@ export async function createCustomCoverAssetRecord(
   }
 
   return data as CustomCoverAssetRow;
+}
+
+
+export async function deleteCustomCoverAssetRecord(
+  supabase: DatabaseClient,
+  assetId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("custom_cover_assets")
+    .delete()
+    .eq("id", assetId);
+
+  if (error) {
+    throw new Error(
+      `Failed to delete custom cover asset record: ${error.message}`
+    );
+  }
 }
 
 export async function getAiGenerationById(

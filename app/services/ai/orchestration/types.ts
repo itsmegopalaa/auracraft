@@ -21,4 +21,16 @@ export type AiGenerationOrchestrationDependencies = {
   generate: (
     request: AiCoverGenerationRequest
   ) => Promise<AiCoverGenerationResult>;
+  ingestAssets: (
+    supabase: SupabaseClient,
+    input: {
+      customerId: string;
+      customizationId: string;
+      generationId: string;
+      assets: AiCoverGenerationResult["assets"];
+    }
+  ) => Promise<{
+    frontAssetId: string | null;
+    backAssetId: string | null;
+  }>;
 };

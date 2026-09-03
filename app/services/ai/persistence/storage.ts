@@ -8,6 +8,7 @@ export type CustomCoverStorageBucket =
 export function buildCustomCoverStoragePath(input: {
   customerId: string;
   customizationId: string;
+  generationId?: string;
   side: CoverSide;
   kind: "original" | "preview" | "production";
   extension: string;
@@ -23,6 +24,7 @@ export function buildCustomCoverStoragePath(input: {
   return [
     input.customerId,
     input.customizationId,
+    input.generationId ?? "current",
     input.side,
     `${input.kind}.${extension}`,
   ].join("/");

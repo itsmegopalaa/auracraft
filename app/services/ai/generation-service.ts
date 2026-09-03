@@ -14,6 +14,7 @@ export type AiGenerationLifecycleStatus =
   | "failed";
 
 export type CreateGenerationRecordInput = {
+  customerId: string;
   customizationId: string;
   prompt: string;
   negativePrompt?: string;

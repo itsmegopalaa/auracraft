@@ -14,6 +14,7 @@ import type {
 } from "./types";
 
 export type GenerateCoverInput = {
+  customerId: string;
   customizationId: string;
   prompt: string;
   negativePrompt?: string;
@@ -30,6 +31,10 @@ export function validateAiGenerationRequest(
 ): AiCoverGenerationRequest {
   const uuidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!uuidPattern.test(input.customerId)) {
+    throw new Error("Invalid customer ID.");
+  }
 
   if (!uuidPattern.test(input.customizationId)) {
     throw new Error("Invalid customization ID.");
@@ -77,6 +82,7 @@ export function validateAiGenerationRequest(
   }
 
   return {
+    customerId: input.customerId,
     customizationId: input.customizationId,
     prompt,
     negativePrompt:
@@ -108,3 +114,5 @@ export * from "./errors";
 export * from "./persistence";
 export * from "./config";
 export * from "./orchestration";
+
+export * from "./assets";

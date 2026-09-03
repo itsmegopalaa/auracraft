@@ -54,7 +54,7 @@ export type CreateCustomCoverAssetRowInput = {
   storagePath: string;
   width?: number;
   height?: number;
-  mimeType?: string;
+  mimeType: string;
   fileSize?: number;
   metadata?: Record<string, unknown>;
 };

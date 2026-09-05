@@ -5,10 +5,13 @@ import type {
 
 import {
   createAiGenerationRecord,
-  completeAiGenerationRecord,
+  finalizeAiGenerationRecord,
   failAiGenerationRecord,
-  deleteCustomCoverAssetRecord,
 } from "../persistence/repository";
+
+import {
+  cleanupCustomCoverAssets,
+} from "../assets/service";
 
 import type {
   AiGenerationOrchestrationDependencies,
@@ -55,37 +58,13 @@ async function safelyFailGeneration(
 async function cleanupIngestedAssets(
   supabase: AiGenerationOrchestrationDependencies["supabase"],
   assetIds: Array<string | null | undefined>
-) {
-  const uniqueAssetIds = [
-    ...new Set(
-      assetIds.filter(
-        (assetId): assetId is string =>
-          typeof assetId === "string" && assetId.length > 0
-      )
-    ),
-  ];
-
-  for (const assetId of uniqueAssetIds) {
-    try {
-      await deleteCustomCoverAssetRecord(
-        supabase,
-        assetId
-      );
-    } catch (cleanupError) {
-      /*
-       * Asset cleanup is best-effort. Do not hide the generation
-       * failure if cleanup itself fails.
-       */
-      console.error(
-        "CUSTOM COVER AI ASSET CLEANUP ERROR:",
-        {
-          assetId,
-          error: cleanupError,
-        }
-      );
-    }
-  }
+): Promise<void> {
+  await cleanupCustomCoverAssets(
+    supabase,
+    assetIds
+  );
 }
+
 
 export async function orchestrateAiGeneration(
   dependencies: AiGenerationOrchestrationDependencies,
@@ -212,12 +191,11 @@ export async function orchestrateAiGeneration(
       ingested.backAssetId;
 
     try {
-      await completeAiGenerationRecord(
+      await finalizeAiGenerationRecord(
         supabase,
         generationId,
         {
           model: result.model,
-          status: "completed",
           frontAssetId,
           insideFrontAssetId,
           insideBackAssetId,

@@ -87,6 +87,63 @@ export async function completeAiGenerationRecord(
   return data as AiGenerationRow;
 }
 
+export async function finalizeAiGenerationRecord(
+  supabase: DatabaseClient,
+  generationId: string,
+  input: {
+    model: string;
+    frontAssetId?: string | null;
+    insideFrontAssetId?: string | null;
+    insideBackAssetId?: string | null;
+    backAssetId?: string | null;
+    metadata?: Record<string, unknown>;
+  }
+): Promise<AiGenerationRow> {
+  const { data, error } = await supabase.rpc(
+    "finalize_custom_cover_ai_generation",
+    {
+      p_generation_id: generationId,
+      p_model: input.model,
+      p_front_asset_id: input.frontAssetId ?? null,
+      p_inside_front_asset_id:
+        input.insideFrontAssetId ?? null,
+      p_inside_back_asset_id:
+        input.insideBackAssetId ?? null,
+      p_back_asset_id: input.backAssetId ?? null,
+      p_metadata: input.metadata ?? {},
+    }
+  );
+
+  if (error) {
+    const wrappedError = new Error(
+      `Failed to finalize AI generation: ${error.message}`
+    );
+
+    Object.assign(wrappedError, {
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    throw wrappedError;
+  }
+
+  const generation =
+    data &&
+    typeof data === "object" &&
+    "generation" in data
+      ? data.generation
+      : null;
+
+  if (!generation || typeof generation !== "object") {
+    throw new Error(
+      "Failed to finalize AI generation: invalid database response."
+    );
+  }
+
+  return generation as AiGenerationRow;
+}
+
 export async function failAiGenerationRecord(
   supabase: DatabaseClient,
   generationId: string,
@@ -143,6 +200,25 @@ export async function createCustomCoverAssetRecord(
   return data as CustomCoverAssetRow;
 }
 
+
+export async function getCustomCoverAssetById(
+  supabase: DatabaseClient,
+  assetId: string
+): Promise<CustomCoverAssetRow | null> {
+  const { data, error } = await supabase
+    .from("custom_cover_assets")
+    .select("*")
+    .eq("id", assetId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `Failed to load custom cover asset record: ${error.message}`
+    );
+  }
+
+  return data as CustomCoverAssetRow | null;
+}
 
 export async function deleteCustomCoverAssetRecord(
   supabase: DatabaseClient,

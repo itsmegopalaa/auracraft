@@ -6,6 +6,7 @@ import {
 } from "../persistence/storage";
 import {
   createCustomCoverAssetRecord,
+  getCustomCoverAssetById,
   deleteCustomCoverAssetRecord,
 } from "../persistence/repository";
 import type { AiGeneratedAsset } from "../types";
@@ -425,6 +426,70 @@ function getAssetIdBySide(
   return assets.find((asset) => asset.side === side)?.id ?? null;
 }
 
+export async function cleanupCustomCoverAssets(
+  supabase: SupabaseClient,
+  assetIds: Array<string | null | undefined>
+): Promise<void> {
+  const uniqueAssetIds = [
+    ...new Set(
+      assetIds.filter(
+        (assetId): assetId is string =>
+          typeof assetId === "string" && assetId.length > 0
+      )
+    ),
+  ];
+
+  const bucket = getCustomCoverStorageBucket("preview");
+
+  for (const assetId of uniqueAssetIds) {
+    try {
+      const asset = await getCustomCoverAssetById(
+        supabase,
+        assetId
+      );
+
+      if (!asset) {
+        continue;
+      }
+
+      const { error: storageError } = await supabase.storage
+        .from(bucket)
+        .remove([asset.storage_path]);
+
+      if (storageError) {
+        console.error(
+          `[AI assets] Failed to remove storage object ${asset.storage_path} during cleanup`,
+          {
+            assetId,
+            error: storageError,
+          }
+        );
+
+        // Keep the DB record so the asset path remains available
+        // for a later cleanup retry.
+        continue;
+      }
+
+      try {
+        await deleteCustomCoverAssetRecord(
+          supabase,
+          assetId
+        );
+      } catch (recordError) {
+        console.error(
+          `[AI assets] Failed to delete asset record ${assetId} during cleanup`,
+          recordError
+        );
+      }
+    } catch (error) {
+      console.error(
+        `[AI assets] Failed to clean up asset ${assetId}`,
+        error
+      );
+    }
+  }
+}
+
 async function cleanupIngestedAssets(
   supabase: SupabaseClient,
   createdAssets: Array<{
@@ -432,38 +497,10 @@ async function cleanupIngestedAssets(
     storagePath: string;
   }>
 ): Promise<void> {
-  for (const asset of createdAssets) {
-    try {
-      await deleteCustomCoverAssetRecord(supabase, asset.id);
-    } catch (error) {
-      console.error(
-        `[AI assets] Failed to delete asset record ${asset.id} during cleanup`,
-        error
-      );
-    }
-  }
-
-  const bucket = getCustomCoverStorageBucket("preview");
-
-  for (const asset of createdAssets) {
-    try {
-      const { error } = await supabase.storage
-        .from(bucket)
-        .remove([asset.storagePath]);
-
-      if (error) {
-        console.error(
-          `[AI assets] Failed to remove storage object ${asset.storagePath} during cleanup`,
-          error
-        );
-      }
-    } catch (error) {
-      console.error(
-        `[AI assets] Unexpected storage cleanup failure for ${asset.storagePath}`,
-        error
-      );
-    }
-  }
+  await cleanupCustomCoverAssets(
+    supabase,
+    createdAssets.map((asset) => asset.id)
+  );
 }
 
 export async function ingestAiGeneratedAssets(

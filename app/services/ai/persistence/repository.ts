@@ -30,9 +30,17 @@ export async function createAiGenerationRecord(
     .single();
 
   if (error) {
-    throw new Error(
+    const wrappedError = new Error(
       `Failed to create AI generation record: ${error.message}`
     );
+
+    Object.assign(wrappedError, {
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    throw wrappedError;
   }
 
   return data as AiGenerationRow;
@@ -45,6 +53,8 @@ export async function completeAiGenerationRecord(
     model: string;
     status: "completed";
     frontAssetId?: string | null;
+    insideFrontAssetId?: string | null;
+    insideBackAssetId?: string | null;
     backAssetId?: string | null;
     metadata?: Record<string, unknown>;
   }
@@ -55,6 +65,10 @@ export async function completeAiGenerationRecord(
       model: input.model,
       status: input.status,
       front_asset_id: input.frontAssetId ?? null,
+      inside_front_asset_id:
+        input.insideFrontAssetId ?? null,
+      inside_back_asset_id:
+        input.insideBackAssetId ?? null,
       back_asset_id: input.backAssetId ?? null,
       metadata: input.metadata ?? {},
       error_message: null,

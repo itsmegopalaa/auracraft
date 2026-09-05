@@ -14,6 +14,8 @@ export type AiGenerationRow = {
   generation_number: number;
   status: AiGenerationStatus;
   front_asset_id: string | null;
+  inside_front_asset_id: string | null;
+  inside_back_asset_id: string | null;
   back_asset_id: string | null;
   metadata: Record<string, unknown> | null;
   error_message: string | null;

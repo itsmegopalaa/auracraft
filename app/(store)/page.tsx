@@ -77,13 +77,23 @@ export default function Home() {
               <span>Made for Ideas</span>
             </div>
 
-            <Link
-              href="/products"
-              className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-yellow-400 px-7 py-3.5 text-sm font-bold sm:mt-10 text-black shadow-[0_10px_30px_rgba(250,204,21,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-[0_14px_36px_rgba(250,204,21,0.2)] active:scale-[0.98]"
-            >
-              Explore Collection
-              <span className="ml-2" aria-hidden="true">→</span>
-            </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-3 sm:mt-10">
+              <Link
+                href="/products"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-yellow-400 px-7 py-3.5 text-sm font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:shadow-[0_14px_36px_rgba(250,204,21,0.2)] active:scale-[0.98]"
+              >
+                Explore Collection
+                <span className="ml-2" aria-hidden="true">→</span>
+              </Link>
+
+              <Link
+                href="/custom-cover"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-400/[0.06] px-6 py-3.5 text-sm font-bold text-yellow-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-yellow-400/50 hover:bg-yellow-400/[0.1] hover:text-yellow-200 active:scale-[0.98]"
+              >
+                Create Your Own
+                <span aria-hidden="true">✨</span>
+              </Link>
+            </div>
           </div>
 
           {/* Product showcase */}

@@ -41,7 +41,7 @@ export type AiCoverGenerationResult = {
 };
 
 export type AiProviderCapabilities = {
-  supportsFrontBack: boolean;
+  supportedSides: readonly CoverSide[];
   supportsNegativePrompt: boolean;
   supportsImageToImage: boolean;
   supportsReferenceImages: boolean;

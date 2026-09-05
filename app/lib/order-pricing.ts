@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 export type OrderItemInput = {
   id: string;
   quantity: number;
+  customCoverId?: string | null;
 };
 
 export async function calculateOrder(items: unknown) {
@@ -35,12 +36,26 @@ export async function calculateOrder(items: unknown) {
       (existingItem) => existingItem.id === id
     );
 
+    const customCoverId =
+      typeof item.customCoverId === "string" &&
+      item.customCoverId.trim()
+        ? item.customCoverId.trim()
+        : null;
+
     if (existing) {
+      /*
+       * Product quantities are aggregated for inventory.
+       *
+       * Custom-cover identity is validated separately by the
+       * checkout/order APIs because the existing inventory RPC
+       * operates on real product UUIDs.
+       */
       existing.quantity += quantity;
     } else {
       normalizedInput.push({
         id,
         quantity,
+        customCoverId,
       });
     }
   }

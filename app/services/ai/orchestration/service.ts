@@ -109,6 +109,12 @@ export async function orchestrateAiGeneration(
     const frontAssetId =
       ingested.frontAssetId;
 
+    const insideFrontAssetId =
+      ingested.insideFrontAssetId;
+
+    const insideBackAssetId =
+      ingested.insideBackAssetId;
+
     const backAssetId =
       ingested.backAssetId;
 
@@ -119,6 +125,8 @@ export async function orchestrateAiGeneration(
         model: result.model,
         status: "completed",
         frontAssetId,
+        insideFrontAssetId,
+        insideBackAssetId,
         backAssetId,
         metadata: {
           ...(request.metadata ?? {}),

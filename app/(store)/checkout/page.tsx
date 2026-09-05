@@ -99,6 +99,8 @@ export default function CheckoutPage() {
         paymentStatus,
         orderStatus,
         items: cart,
+        customCoverId:
+          cart.find((item) => item.customCoverId)?.customCoverId ?? null,
         total,
         razorpayOrderId: razorpayOrderId || null,
         razorpayPaymentId: razorpayPaymentId || null,

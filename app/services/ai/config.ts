@@ -29,7 +29,8 @@ export function isAiProviderConfigured(
   switch (providerId) {
     case "flux":
       return Boolean(
-        process.env.FLUX_API_ENDPOINT?.trim()
+        process.env.BFL_API_KEY?.trim() ||
+          process.env.FLUX_API_KEY?.trim()
       );
 
     case "openai":

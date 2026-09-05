@@ -91,6 +91,74 @@ export async function POST(request: Request) {
       );
     }
 
+    const customCoverIds = Array.from(
+      new Set(
+        (Array.isArray(items) ? items : [])
+          .map((item) =>
+            item &&
+            typeof item === "object" &&
+            "customCoverId" in item
+              ? String(
+                  (item as { customCoverId?: unknown }).customCoverId ?? ""
+                ).trim()
+              : ""
+          )
+          .filter(Boolean)
+      )
+    );
+
+    if (customCoverIds.length > 1) {
+      return NextResponse.json(
+        { error: "Only one custom cover can be attached to an order." },
+        { status: 400 }
+      );
+    }
+
+    const customCoverId = customCoverIds[0] ?? null;
+
+    let customCoverSnapshot = null;
+
+    if (customCoverId) {
+      const { data: customization, error: customizationError } =
+        await supabaseAdmin
+          .from("custom_cover_customizations")
+          .select(
+            "id, customer_id, product_id, template_id, creation_method, status, version, customer_name, customer_text, design, print_spec"
+          )
+          .eq("id", customCoverId)
+          .eq("customer_id", user.id)
+          .eq("status", "customer_approved")
+          .single();
+
+      if (customizationError || !customization) {
+        return NextResponse.json(
+          { error: "Custom cover is not approved for ordering." },
+          { status: 400 }
+        );
+      }
+
+      const { data: assets, error: assetsError } =
+        await supabaseAdmin
+          .from("custom_cover_assets")
+          .select(
+            "id, side, kind, storage_path, width, height, mime_type, file_size"
+          )
+          .eq("customization_id", customCoverId)
+          .in("kind", ["original", "preview"]);
+
+      if (assetsError) {
+        return NextResponse.json(
+          { error: "Unable to load custom cover assets." },
+          { status: 500 }
+        );
+      }
+
+      customCoverSnapshot = {
+        customization,
+        assets: assets ?? [],
+      };
+    }
+
     let paymentStatus = "pending";
     let orderStatus = "placed";
 
@@ -232,7 +300,9 @@ export async function POST(request: Request) {
     }
 
     const { data, error } = await supabaseAdmin.rpc(
-      "create_order_with_inventory",
+      customCoverId
+        ? "create_order_with_custom_cover"
+        : "create_order_with_inventory",
       {
         p_customer_id: user.id,
         p_order_id: String(orderId),
@@ -261,6 +331,12 @@ export async function POST(request: Request) {
           paymentMethod === "Razorpay"
             ? new Date().toISOString()
             : null,
+        ...(customCoverId
+          ? {
+              p_custom_cover_id: customCoverId,
+              p_custom_cover_snapshot: customCoverSnapshot,
+            }
+          : {}),
       }
     );
 

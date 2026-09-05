@@ -15,21 +15,66 @@ export type CartItem = {
   description?: string | null;
   category?: string | null;
   quantity: number;
+
+  /*
+   * Custom-cover metadata.
+   *
+   * id remains the REAL product UUID because the order/inventory
+   * system uses it for stock deduction.
+   *
+   * cartKey is the client-side identity.
+   */
+  cartKey?: string;
+  customCoverId?: string | null;
 };
 
 type CartProduct = Omit<CartItem, "quantity">;
 
+type CustomCoverCartProduct = {
+  id: string;
+  name: string;
+  price: number;
+  image?: string | null;
+  description?: string | null;
+  category?: string | null;
+};
+
 type CartContextType = {
   cart: CartItem[];
+
   addToCart: (product: CartProduct) => void;
-  removeFromCart: (id: string) => void;
-  increaseQuantity: (id: string) => void;
-  decreaseQuantity: (id: string) => void;
+
+  addCustomCoverToCart: (
+    product: CustomCoverCartProduct,
+    customCoverId: string
+  ) => void;
+
+  removeFromCart: (idOrCartKey: string) => void;
+  increaseQuantity: (idOrCartKey: string) => void;
+  decreaseQuantity: (idOrCartKey: string) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(
   undefined
 );
+
+function getCartItemKey(item: {
+  id: string;
+  cartKey?: string;
+  customCoverId?: string | null;
+}) {
+  if (item.cartKey) {
+    return String(item.cartKey);
+  }
+
+  if (item.customCoverId) {
+    return `${String(item.id)}::custom::${String(
+      item.customCoverId
+    )}`;
+  }
+
+  return String(item.id);
+}
 
 export function CartProvider({
   children,
@@ -67,20 +112,32 @@ export function CartProvider({
                 return result;
               }
 
+              const normalizedItem: CartItem = {
+                ...item,
+                id: String(item.id),
+                price: Number(item.price),
+                quantity: Number(item.quantity),
+                cartKey: getCartItemKey(item),
+                customCoverId:
+                  item.customCoverId
+                    ? String(item.customCoverId)
+                    : null,
+              };
+
+              const normalizedKey =
+                getCartItemKey(normalizedItem);
+
               const existing = result.find(
                 (existingItem) =>
-                  existingItem.id === String(item.id)
+                  getCartItemKey(existingItem) ===
+                  normalizedKey
               );
 
               if (existing) {
-                existing.quantity += Number(item.quantity);
+                existing.quantity +=
+                  normalizedItem.quantity;
               } else {
-                result.push({
-                  ...item,
-                  id: String(item.id),
-                  price: Number(item.price),
-                  quantity: Number(item.quantity),
-                });
+                result.push(normalizedItem);
               }
 
               return result;
@@ -114,13 +171,16 @@ export function CartProvider({
 
   function addToCart(product: CartProduct) {
     setCart((prev) => {
+      const productId = String(product.id);
+
       const existing = prev.find(
-        (item) => item.id === String(product.id)
+        (item) =>
+          getCartItemKey(item) === productId
       );
 
       if (existing) {
         return prev.map((item) =>
-          item.id === String(product.id)
+          getCartItemKey(item) === productId
             ? {
                 ...item,
                 name: product.name,
@@ -138,42 +198,143 @@ export function CartProvider({
         ...prev,
         {
           ...product,
-          id: String(product.id),
+          id: productId,
+          cartKey: productId,
+          customCoverId: null,
           quantity: 1,
         },
       ];
     });
   }
 
-  function removeFromCart(id: string) {
+  function addCustomCoverToCart(
+    product: CustomCoverCartProduct,
+    customCoverId: string
+  ) {
+    const productId = String(product.id);
+    const customizationId = String(
+      customCoverId
+    );
+    const cartKey =
+      `${productId}::custom::${customizationId}`;
+
+    setCart((prev) => {
+      const existing = prev.find(
+        (item) =>
+          getCartItemKey(item) === cartKey
+      );
+
+      if (existing) {
+        return prev.map((item) =>
+          getCartItemKey(item) === cartKey
+            ? {
+                ...item,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                description: product.description,
+                category: product.category,
+                customCoverId: customizationId,
+                cartKey,
+                quantity: item.quantity + 1,
+              }
+            : item
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          id: productId,
+          name: product.name,
+          price: product.price,
+          image: product.image ?? null,
+          description: product.description ?? null,
+          category: product.category ?? null,
+          quantity: 1,
+          cartKey,
+          customCoverId: customizationId,
+        },
+      ];
+    });
+  }
+
+  function removeFromCart(
+    idOrCartKey: string
+  ) {
+    const key = String(idOrCartKey);
+
     setCart((prev) =>
-      prev.filter((item) => item.id !== String(id))
+      prev.filter((item) => {
+        const itemKey = getCartItemKey(item);
+
+        /*
+         * Keep legacy behavior:
+         * passing a product ID removes normal product items.
+         *
+         * For custom items, callers should pass cartKey.
+         */
+        if (itemKey === key) {
+          return false;
+        }
+
+        if (
+          !item.customCoverId &&
+          String(item.id) === key
+        ) {
+          return false;
+        }
+
+        return true;
+      })
     );
   }
 
-  function increaseQuantity(id: string) {
+  function increaseQuantity(
+    idOrCartKey: string
+  ) {
+    const key = String(idOrCartKey);
+
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === String(id)
+      prev.map((item) => {
+        const itemKey = getCartItemKey(item);
+
+        const matches =
+          itemKey === key ||
+          (!item.customCoverId &&
+            String(item.id) === key);
+
+        return matches
           ? {
               ...item,
               quantity: item.quantity + 1,
             }
-          : item
-      )
+          : item;
+      })
     );
   }
 
-  function decreaseQuantity(id: string) {
+  function decreaseQuantity(
+    idOrCartKey: string
+  ) {
+    const key = String(idOrCartKey);
+
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === String(id) && item.quantity > 1
+      prev.map((item) => {
+        const itemKey = getCartItemKey(item);
+
+        const matches =
+          itemKey === key ||
+          (!item.customCoverId &&
+            String(item.id) === key);
+
+        return matches && item.quantity > 1
           ? {
               ...item,
               quantity: item.quantity - 1,
             }
-          : item
-      )
+          : item;
+      })
     );
   }
 
@@ -182,6 +343,7 @@ export function CartProvider({
       value={{
         cart,
         addToCart,
+        addCustomCoverToCart,
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,

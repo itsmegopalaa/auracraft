@@ -38,32 +38,41 @@ function isUuid(value: unknown): value is string {
   );
 }
 
-function normalizeSides(value: unknown): ("front" | "back")[] {
+type AiCoverSide =
+  | "front"
+  | "insideFront"
+  | "back"
+  | "insideBack";
+
+function normalizeSides(value: unknown): AiCoverSide[] {
   if (value === undefined) {
-    return ["front", "back"];
+    return ["front"];
   }
 
   if (!Array.isArray(value) || value.length === 0) {
-    throw new Error("At least one cover side is required.");
+    throw new Error("At least one cover surface is required.");
   }
 
   const uniqueSides = [
     ...new Set(
       value.filter(
-        (side): side is "front" | "back" =>
-          side === "front" || side === "back"
+        (side): side is AiCoverSide =>
+          side === "front" ||
+          side === "insideFront" ||
+          side === "back" ||
+          side === "insideBack"
       )
     ),
   ];
 
   if (uniqueSides.length !== value.length) {
     throw new Error(
-      "AI generation sides must contain only front or back."
+      "AI generation surfaces must contain only front, insideFront, back, or insideBack."
     );
   }
 
   if (uniqueSides.length === 0) {
-    throw new Error("At least one valid cover side is required.");
+    throw new Error("At least one valid cover surface is required.");
   }
 
   return uniqueSides;
@@ -147,7 +156,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let sides: ("front" | "back")[];
+    let sides: AiCoverSide[];
 
     try {
       sides = normalizeSides(body.sides);
@@ -260,19 +269,30 @@ export async function POST(request: Request) {
     }
 
     /*
-     * Generation number is SERVER CONTROLLED.
+     * AI CREDIT ACCOUNTING
      *
-     * We count every generation attempt, including failed ones,
-     * because an attempt has consumed provider/compute resources.
+     * Only pending + completed generations reserve/consume
+     * the included allowance.
+     *
+     * Failed generations consume 0 credits.
+     *
+     * Generation numbers are independent from credit usage:
+     * if generation #1 fails, the next attempt becomes #2.
+     *
+     * This preserves the unique
+     * (customization_id, generation_number) constraint and
+     * allows failed attempts to leave gaps in numbering.
      */
-    const { count: generationCount, error: generationCountError } =
+
+    const { count: activeGenerationCount, error: generationCountError } =
       await supabaseAdmin
         .from("custom_cover_generations")
         .select("id", {
           count: "exact",
           head: true,
         })
-        .eq("customization_id", customizationId);
+        .eq("customization_id", customizationId)
+        .in("status", ["pending", "completed"]);
 
     if (generationCountError) {
       console.error(
@@ -288,7 +308,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const currentGenerationCount = generationCount ?? 0;
+    const currentGenerationCount = activeGenerationCount ?? 0;
 
     if (
       currentGenerationCount >=
@@ -303,7 +323,42 @@ export async function POST(request: Request) {
       );
     }
 
-    const generationNumber = currentGenerationCount + 1;
+    /*
+     * Generation numbering is based on the highest existing
+     * attempt, regardless of status.
+     *
+     * Example:
+     *   #1 failed
+     *   #2 completed
+     *   #3 pending
+     *
+     * Next attempt = #4.
+     */
+    const { data: latestGeneration, error: latestGenerationError } =
+      await supabaseAdmin
+        .from("custom_cover_generations")
+        .select("generation_number")
+        .eq("customization_id", customizationId)
+        .order("generation_number", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (latestGenerationError) {
+      console.error(
+        "CUSTOM COVER GENERATE LATEST GENERATION LOOKUP ERROR:",
+        latestGenerationError
+      );
+
+      return NextResponse.json(
+        {
+          error: "Unable to determine generation number.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const generationNumber =
+      (latestGeneration?.generation_number ?? 0) + 1;
 
     /*
      * Provider is SERVER CONTROLLED.

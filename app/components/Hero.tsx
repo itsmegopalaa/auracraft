@@ -43,16 +43,15 @@ export default function Hero() {
           </div>
 
           <h1 className="mx-auto max-w-3xl text-[2.8rem] font-black leading-[0.98] tracking-[-0.055em] sm:text-6xl md:mx-0 md:text-[4.2rem] lg:text-[5rem] xl:text-[5.25rem]">
-            <span className="block">Craft Ideas.</span>
+            <span className="block">Your Ideas.</span>
             <span className="mt-2 block bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent sm:mt-3">
-              Create Your Legacy.
+              AI-Powered Design.
             </span>
           </h1>
 
           <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-zinc-300 sm:mt-6 sm:text-base sm:leading-8 md:mx-0 md:text-lg">
-            AuraNotes by MineNote transforms ordinary notebooks into premium
-            creations designed for students, creators and dreamers who want
-            every page to feel like their own.
+            Create a notebook that reflects your imagination, personality,
+            and story.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center md:justify-start">
@@ -66,6 +65,19 @@ export default function Hero() {
                 className="transition-transform duration-200 group-hover:translate-x-1"
               >
                 →
+              </span>
+            </Link>
+
+            <Link
+              href="/custom-cover"
+              className="group inline-flex min-h-[52px] items-center justify-center gap-3 rounded-full border border-yellow-400/30 bg-yellow-400/[0.06] px-7 text-sm font-bold text-yellow-300 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-yellow-400/50 hover:bg-yellow-400/[0.1] hover:text-yellow-200 active:translate-y-0"
+            >
+              Create Your Own
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-200 group-hover:scale-110"
+              >
+                ✨
               </span>
             </Link>
 

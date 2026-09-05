@@ -31,6 +31,8 @@ export type AiGenerationOrchestrationDependencies = {
     }
   ) => Promise<{
     frontAssetId: string | null;
+    insideFrontAssetId: string | null;
+    insideBackAssetId: string | null;
     backAssetId: string | null;
   }>;
 };

@@ -1,3 +1,4 @@
+import type { AiProvider } from "../types";
 import type {
   AiCoverGenerationRequest,
   AiCoverGenerationResult,
@@ -16,7 +17,7 @@ type HttpProviderConfig = {
 type HttpGenerationResponse = {
   model?: string;
   assets?: Array<{
-    side: "front" | "back";
+    side: "front" | "insideFront" | "insideBack" | "back";
     url: string;
     width: number;
     height: number;
@@ -24,7 +25,7 @@ type HttpGenerationResponse = {
     metadata?: Record<string, unknown>;
   }>;
   images?: Array<{
-    side?: "front" | "back";
+    side?: "front" | "insideFront" | "insideBack" | "back";
     url: string;
     width?: number;
     height?: number;
@@ -42,7 +43,12 @@ function isValidAsset(
   const value = asset as Record<string, unknown>;
 
   return (
-    (value.side === "front" || value.side === "back") &&
+    (
+      value.side === "front" ||
+      value.side === "insideFront" ||
+      value.side === "insideBack" ||
+      value.side === "back"
+    ) &&
     typeof value.url === "string" &&
     value.url.length > 0 &&
     typeof value.width === "number" &&
@@ -78,13 +84,18 @@ function normalizeAssets(
 
 export function createHttpAiProvider(
   config: HttpProviderConfig
-) {
+): AiProvider {
   return {
     id: config.id,
     name: config.name,
 
     capabilities: {
-      supportsFrontBack: true,
+      supportedSides: [
+      "front",
+      "insideFront",
+      "insideBack",
+      "back",
+    ],
       supportsNegativePrompt: true,
       supportsImageToImage: true,
       supportsReferenceImages: true,

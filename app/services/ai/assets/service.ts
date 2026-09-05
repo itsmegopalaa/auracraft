@@ -25,7 +25,12 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 function assertValidSide(side: CoverSide): void {
-  if (side !== "front" && side !== "back") {
+  if (
+    side !== "front" &&
+    side !== "insideFront" &&
+    side !== "insideBack" &&
+    side !== "back"
+  ) {
     throw new Error(`Unsupported cover side: ${side}`);
   }
 }
@@ -619,6 +624,14 @@ export async function ingestAiGeneratedAssets(
     return {
       assets: ingestedAssets,
       frontAssetId: getAssetIdBySide(ingestedAssets, "front"),
+      insideFrontAssetId: getAssetIdBySide(
+        ingestedAssets,
+        "insideFront"
+      ),
+      insideBackAssetId: getAssetIdBySide(
+        ingestedAssets,
+        "insideBack"
+      ),
       backAssetId: getAssetIdBySide(ingestedAssets, "back"),
     };
   } catch (error) {

@@ -1,3 +1,4 @@
+import type { CoverSide } from "@/app/lib/customization";
 import { getAiProvider } from "./registry";
 import {
   validateAiGenerationRequest,
@@ -18,7 +19,7 @@ export type CreateGenerationRecordInput = {
   customizationId: string;
   prompt: string;
   negativePrompt?: string;
-  sides?: ("front" | "back")[];
+  sides?: CoverSide[];
   generationNumber: number;
   provider?: AiProviderId;
   metadata?: Record<string, unknown>;

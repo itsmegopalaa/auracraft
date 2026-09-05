@@ -18,7 +18,7 @@ export type GenerateCoverInput = {
   customizationId: string;
   prompt: string;
   negativePrompt?: string;
-  sides?: ("front" | "back")[];
+  sides?: CoverSide[];
   generationNumber: number;
   provider?: AiProviderId;
   metadata?: Record<string, unknown>;
@@ -51,33 +51,44 @@ export function validateAiGenerationRequest(
     );
   }
 
+  /*
+   * Generation number is an attempt number, not a credit count.
+   *
+   * Failed attempts intentionally do not consume AI credits,
+   * so a customization may legitimately reach generation #8,
+   * #9, etc. while still having included credits remaining.
+   *
+   * The customer-facing 7-credit hard cap is enforced by the
+   * custom-cover generation API using pending + completed records.
+   */
   if (
     !Number.isInteger(input.generationNumber) ||
-    input.generationNumber < 1 ||
-    input.generationNumber >
-      CUSTOM_COVER_LIMITS.maxAiGenerations
+    input.generationNumber < 1
   ) {
     throw new Error(
-      `AI generation number must be between 1 and ${CUSTOM_COVER_LIMITS.maxAiGenerations}.`
+      "AI generation number must be a positive integer."
     );
   }
 
-  const sides =
+  const sides: CoverSide[] =
     input.sides && input.sides.length > 0
       ? input.sides
-      : ["front", "back"];
+      : ["front"];
 
   const uniqueSides: CoverSide[] = [
-    ...new Set(sides as CoverSide[]),
+    ...new Set(sides),
   ];
 
-  if (
-    uniqueSides.some(
-      (side) => side !== "front" && side !== "back"
-    )
-  ) {
+  const validSides = new Set<CoverSide>([
+    "front",
+    "insideFront",
+    "insideBack",
+    "back",
+  ]);
+
+  if (uniqueSides.some((side) => !validSides.has(side))) {
     throw new Error(
-      "AI generation sides must be front or back."
+      "AI generation sides must be valid custom cover surfaces."
     );
   }
 

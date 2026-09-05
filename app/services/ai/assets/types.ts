@@ -15,6 +15,8 @@ export type IngestedAiAsset = {
 export type AiAssetIngestionResult = {
   assets: IngestedAiAsset[];
   frontAssetId: string | null;
+  insideFrontAssetId: string | null;
+  insideBackAssetId: string | null;
   backAssetId: string | null;
 };
 

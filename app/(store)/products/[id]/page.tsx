@@ -338,6 +338,27 @@ export default async function ProductPage({
               </div>
             </div>
 
+            {/* Custom Cover */}
+            <div className="mt-7 rounded-[1.5rem] border border-yellow-400/20 bg-yellow-400/[0.045] p-4 sm:mt-8 sm:p-5">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-yellow-400">
+                  ✨ Make it yours
+                </p>
+
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  Create a personalised front + back cover with AI,
+                  your own design, or a MineNote template.
+                </p>
+              </div>
+
+              <a
+                href={`/custom-cover?productId=${typedProduct.id}`}
+                className="mt-4 flex w-full items-center justify-center rounded-full bg-yellow-400 px-5 py-4 text-sm font-black text-black transition hover:scale-[1.01] hover:bg-yellow-300"
+              >
+                Customise This Cover ✨
+              </a>
+            </div>
+
             {/* Shopping Actions */}
             <div className="mt-7 sm:mt-8">
               <AddToCartButton

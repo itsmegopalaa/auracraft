@@ -1,6 +1,8 @@
 import {
   CUSTOM_COVER_VERSION,
   DEFAULT_CUSTOM_COVER_PRINT_SPEC,
+  DEFAULT_CUSTOM_COVER_PHYSICAL_CONFIG,
+  DEFAULT_CUSTOM_COVER_AI_BUDGET,
   validateCustomization,
   validateCustomerText,
 } from "@/app/lib/customization";
@@ -17,6 +19,10 @@ export type CreateCustomizationInput = {
   templateId?: string;
   customerName?: string;
   customerText?: string;
+  creativeDirection?: {
+    category: string;
+    theme: string;
+  };
 };
 
 export function createDraftCustomization(
@@ -31,12 +37,22 @@ export function createDraftCustomization(
     version: CUSTOM_COVER_VERSION,
     customerName: validateCustomerText(input.customerName) ?? undefined,
     customerText: validateCustomerText(input.customerText) ?? undefined,
+    physicalConfig: DEFAULT_CUSTOM_COVER_PHYSICAL_CONFIG,
+    aiBudget: DEFAULT_CUSTOM_COVER_AI_BUDGET,
     design: {
       front: {
         assets: [],
         texts: [],
       },
+      insideFront: {
+        assets: [],
+        texts: [],
+      },
       back: {
+        assets: [],
+        texts: [],
+      },
+      insideBack: {
         assets: [],
         texts: [],
       },
@@ -45,6 +61,14 @@ export function createDraftCustomization(
         auraCraft: false,
         logoVariant: "default",
       },
+      ...(input.creativeDirection
+        ? {
+            creativeDirection: {
+              category: input.creativeDirection.category,
+              theme: input.creativeDirection.theme,
+            },
+          }
+        : {}),
     },
     printSpec: DEFAULT_CUSTOM_COVER_PRINT_SPEC,
   };

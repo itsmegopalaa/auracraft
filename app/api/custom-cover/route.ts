@@ -57,8 +57,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const { productId, creationMethod, customerName, customerText, templateId } =
-      body;
+    const {
+      productId,
+      creationMethod,
+      customerName,
+      customerText,
+      templateId,
+      category,
+      theme,
+    } = body;
 
     if (!isValidUuid(productId)) {
       return NextResponse.json(
@@ -103,6 +110,33 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    if (category !== undefined && typeof category !== "string") {
+      return NextResponse.json(
+        { error: "category must be a string." },
+        { status: 400 }
+      );
+    }
+
+    if (theme !== undefined && typeof theme !== "string") {
+      return NextResponse.json(
+        { error: "theme must be a string." },
+        { status: 400 }
+      );
+    }
+
+    const normalizedCategory =
+      typeof category === "string" ? category.trim() : "";
+
+    const normalizedTheme =
+      typeof theme === "string" ? theme.trim() : "";
+
+    if (!normalizedCategory || !normalizedTheme) {
+      return NextResponse.json(
+        { error: "Choose a category and theme first." },
+        { status: 400 }
+      );
+    }
+
 
     if (creationMethod === "template" && !templateId) {
       return NextResponse.json(
@@ -151,6 +185,10 @@ export async function POST(request: Request) {
       customerName,
       customerText,
       templateId,
+      creativeDirection: {
+        category: normalizedCategory,
+        theme: normalizedTheme,
+      },
     };
 
     const customization = createDraftCustomization(input);

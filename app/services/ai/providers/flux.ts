@@ -248,14 +248,25 @@ async function generateSingleSide(
     }
   );
 
-  const task =
-    (await response.json().catch(() => ({}))) as FluxSubmitResponse;
+  const responseBody =
+    await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    const detail =
+      responseBody &&
+      typeof responseBody === "object"
+        ? JSON.stringify(responseBody)
+        : String(responseBody);
+
     throw new Error(
-      `FLUX ${side} request failed (${response.status}).`
+      `FLUX ${side} request failed (${response.status})${
+        detail ? `: ${detail.slice(0, 500)}` : "."
+      }`
     );
   }
+
+  const task =
+    responseBody as FluxSubmitResponse;
 
   if (!task.id) {
     throw new Error(

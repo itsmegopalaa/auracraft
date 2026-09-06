@@ -1,0 +1,369 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  image?: string | null;
+};
+
+type Props = {
+  product: Product;
+};
+
+const templates = [
+  {
+    id: "minimal",
+    name: "Minimal",
+    description: "Clean, premium and simple.",
+    icon: "◻️",
+  },
+  {
+    id: "anime",
+    name: "Anime",
+    description: "Expressive anime-inspired style.",
+    icon: "🌸",
+  },
+  {
+    id: "aesthetic",
+    name: "Aesthetic",
+    description: "Modern visual compositions.",
+    icon: "✨",
+  },
+  {
+    id: "adventure",
+    name: "Adventure",
+    description: "Bold exploration-inspired style.",
+    icon: "🏔️",
+  },
+  {
+    id: "gaming",
+    name: "Gaming",
+    description: "Energetic gaming-inspired style.",
+    icon: "🎮",
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    description: "Refined luxury-inspired layout.",
+    icon: "👑",
+  },
+];
+
+type CreationMethod = "ai" | "upload" | "template";
+
+export default function CustomCoverBuilder({ product }: Props) {
+  const router = useRouter();
+
+  const [method, setMethod] = useState<CreationMethod | null>(null);
+  const [customerName, setCustomerName] = useState("");
+  const [customerText, setCustomerText] = useState("");
+  const [templateId, setTemplateId] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const createCustomization = async () => {
+    if (!method) {
+      toast.error("Choose how you want to create your cover.");
+      return;
+    }
+
+    if (method === "template" && !templateId) {
+      toast.error("Choose a template first.");
+      return;
+    }
+
+    setCreating(true);
+
+    try {
+      const response = await fetch("/api/custom-cover", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          productId: product.id,
+          creationMethod: method,
+          customerName: customerName.trim() || undefined,
+          customerText: customerText.trim() || undefined,
+          templateId:
+            method === "template" ? templateId : undefined,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (response.status === 401) {
+        toast.error("Please sign in first.");
+        router.push("/login?redirect=/custom-cover");
+        return;
+      }
+
+      if (!response.ok) {
+        toast.error(
+          typeof data?.error === "string"
+            ? data.error
+            : "Unable to start customization."
+        );
+        return;
+      }
+
+      const customizationId = data?.customization?.id;
+
+      if (!customizationId) {
+        toast.error("Customization was created but no ID was returned.");
+        return;
+      }
+
+      toast.success("Your custom cover is ready to edit ✨");
+
+      router.push(
+        `/custom-cover/${customizationId}`
+      );
+    } catch (error) {
+      console.error("CUSTOM COVER CREATION FAILED:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-zinc-950">
+        <div className="aspect-[4/5] bg-zinc-900">
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-6xl">
+              📓
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-white/[0.07] p-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
+            Selected notebook
+          </p>
+
+          <h2 className="mt-2 text-xl font-bold text-white">
+            {product.name}
+          </h2>
+
+          <p className="mt-2 text-lg font-black text-yellow-400">
+            ₹{product.price}
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-[2rem] border border-white/[0.08] bg-zinc-950 p-5 sm:p-7 lg:p-8">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+            Step 1
+          </p>
+
+          <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+            How do you want to create it?
+          </h2>
+        </div>
+
+        <div className="mt-6 grid gap-3">
+          <button
+            type="button"
+            onClick={() => setMethod("ai")}
+            className={`rounded-2xl border p-5 text-left transition ${
+              method === "ai"
+                ? "border-yellow-400 bg-yellow-400/[0.08]"
+                : "border-white/[0.08] bg-white/[0.025] hover:border-yellow-400/30"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <span className="text-2xl">🤖</span>
+              <div>
+                <p className="font-bold text-white">
+                  Create with AI
+                </p>
+                <p className="mt-1 text-sm leading-6 text-zinc-500">
+                  Describe your idea and turn it into a unique
+                  cover design.
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMethod("upload")}
+            className={`rounded-2xl border p-5 text-left transition ${
+              method === "upload"
+                ? "border-yellow-400 bg-yellow-400/[0.08]"
+                : "border-white/[0.08] bg-white/[0.025] hover:border-yellow-400/30"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <span className="text-2xl">🖼️</span>
+              <div>
+                <p className="font-bold text-white">
+                  Upload Your Own Design
+                </p>
+                <p className="mt-1 text-sm leading-6 text-zinc-500">
+                  Use your own artwork, illustration, photo, or
+                  design.
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMethod("template")}
+            className={`rounded-2xl border p-5 text-left transition ${
+              method === "template"
+                ? "border-yellow-400 bg-yellow-400/[0.08]"
+                : "border-white/[0.08] bg-white/[0.025] hover:border-yellow-400/30"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <span className="text-2xl">🎨</span>
+              <div>
+                <p className="font-bold text-white">
+                  Start from a Template
+                </p>
+                <p className="mt-1 text-sm leading-6 text-zinc-500">
+                  Pick a MineNote style and customise it.
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div className="mt-8 border-t border-white/[0.07] pt-8">
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+            Personalisation
+          </p>
+
+          <div className="mt-5 grid gap-4">
+            <label className="block">
+              <span className="text-sm font-semibold text-zinc-300">
+                Your name
+              </span>
+
+              <input
+                value={customerName}
+                onChange={(event) =>
+                  setCustomerName(event.target.value)
+                }
+                maxLength={120}
+                placeholder="e.g. Gopalaa"
+                className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-black px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400/50"
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-semibold text-zinc-300">
+                Text / quote
+              </span>
+
+              <textarea
+                value={customerText}
+                onChange={(event) =>
+                  setCustomerText(event.target.value)
+                }
+                maxLength={120}
+                rows={3}
+                placeholder="Add a name, quote, reminder, or anything meaningful..."
+                className="mt-2 w-full resize-none rounded-2xl border border-white/[0.08] bg-black px-4 py-3.5 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400/50"
+              />
+            </label>
+          </div>
+        </div>
+
+        {method === "template" && (
+          <div className="mt-8 border-t border-white/[0.07] pt-8">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+              Choose template
+            </p>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {templates.map((template) => (
+                <button
+                  key={template.id}
+                  type="button"
+                  onClick={() => setTemplateId(template.id)}
+                  className={`rounded-2xl border p-4 text-left transition ${
+                    templateId === template.id
+                      ? "border-yellow-400 bg-yellow-400/[0.08]"
+                      : "border-white/[0.08] bg-white/[0.025] hover:border-yellow-400/30"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">
+                      {template.icon}
+                    </span>
+
+                    <div>
+                      <p className="font-bold text-white">
+                        {template.name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {template.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {method === "ai" && (
+          <div className="mt-6 rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.04] p-4">
+            <p className="text-sm font-semibold text-yellow-400">
+              AI generation comes next 🤖
+            </p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              Your customization draft will be created now. The next
+              editor step will let you generate and refine the artwork.
+            </p>
+          </div>
+        )}
+
+        {method === "upload" && (
+          <div className="mt-6 rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.04] p-4">
+            <p className="text-sm font-semibold text-yellow-400">
+              Upload workflow comes next 🖼️
+            </p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              Your customization draft will be created now. The next
+              editor step will handle your original artwork upload.
+            </p>
+          </div>
+        )}
+
+        <button
+          type="button"
+          disabled={creating || !method}
+          onClick={createCustomization}
+          className="mt-8 w-full rounded-full bg-yellow-400 px-6 py-4 font-black text-black transition hover:scale-[1.01] hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {creating
+            ? "Creating your cover..."
+            : "Continue to Cover Editor →"}
+        </button>
+
+        <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
+          Your design stays linked to this notebook
+        </p>
+      </div>
+    </div>
+  );
+}

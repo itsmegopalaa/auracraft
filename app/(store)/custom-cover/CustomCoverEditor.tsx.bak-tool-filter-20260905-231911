@@ -309,9 +309,6 @@ export default function CustomCoverEditor({
   const [editingElementId, setEditingElementId] =
     useState<string | null>(null);
 
-  const [isEditorFullscreen, setIsEditorFullscreen] = useState(false);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
-
   const surfaceSwipeStartX = useRef<number | null>(null);
 
   const [designElements, setDesignElements] =
@@ -1941,19 +1938,13 @@ const [resizeState, setResizeState] = useState<{
   };
 
   return (
-    <div
-      className={
-        isEditorFullscreen
-          ? "fixed inset-0 z-[200] grid h-screen w-screen overflow-hidden bg-[#09090b] lg:grid-cols-[64px_minmax(0,1fr)_340px] xl:grid-cols-[72px_minmax(0,1fr)_360px]"
-          : "grid h-full min-h-0 w-full min-w-0 overflow-hidden gap-0 lg:grid-cols-[64px_minmax(0,1fr)_340px] xl:grid-cols-[72px_minmax(0,1fr)_360px]"
-      }
-    >
+    <div className="grid gap-4 lg:grid-cols-[72px_minmax(0,1fr)] xl:grid-cols-[80px_minmax(0,1fr)]">
       {/* LEFT EDITOR TOOLBAR */}
       <aside
         data-editor-control="true"
-        className="order-2 min-h-0 h-full lg:order-1 lg:sticky lg:top-0 md:h-full md:max-h-full"
+        className="order-2 lg:order-1 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:max-h-[900px]"
       >
-        <div className="flex h-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-zinc-950 p-2 md:flex-col lg:overflow-visible">
+        <div className="flex h-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-zinc-950 p-2 lg:flex-col lg:overflow-visible">
           <div className="hidden items-center justify-center pb-1 lg:flex">
             <div className="h-8 w-8 rounded-xl border border-yellow-400/20 bg-yellow-400/[0.06] text-center text-[9px] font-black leading-8 text-yellow-300">
               M
@@ -2080,263 +2071,41 @@ const [resizeState, setResizeState] = useState<{
         </div>
       </aside>
 
-      {/* PREVIEW MODE OVERLAY */}
-      {isPreviewMode ? (
-        <div className="fixed inset-0 z-[300] flex h-screen w-screen flex-col overflow-hidden bg-[#070707]">
-          {/* PREVIEW HEADER */}
-          <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl sm:px-6">
-            <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.22em] text-yellow-400">
-                Final Preview
-              </div>
-              <div className="mt-1 text-sm font-black text-white sm:text-base">
-                Your MineNote Cover
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsPreviewMode(false)}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-black text-zinc-300 transition hover:bg-white/[0.08] hover:text-white"
-            >
-              ← Back to Editor
-            </button>
-          </div>
-
-          {/* PREVIEW CANVAS */}
-          <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8 sm:py-8">
-            <div className="mx-auto flex min-w-max items-center justify-center gap-3 sm:gap-5 lg:min-w-0">
-              {(
-                [
-                  ["front", "FRONT"],
-                  ["insideFront", "INSIDE FRONT"],
-                  ["insideBack", "INSIDE BACK"],
-                  ["back", "BACK"],
-                ] as const
-              ).map(([surface, label]) => {
-                const surfaceElements = (designElements[surface] ?? [])
-                  .slice()
-                  .sort((a, b) => a.zIndex - b.zIndex);
-
-                const surfaceBackground = readDesignBackground(
-                  customization.design,
-                  surface,
-                );
-
-                return (
-                  <div
-                    key={surface}
-                    className="flex w-[220px] shrink-0 flex-col items-center sm:w-[260px] lg:w-[280px]"
-                  >
-                    <div className="mb-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                      {label}
-                    </div>
-
-                    <div
-                      className="relative aspect-[216/279] w-full overflow-hidden rounded-[12px] border border-white/15 shadow-[0_25px_70px_rgba(0,0,0,0.6)]"
-                      style={{
-                        background: surfaceBackground,
-                      }}
-                    >
-                      {surfaceElements.map((element) => {
-                        const asset =
-                          element.type === "image"
-                            ? assets.find(
-                                (item) => item.id === element.assetId,
-                              )
-                            : null;
-
-                        return (
-                          <div
-                            key={element.id}
-                            className="absolute overflow-hidden"
-                            style={{
-                              left: `${element.x}%`,
-                              top: `${element.y}%`,
-                              width: `${element.width}%`,
-                              height: `${element.height}%`,
-                              zIndex: element.zIndex,
-                              transform: `rotate(${element.rotation}deg)`,
-                              transformOrigin: "center",
-                              opacity: element.opacity ?? 1,
-                            }}
-                          >
-                            {element.type === "image" &&
-                            asset?.previewUrl ? (
-                              <img
-                                src={asset.previewUrl}
-                                alt=""
-                                draggable={false}
-                                className={`h-full w-full ${
-                                  element.objectFit === "contain"
-                                    ? "object-contain"
-                                    : "object-cover"
-                                }`}
-                              />
-                            ) : element.type === "text" ? (
-                              <div
-                                className="flex h-full w-full items-center justify-center overflow-hidden break-words whitespace-pre-wrap p-1"
-                                style={{
-                                  fontSize: `${element.fontSize ?? 16}px`,
-                                  fontWeight: element.fontWeight ?? 700,
-                                  fontFamily:
-                                    element.fontFamily ??
-                                    "Inter, sans-serif",
-                                  color: element.color ?? "#ffffff",
-                                  textAlign: element.align ?? "center",
-                                  lineHeight:
-                                    element.lineHeight ?? 1.15,
-                                  letterSpacing: `${
-                                    element.letterSpacing ?? 0
-                                  }px`,
-                                  textShadow:
-                                    "0 3px 20px rgba(0,0,0,.45)",
-                                }}
-                              >
-                                {element.text || ""}
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-
-                      <div className="pointer-events-none absolute left-1/2 top-[4%] z-[900] -translate-x-1/2 text-[7px] font-black uppercase tracking-[0.3em] text-white/50">
-                        MineNote
-                      </div>
-
-                      <div className="pointer-events-none absolute inset-[5%] z-[950] rounded-[7px] border border-dashed border-white/10" />
-
-                      <div className="pointer-events-none absolute inset-0 z-[980] bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.10),transparent_25%),linear-gradient(135deg,rgba(255,255,255,.03),transparent_45%,rgba(0,0,0,.16))]" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mx-auto mt-8 max-w-xl text-center">
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600">
-                Final review
-              </div>
-              <p className="mt-2 text-xs leading-5 text-zinc-500">
-                Check all four cover surfaces before approving your custom
-                notebook.
-              </p>
-            </div>
-          </div>
-
-          {/* PREVIEW ACTIONS */}
-          <div className="flex shrink-0 items-center justify-center border-t border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl sm:px-6">
-            <div className="flex w-full max-w-xl items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsPreviewMode(false)}
-                className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-xs font-black text-white transition hover:bg-white/[0.08]"
-              >
-                ← Edit Again
-              </button>
-
-              <button
-                type="button"
-                disabled={saving || approving || generatingAi}
-                onClick={approveAndAddToCart}
-                className="flex-[1.4] rounded-xl bg-yellow-400 px-4 py-3.5 text-xs font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {approving ? "Approving..." : "Approve & Add to Cart →"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       {/* MAIN WORKSPACE */}
-      <main
-          className={`relative flex min-h-0 min-w-0 flex-col overflow-hidden border-x border-white/10 bg-[#09090b] lg:order-2 ${
-            isEditorFullscreen ? "h-screen" : "h-full"
-          }`}
-        >
-      <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl">
-        <div>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
-            Surface {currentSurfaceIndex + 1} / 4
-          </div>
-          <div className="mt-1 text-sm font-black text-white">
-            {getCoverSideLabel(side)}
-          </div>
-        </div>
-
-        {!isEditorFullscreen ? (
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => setIsEditorFullscreen(true)}
-            className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-black text-zinc-200 transition hover:bg-white/[0.1] hover:text-white"
-            aria-label="Enter fullscreen editor"
-            title="Fullscreen"
-          >
-            ⛶ Fullscreen
-          </button>
-        ) : null}
-      </div>
-
+      <main className="order-1 min-w-0 lg:order-2">
       {/* PREVIEW / DESIGN CANVAS */}
-              {isEditorFullscreen ? (
-          <button
-            type="button"
-            onClick={() => setIsEditorFullscreen(false)}
-            className="fixed right-4 top-4 z-[240] rounded-xl border border-white/10 bg-zinc-950/95 px-3 py-2 text-xs font-black text-white shadow-xl backdrop-blur-xl transition hover:bg-zinc-900"
-            aria-label="Exit fullscreen editor"
-          >
-            ✕ Exit Fullscreen
-          </button>
-        ) : null}
-
-        {/* EDITOR ACTION BAR */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[130] flex justify-center px-3 pb-2 sm:px-4 sm:pb-3">
-          <div className="pointer-events-auto flex w-full max-w-xl items-center justify-between gap-2 rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl">
-            <button
-              type="button"
-              disabled={saving || approving || generatingAi}
-              onClick={saveDraft}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-black text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saving ? "Saving..." : "Save Draft ✨"}
-            </button>
-
-            <div className="min-w-0 flex-1 truncate text-center text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
-              {message || `${getCoverSideLabel(side)} · Surface ${currentSurfaceIndex + 1} / 4`}
-            </div>
-
-            <button
-              type="button"
-              disabled={saving || approving || generatingAi}
-              onClick={() => setIsPreviewMode(true)}
-              className="rounded-xl bg-yellow-400 px-5 py-3 text-xs font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Preview →
-            </button>
-          </div>
-        </div>
-
-<section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#0b0b0d] p-0">
-        <div className="flex shrink-0 items-start justify-between gap-4">
+      <section className="rounded-3xl border border-white/10 bg-zinc-950 p-5 shadow-2xl sm:p-7">
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-400">
               Design Studio
             </p>
 
-            <h2 className="mt-1 text-lg font-black tracking-tight">
+            <h2 className="mt-1 text-xl font-black tracking-tight">
               {getCoverSideLabel(side)}
             </h2>
+
+            <p className="mt-1 text-xs text-zinc-600">
+              Drag elements · Resize · Rotate · Layer
+            </p>
           </div>
 
+          <button
+            type="button"
+            onClick={resetCurrentSurface}
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black text-zinc-400 transition hover:border-red-400/30 hover:text-red-300"
+          >
+            Reset surface
+          </button>
         </div>
 
-        {/* EDITABLE SURFACES */}
-        <div className="flex shrink-0 items-center justify-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-zinc-950/80 px-3 py-2 backdrop-blur-xl">
+        {/* PHYSICAL BOOK ORDER */}
+        <div className="mb-5 flex items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-black/40 p-2">
           {(
             [
               ["front", "FRONT"],
               ["insideFront", "INSIDE FRONT"],
+              ["pages", "📄 PAGES"],
               ["insideBack", "INSIDE BACK"],
               ["back", "BACK"],
             ] as const
@@ -2344,15 +2113,19 @@ const [resizeState, setResizeState] = useState<{
             <button
               key={surface}
               type="button"
+              disabled={surface === "pages"}
               onClick={() => {
-                setSide(surface);
-                setSelectedElementId(null);
-                setEditingElementId(null);
+                if (surface !== "pages") {
+                  setSide(surface);
+                  setSelectedElementId(null);
+                }
               }}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-[8px] font-black tracking-[0.12em] transition ${
-                side === surface
-                  ? "bg-white text-black"
-                  : "text-zinc-500 hover:text-white"
+              className={`shrink-0 rounded-xl px-3 py-2 text-[9px] font-black tracking-wider transition ${
+                surface === "pages"
+                  ? "cursor-default text-zinc-700"
+                  : side === surface
+                    ? "bg-white text-black"
+                    : "text-zinc-500 hover:text-white"
               }`}
             >
               {label}
@@ -2360,36 +2133,11 @@ const [resizeState, setResizeState] = useState<{
           ))}
         </div>
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,rgba(255,255,255,.035),transparent_55%)] px-2 pb-[84px] pt-2 sm:px-4 sm:pb-[92px] sm:pt-3">
-              <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-[60] flex items-center justify-between px-2 sm:px-4">
-                <button
-                  type="button"
-                  data-editor-control="true"
-                  onClick={() => navigateSurface(-1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
-                  aria-label="Previous surface"
-                  title="Previous surface"
-                >
-                  ‹
-                </button>
-
-                <button
-                  type="button"
-                  data-editor-control="true"
-                  onClick={() => navigateSurface(1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
-                  aria-label="Next surface"
-                  title="Next surface"
-                >
-                  ›
-                </button>
-              </div>
-
-
-          <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
+        <div className="flex min-h-[560px] items-center justify-center rounded-2xl border border-white/5 bg-black/60 p-5 sm:p-10">
+          <div className="w-full max-w-[390px]">
             <div
               key={editorResetVersion}
-              className="relative aspect-[216/279] h-[82%] max-h-full w-auto max-w-[90%] overflow-visible rounded-[8px] border border-white/15 bg-black shadow-[0_24px_64px_rgba(0,0,0,0.62)] select-none"
+              className="relative mx-auto aspect-[216/279] w-full overflow-hidden rounded-[14px] border border-white/15 shadow-[0_30px_80px_rgba(0,0,0,0.65)] select-none"
               style={{
                 background: previewBackground,
                 touchAction: "none",
@@ -2683,24 +2431,97 @@ const [resizeState, setResizeState] = useState<{
               <div className="pointer-events-none absolute inset-0 z-[980] bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.10),transparent_25%),linear-gradient(135deg,rgba(255,255,255,.03),transparent_45%,rgba(0,0,0,.16))]" />
             </div>
 
+            <p className="mt-4 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+              {activeElements.length} editable element
+              {activeElements.length === 1 ? "" : "s"} ·
+              print proportions
+            </p>
           </div>
         </div>
-        </section>
+
+        {/* SURFACE NAV */}
+        <div className="mt-5 space-y-3">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+            <button
+              type="button"
+              data-editor-control="true"
+              onClick={() => navigateSurface(-1)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-lg text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+              aria-label="Previous surface"
+            >
+              ←
+            </button>
+
+            <div className="text-center">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-yellow-400">
+                Surface {currentSurfaceIndex + 1} / 4
+              </div>
+
+              <div className="mt-1 text-xs font-bold text-zinc-300">
+                {getCoverSideLabel(side)}
+              </div>
+
+              <div className="mt-1 text-[9px] uppercase tracking-wider text-zinc-600">
+                Swipe to navigate
+              </div>
+            </div>
+
+            <button
+              type="button"
+              data-editor-control="true"
+              onClick={() => navigateSurface(1)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-lg text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+              aria-label="Next surface"
+            >
+              →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-1 sm:grid-cols-4">
+            {(
+              [
+                ["front", "Front Cover"],
+                ["insideFront", "Inside Front"],
+                ["back", "Back Cover"],
+                ["insideBack", "Inside Back"],
+              ] as const
+            ).map(([surface, label]) => (
+              <button
+                key={surface}
+                type="button"
+                data-editor-control="true"
+                onClick={() => {
+                  setSide(surface);
+                  setSelectedElementId(null);
+                  setEditingElementId(null);
+                }}
+                className={`rounded-xl px-3 py-3 text-xs font-black transition ${
+                  side === surface
+                    ? "bg-white text-black"
+                    : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       </main>
 
       {/* EDITOR */}
       <section
-        className={`order-2 min-h-0 min-w-0 overflow-y-auto border-l border-white/[0.07] bg-zinc-950 md:order-3 ${
-    isEditorFullscreen
-      ? "md:h-screen md:max-h-screen"
-      : "lg:h-full lg:max-h-full"
-  }`}
+        className={`fixed inset-y-0 right-0 z-[120] w-full max-w-[420px] overflow-y-auto border-l border-white/10 bg-zinc-950/98 p-5 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:top-0 ${
+          activeEditorTool
+            ? "translate-x-0"
+            : "translate-x-full"
+        }`}
         aria-label="Editor tools"
       >
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.07] bg-zinc-950/95 px-4 py-2.5 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 -mx-5 mb-5 flex items-center justify-between border-b border-white/10 bg-zinc-950/95 px-5 py-4 backdrop-blur-xl">
           <div>
-            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
+            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-400">
               {activeEditorTool === "select"
                 ? "Inspector"
                 : activeEditorTool === "text"
@@ -2713,15 +2534,8 @@ const [resizeState, setResizeState] = useState<{
                         ? "Style"
                         : "Layers"}
             </div>
-            <div className="mt-1 flex items-center gap-2">
-              <div className="text-sm font-black text-white">
-                {getCoverSideLabel(side)}
-              </div>
-              {selectedElement ? (
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-zinc-500">
-                  {selectedElement.type}
-                </span>
-              ) : null}
+            <div className="mt-1 text-sm font-black text-white">
+              {getCoverSideLabel(side)}
             </div>
           </div>
 
@@ -2737,9 +2551,7 @@ const [resizeState, setResizeState] = useState<{
           </button>
         </div>
 
-        {/* Legacy drawer intro intentionally hidden.
-            The left toolbar + active tool header are now the primary editor UI. */}
-        <div className="hidden">
+        <div className="mb-8">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-400">
             Cover Editor
           </p>
@@ -2754,8 +2566,8 @@ const [resizeState, setResizeState] = useState<{
           </p>
         </div>
 
-        <div className="space-y-4 p-3 sm:p-4">
-          <div className="hidden rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.025] px-4 py-3 text-[10px] leading-5 text-zinc-500">
+        <div className="space-y-7">
+          <div className="rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.025] px-4 py-3 text-[10px] leading-5 text-zinc-500">
             <span className="font-black text-yellow-300">
               Tip:
             </span>{" "}
@@ -2763,23 +2575,21 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* ELEMENT TOOLBAR */}
-          <div
-            className={`rounded-2xl border border-white/10 bg-white/[0.025] p-3 ${
-              ["select", "text", "image", "layers"].includes(activeEditorTool)
-                ? ""
-                : "hidden"
-            }`}
-          >
+          <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/[0.025] p-4">
             <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
+              <div>
+                <div className="text-xs font-black uppercase tracking-wider text-yellow-300">
+                  Elements
+                </div>
+
+                <p className="mt-1 text-[10px] leading-4 text-zinc-600">
+                  Select an element on the canvas to edit it.
+                </p>
 
                 {/* LAYERS PANEL */}
                 <div
                   id="custom-cover-layers"
-                  className={`mt-1 overflow-hidden rounded-xl border border-white/10 bg-black/20 ${
-                    activeEditorTool === "layers" ? "" : "hidden"
-                  }`}
-                >
+                  className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
                   <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
                     <div className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
                       Layers
@@ -2791,7 +2601,7 @@ const [resizeState, setResizeState] = useState<{
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 border-b border-white/10 p-1.5">
+                  <div className="flex flex-wrap gap-1 border-b border-white/10 p-2">
                     <button
                       type="button"
                       data-editor-control="true"
@@ -2923,7 +2733,7 @@ const [resizeState, setResizeState] = useState<{
                 </div>
               </div>
 
-              <div className="hidden flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={undo}
@@ -2970,15 +2780,15 @@ const [resizeState, setResizeState] = useState<{
               <button
                 type="button"
                 onClick={addTextElement}
-                className="hidden rounded-xl bg-white px-3 py-2 text-[10px] font-black text-black transition hover:bg-zinc-200"
+                className="rounded-xl bg-white px-3 py-2 text-[10px] font-black text-black transition hover:bg-zinc-200"
               >
                 + Text
               </button>
             </div>
 
             {selectedElement ? (
-              <div className="mt-3 space-y-3">
-                <div className="hidden grid grid-cols-4 gap-2">
+              <div className="mt-4 space-y-3">
+                <div className="grid grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => rotateSelected(-15)}
@@ -3016,15 +2826,15 @@ const [resizeState, setResizeState] = useState<{
               {selectedElement?.type === "image" ? (
                 <div
                   data-editor-control="true"
-                  className="rounded-xl border border-white/10 bg-white/[0.035] p-3"
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-black uppercase tracking-wider text-white">
+                      <h3 className="text-sm font-semibold text-white">
                         Image
                       </h3>
-                      <p className="mt-1 text-[10px] text-white/40">
-                        Selected artwork
+                      <p className="mt-1 text-[11px] text-white/45">
+                        Edit the selected artwork directly.
                       </p>
                     </div>
 
@@ -3042,11 +2852,11 @@ const [resizeState, setResizeState] = useState<{
                     );
 
                     return selectedAsset?.previewUrl ? (
-                      <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-black/30">
+                      <div className="mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/30">
                         <img
                           src={selectedAsset.previewUrl}
                           alt=""
-                          className="h-24 w-full object-contain"
+                          className="h-28 w-full object-contain"
                         />
                       </div>
                     ) : (
@@ -3057,8 +2867,8 @@ const [resizeState, setResizeState] = useState<{
                   })()}
 
                   {/* FIT / FILL */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
+                  <div className="mb-4">
+                    <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-white/45">
                       Image Fit
                     </div>
 
@@ -3101,9 +2911,9 @@ const [resizeState, setResizeState] = useState<{
                   </div>
 
                   {/* OPACITY */}
-                  <div className="mb-3">
+                  <div className="mb-4">
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-white/45">
                         Opacity
                       </span>
                       <span className="text-xs text-white/60">
@@ -3131,8 +2941,8 @@ const [resizeState, setResizeState] = useState<{
                   </div>
 
                   {/* POSITION */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
+                  <div className="mb-4">
+                    <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-white/45">
                       Position
                     </div>
 
@@ -3204,8 +3014,8 @@ const [resizeState, setResizeState] = useState<{
                   </div>
 
                   {/* SIZE */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
+                  <div className="mb-4">
+                    <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-white/45">
                       Size
                     </div>
 
@@ -3277,9 +3087,9 @@ const [resizeState, setResizeState] = useState<{
                   </div>
 
                   {/* ROTATION */}
-                  <div className="mb-3">
+                  <div className="mb-4">
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-white/45">
                         Rotation
                       </span>
                       <span className="text-xs text-white/60">
@@ -3369,7 +3179,7 @@ const [resizeState, setResizeState] = useState<{
                 {selectedElement.type === "text" ? (
                   <>
               {/* TYPOGRAPHY PANEL */}
-                    <div className="space-y-3 rounded-xl border border-white/10 bg-black/20 p-3">
+                    <div className="space-y-3 rounded-2xl border border-white/10 bg-black/20 p-3">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-300">
@@ -3826,7 +3636,7 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* NAME */}
-          <label className="hidden">
+          <label className="block">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                 Your name
@@ -3849,7 +3659,7 @@ const [resizeState, setResizeState] = useState<{
           </label>
 
           {/* QUOTE */}
-          <label className="hidden">
+          <label className="block">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                 Text / quote
@@ -3873,10 +3683,9 @@ const [resizeState, setResizeState] = useState<{
           </label>
 
           {/* AI GENERATION */}
-          {customization.creationMethod === "ai" &&
-          activeEditorTool === "ai" ? (
+          {customization.creationMethod === "ai" ? (
             <div id="custom-cover-ai-tools">
-            <div className="rounded-xl border border-yellow-400/15 bg-yellow-400/[0.025] p-3">
+            <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/[0.025] p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-black uppercase tracking-wider text-yellow-300">
@@ -4017,11 +3826,7 @@ const [resizeState, setResizeState] = useState<{
           ) : null}
 
           {/* UPLOAD ARTWORK */}
-          <div
-            className={`rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 ${
-              activeEditorTool === "image" ? "" : "hidden"
-            }`}
-          >
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-xs font-black uppercase tracking-wider text-zinc-300">
@@ -4096,15 +3901,12 @@ const [resizeState, setResizeState] = useState<{
             ) : null}
 
             <p className="mt-3 text-[9px] leading-4 text-zinc-700">
-              15 MB max · 600×800 minimum · private
+              Maximum 15 MB · Minimum 600×800 px · Your artwork remains private.
             </p>
           </div>
 
           {/* TEMPLATE */}
-          <div
-            id="custom-cover-style-tools"
-            className={activeEditorTool === "style" ? "" : "hidden"}
-          >
+          <div id="custom-cover-style-tools">
             <div className="mb-3">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                 Choose template
@@ -4149,7 +3951,7 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* BRANDING */}
-          <div className="hidden rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <div className="text-xs font-black uppercase tracking-wider text-zinc-300">
               System branding
             </div>
@@ -4172,7 +3974,7 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* CREATION METHOD */}
-          <div className="hidden rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <div className="text-[10px] font-black uppercase tracking-wider text-zinc-600">
               Creation method
             </div>
@@ -4186,7 +3988,40 @@ const [resizeState, setResizeState] = useState<{
             </p>
           </div>
 
-          <div className="text-center text-[9px] font-black uppercase tracking-[0.16em] text-zinc-700">
+          {/* ACTIONS */}
+          <div className="grid gap-2">
+            <button
+              type="button"
+              disabled={saving || approving || generatingAi}
+              onClick={saveDraft}
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Save Draft ✨"}
+            </button>
+
+            <button
+              type="button"
+              disabled={saving || approving || generatingAi}
+              onClick={approveAndAddToCart}
+              className="w-full rounded-2xl bg-yellow-400 px-5 py-4 text-sm font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {approving ? "Approving..." : "Approve & Add to Cart →"}
+            </button>
+          </div>
+
+          {message ? (
+            <p
+              className={`text-center text-xs font-bold ${
+                message.includes("saved")
+                  ? "text-emerald-400"
+                  : "text-red-400"
+              }`}
+            >
+              {message}
+            </p>
+          ) : null}
+
+          <div className="text-center text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-700">
             Status · {approving ? "Approving..." : customization.status}
           </div>
         </div>

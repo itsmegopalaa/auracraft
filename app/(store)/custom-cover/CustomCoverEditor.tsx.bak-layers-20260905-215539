@@ -63,13 +63,8 @@ type CoverElement = {
   assetId?: string;
   fontSize?: number;
   fontWeight?: number;
-  fontFamily?: string;
   color?: string;
   align?: "left" | "center" | "right";
-  lineHeight?: number;
-  letterSpacing?: number;
-  opacity?: number;
-  objectFit?: "cover" | "contain";
 };
 
 type SurfaceEditorDesign = {
@@ -295,22 +290,8 @@ export default function CustomCoverEditor({
   const [selectedElementId, setSelectedElementId] =
     useState<string | null>(null);
 
-  type EditorTool =
-    | "select"
-    | "text"
-    | "image"
-    | "ai"
-    | "style"
-    | "layers";
-
-  const [activeEditorTool, setActiveEditorTool] =
-    useState<EditorTool>("select");
-
   const [editingElementId, setEditingElementId] =
     useState<string | null>(null);
-
-  const [isEditorFullscreen, setIsEditorFullscreen] = useState(false);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   const surfaceSwipeStartX = useRef<number | null>(null);
 
@@ -875,57 +856,6 @@ const [resizeState, setResizeState] = useState<{
 
     setSelectedElementId(duplicate.id);
     setEditingElementId(null);
-  }
-
-  function moveLayerToEdge(
-    direction: "front" | "back"
-  ) {
-    if (!selectedElement) return;
-
-    setDesignElements((current) => {
-      const existing = current[side] ?? [];
-
-      if (existing.length === 0) {
-        return current;
-      }
-
-      pushHistory(side, existing);
-
-      const sorted = [...existing].sort(
-        (a, b) => a.zIndex - b.zIndex
-      );
-
-      const targetId = selectedElement.id;
-
-      const reordered =
-        direction === "front"
-          ? [
-              ...sorted.filter(
-                (item) => item.id !== targetId
-              ),
-              ...sorted.filter(
-                (item) => item.id === targetId
-              ),
-            ]
-          : [
-              ...sorted.filter(
-                (item) => item.id === targetId
-              ),
-              ...sorted.filter(
-                (item) => item.id !== targetId
-              ),
-            ];
-
-      return {
-        ...current,
-        [side]: reordered.map(
-          (item, index) => ({
-            ...item,
-            zIndex: index + 1,
-          })
-        ),
-      };
-    });
   }
 
   function moveLayer(direction: "up" | "down") {
@@ -1941,402 +1871,40 @@ const [resizeState, setResizeState] = useState<{
   };
 
   return (
-    <div
-      className={
-        isEditorFullscreen
-          ? "fixed inset-0 z-[200] grid h-screen w-screen overflow-hidden bg-[#09090b] lg:grid-cols-[64px_minmax(0,1fr)_340px] xl:grid-cols-[72px_minmax(0,1fr)_360px]"
-          : "grid h-full min-h-0 w-full min-w-0 overflow-hidden gap-0 lg:grid-cols-[64px_minmax(0,1fr)_340px] xl:grid-cols-[72px_minmax(0,1fr)_360px]"
-      }
-    >
-      {/* LEFT EDITOR TOOLBAR */}
-      <aside
-        data-editor-control="true"
-        className="order-2 min-h-0 h-full lg:order-1 lg:sticky lg:top-0 md:h-full md:max-h-full"
-      >
-        <div className="flex h-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-zinc-950 p-2 md:flex-col lg:overflow-visible">
-          <div className="hidden items-center justify-center pb-1 lg:flex">
-            <div className="h-8 w-8 rounded-xl border border-yellow-400/20 bg-yellow-400/[0.06] text-center text-[9px] font-black leading-8 text-yellow-300">
-              M
-            </div>
-          </div>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => setSelectedElementId(null)}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Select"
-            aria-label="Select tool"
-          >
-            ↖
-            <span className="text-[7px] font-black uppercase tracking-wider">Select</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              addTextElement();
-              setActiveEditorTool("text");
-            }}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Add text"
-            aria-label="Add text"
-          >
-            T
-            <span className="text-[7px] font-black uppercase tracking-wider">Text</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              setActiveEditorTool("image");
-              openUpload(side);
-            }}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Upload image"
-            aria-label="Upload image"
-          >
-            ▧
-            <span className="text-[7px] font-black uppercase tracking-wider">Image</span>
-          </button>
-
-          {customization.creationMethod === "ai" ? (
-            <button
-              type="button"
-              data-editor-control="true"
-              onClick={() => {
-                setActiveEditorTool("ai");
-              }}
-              className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-yellow-400/15 bg-yellow-400/[0.04] text-[16px] text-yellow-300 transition hover:border-yellow-400/40 hover:bg-yellow-400/[0.08]"
-              title="AI tools"
-              aria-label="AI tools"
-            >
-              ✨
-              <span className="text-[7px] font-black uppercase tracking-wider">AI</span>
-            </button>
-          ) : null}
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              setActiveEditorTool("style");
-            }}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Style and template"
-            aria-label="Style and template"
-          >
-            ◈
-            <span className="text-[7px] font-black uppercase tracking-wider">Style</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              setActiveEditorTool("layers");
-            }}
-            className={`flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border text-[16px] transition ${
-              selectedElement
-                ? "border-yellow-400/30 bg-yellow-400/[0.06] text-yellow-300"
-                : "border-white/10 bg-white/[0.04] text-zinc-300 hover:border-yellow-400/30 hover:text-white"
-            }`}
-            title="Layers"
-            aria-label="Layers"
-          >
-            ▱
-            <span className="text-[7px] font-black uppercase tracking-wider">Layers</span>
-          </button>
-
-          <div className="hidden flex-1 lg:block" />
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={undo}
-            disabled={(history[side] ?? []).length === 0}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            title="Undo"
-            aria-label="Undo"
-          >
-            ↶
-            <span className="text-[7px] font-black uppercase tracking-wider">Undo</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={redo}
-            disabled={(future[side] ?? []).length === 0}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            title="Redo"
-            aria-label="Redo"
-          >
-            ↷
-            <span className="text-[7px] font-black uppercase tracking-wider">Redo</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* PREVIEW MODE OVERLAY */}
-      {isPreviewMode ? (
-        <div className="fixed inset-0 z-[300] flex h-screen w-screen flex-col overflow-hidden bg-[#070707]">
-          {/* PREVIEW HEADER */}
-          <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl sm:px-6">
-            <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.22em] text-yellow-400">
-                Final Preview
-              </div>
-              <div className="mt-1 text-sm font-black text-white sm:text-base">
-                Your MineNote Cover
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsPreviewMode(false)}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-black text-zinc-300 transition hover:bg-white/[0.08] hover:text-white"
-            >
-              ← Back to Editor
-            </button>
-          </div>
-
-          {/* PREVIEW CANVAS */}
-          <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8 sm:py-8">
-            <div className="mx-auto flex min-w-max items-center justify-center gap-3 sm:gap-5 lg:min-w-0">
-              {(
-                [
-                  ["front", "FRONT"],
-                  ["insideFront", "INSIDE FRONT"],
-                  ["insideBack", "INSIDE BACK"],
-                  ["back", "BACK"],
-                ] as const
-              ).map(([surface, label]) => {
-                const surfaceElements = (designElements[surface] ?? [])
-                  .slice()
-                  .sort((a, b) => a.zIndex - b.zIndex);
-
-                const surfaceBackground = readDesignBackground(
-                  customization.design,
-                  surface,
-                );
-
-                return (
-                  <div
-                    key={surface}
-                    className="flex w-[220px] shrink-0 flex-col items-center sm:w-[260px] lg:w-[280px]"
-                  >
-                    <div className="mb-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                      {label}
-                    </div>
-
-                    <div
-                      className="relative aspect-[216/279] w-full overflow-hidden rounded-[12px] border border-white/15 shadow-[0_25px_70px_rgba(0,0,0,0.6)]"
-                      style={{
-                        background: surfaceBackground,
-                      }}
-                    >
-                      {surfaceElements.map((element) => {
-                        const asset =
-                          element.type === "image"
-                            ? assets.find(
-                                (item) => item.id === element.assetId,
-                              )
-                            : null;
-
-                        return (
-                          <div
-                            key={element.id}
-                            className="absolute overflow-hidden"
-                            style={{
-                              left: `${element.x}%`,
-                              top: `${element.y}%`,
-                              width: `${element.width}%`,
-                              height: `${element.height}%`,
-                              zIndex: element.zIndex,
-                              transform: `rotate(${element.rotation}deg)`,
-                              transformOrigin: "center",
-                              opacity: element.opacity ?? 1,
-                            }}
-                          >
-                            {element.type === "image" &&
-                            asset?.previewUrl ? (
-                              <img
-                                src={asset.previewUrl}
-                                alt=""
-                                draggable={false}
-                                className={`h-full w-full ${
-                                  element.objectFit === "contain"
-                                    ? "object-contain"
-                                    : "object-cover"
-                                }`}
-                              />
-                            ) : element.type === "text" ? (
-                              <div
-                                className="flex h-full w-full items-center justify-center overflow-hidden break-words whitespace-pre-wrap p-1"
-                                style={{
-                                  fontSize: `${element.fontSize ?? 16}px`,
-                                  fontWeight: element.fontWeight ?? 700,
-                                  fontFamily:
-                                    element.fontFamily ??
-                                    "Inter, sans-serif",
-                                  color: element.color ?? "#ffffff",
-                                  textAlign: element.align ?? "center",
-                                  lineHeight:
-                                    element.lineHeight ?? 1.15,
-                                  letterSpacing: `${
-                                    element.letterSpacing ?? 0
-                                  }px`,
-                                  textShadow:
-                                    "0 3px 20px rgba(0,0,0,.45)",
-                                }}
-                              >
-                                {element.text || ""}
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-
-                      <div className="pointer-events-none absolute left-1/2 top-[4%] z-[900] -translate-x-1/2 text-[7px] font-black uppercase tracking-[0.3em] text-white/50">
-                        MineNote
-                      </div>
-
-                      <div className="pointer-events-none absolute inset-[5%] z-[950] rounded-[7px] border border-dashed border-white/10" />
-
-                      <div className="pointer-events-none absolute inset-0 z-[980] bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.10),transparent_25%),linear-gradient(135deg,rgba(255,255,255,.03),transparent_45%,rgba(0,0,0,.16))]" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mx-auto mt-8 max-w-xl text-center">
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600">
-                Final review
-              </div>
-              <p className="mt-2 text-xs leading-5 text-zinc-500">
-                Check all four cover surfaces before approving your custom
-                notebook.
-              </p>
-            </div>
-          </div>
-
-          {/* PREVIEW ACTIONS */}
-          <div className="flex shrink-0 items-center justify-center border-t border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl sm:px-6">
-            <div className="flex w-full max-w-xl items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsPreviewMode(false)}
-                className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-xs font-black text-white transition hover:bg-white/[0.08]"
-              >
-                ← Edit Again
-              </button>
-
-              <button
-                type="button"
-                disabled={saving || approving || generatingAi}
-                onClick={approveAndAddToCart}
-                className="flex-[1.4] rounded-xl bg-yellow-400 px-4 py-3.5 text-xs font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {approving ? "Approving..." : "Approve & Add to Cart →"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {/* MAIN WORKSPACE */}
-      <main
-          className={`relative flex min-h-0 min-w-0 flex-col overflow-hidden border-x border-white/10 bg-[#09090b] lg:order-2 ${
-            isEditorFullscreen ? "h-screen" : "h-full"
-          }`}
-        >
-      <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl">
-        <div>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
-            Surface {currentSurfaceIndex + 1} / 4
-          </div>
-          <div className="mt-1 text-sm font-black text-white">
-            {getCoverSideLabel(side)}
-          </div>
-        </div>
-
-        {!isEditorFullscreen ? (
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => setIsEditorFullscreen(true)}
-            className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-black text-zinc-200 transition hover:bg-white/[0.1] hover:text-white"
-            aria-label="Enter fullscreen editor"
-            title="Fullscreen"
-          >
-            ⛶ Fullscreen
-          </button>
-        ) : null}
-      </div>
-
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px]">
       {/* PREVIEW / DESIGN CANVAS */}
-              {isEditorFullscreen ? (
-          <button
-            type="button"
-            onClick={() => setIsEditorFullscreen(false)}
-            className="fixed right-4 top-4 z-[240] rounded-xl border border-white/10 bg-zinc-950/95 px-3 py-2 text-xs font-black text-white shadow-xl backdrop-blur-xl transition hover:bg-zinc-900"
-            aria-label="Exit fullscreen editor"
-          >
-            ✕ Exit Fullscreen
-          </button>
-        ) : null}
-
-        {/* EDITOR ACTION BAR */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[130] flex justify-center px-3 pb-2 sm:px-4 sm:pb-3">
-          <div className="pointer-events-auto flex w-full max-w-xl items-center justify-between gap-2 rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl">
-            <button
-              type="button"
-              disabled={saving || approving || generatingAi}
-              onClick={saveDraft}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-black text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saving ? "Saving..." : "Save Draft ✨"}
-            </button>
-
-            <div className="min-w-0 flex-1 truncate text-center text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
-              {message || `${getCoverSideLabel(side)} · Surface ${currentSurfaceIndex + 1} / 4`}
-            </div>
-
-            <button
-              type="button"
-              disabled={saving || approving || generatingAi}
-              onClick={() => setIsPreviewMode(true)}
-              className="rounded-xl bg-yellow-400 px-5 py-3 text-xs font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Preview →
-            </button>
-          </div>
-        </div>
-
-<section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#0b0b0d] p-0">
-        <div className="flex shrink-0 items-start justify-between gap-4">
+      <section className="rounded-3xl border border-white/10 bg-zinc-950 p-5 shadow-2xl sm:p-7">
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-400">
               Design Studio
             </p>
 
-            <h2 className="mt-1 text-lg font-black tracking-tight">
+            <h2 className="mt-1 text-xl font-black tracking-tight">
               {getCoverSideLabel(side)}
             </h2>
+
+            <p className="mt-1 text-xs text-zinc-600">
+              Drag elements · Resize · Rotate · Layer
+            </p>
           </div>
 
+          <button
+            type="button"
+            onClick={resetCurrentSurface}
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black text-zinc-400 transition hover:border-red-400/30 hover:text-red-300"
+          >
+            Reset surface
+          </button>
         </div>
 
-        {/* EDITABLE SURFACES */}
-        <div className="flex shrink-0 items-center justify-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-zinc-950/80 px-3 py-2 backdrop-blur-xl">
+        {/* PHYSICAL BOOK ORDER */}
+        <div className="mb-5 flex items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-black/40 p-2">
           {(
             [
               ["front", "FRONT"],
               ["insideFront", "INSIDE FRONT"],
+              ["pages", "📄 PAGES"],
               ["insideBack", "INSIDE BACK"],
               ["back", "BACK"],
             ] as const
@@ -2344,15 +1912,19 @@ const [resizeState, setResizeState] = useState<{
             <button
               key={surface}
               type="button"
+              disabled={surface === "pages"}
               onClick={() => {
-                setSide(surface);
-                setSelectedElementId(null);
-                setEditingElementId(null);
+                if (surface !== "pages") {
+                  setSide(surface);
+                  setSelectedElementId(null);
+                }
               }}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-[8px] font-black tracking-[0.12em] transition ${
-                side === surface
-                  ? "bg-white text-black"
-                  : "text-zinc-500 hover:text-white"
+              className={`shrink-0 rounded-xl px-3 py-2 text-[9px] font-black tracking-wider transition ${
+                surface === "pages"
+                  ? "cursor-default text-zinc-700"
+                  : side === surface
+                    ? "bg-white text-black"
+                    : "text-zinc-500 hover:text-white"
               }`}
             >
               {label}
@@ -2360,36 +1932,11 @@ const [resizeState, setResizeState] = useState<{
           ))}
         </div>
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,rgba(255,255,255,.035),transparent_55%)] px-2 pb-[84px] pt-2 sm:px-4 sm:pb-[92px] sm:pt-3">
-              <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-[60] flex items-center justify-between px-2 sm:px-4">
-                <button
-                  type="button"
-                  data-editor-control="true"
-                  onClick={() => navigateSurface(-1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
-                  aria-label="Previous surface"
-                  title="Previous surface"
-                >
-                  ‹
-                </button>
-
-                <button
-                  type="button"
-                  data-editor-control="true"
-                  onClick={() => navigateSurface(1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
-                  aria-label="Next surface"
-                  title="Next surface"
-                >
-                  ›
-                </button>
-              </div>
-
-
-          <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
+        <div className="flex min-h-[560px] items-center justify-center rounded-2xl border border-white/5 bg-black/60 p-5 sm:p-10">
+          <div className="w-full max-w-[390px]">
             <div
               key={editorResetVersion}
-              className="relative aspect-[216/279] h-[82%] max-h-full w-auto max-w-[90%] overflow-visible rounded-[8px] border border-white/15 bg-black shadow-[0_24px_64px_rgba(0,0,0,0.62)] select-none"
+              className="relative mx-auto aspect-[216/279] w-full overflow-hidden rounded-[14px] border border-white/15 shadow-[0_30px_80px_rgba(0,0,0,0.65)] select-none"
               style={{
                 background: previewBackground,
                 touchAction: "none",
@@ -2522,11 +2069,7 @@ const [resizeState, setResizeState] = useState<{
                           src={asset.previewUrl}
                           alt=""
                           draggable={false}
-                          className={`pointer-events-none h-full w-full ${
-                            element.objectFit === "contain"
-                              ? "object-contain"
-                              : "object-cover"
-                          }`}
+                          className="pointer-events-none h-full w-full object-cover"
                         />
                       ) : element.type === "text" ? (
                         editingElementId === element.id ? (
@@ -2553,15 +2096,9 @@ const [resizeState, setResizeState] = useState<{
                             style={{
                               fontSize: `${element.fontSize ?? 16}px`,
                               fontWeight: element.fontWeight ?? 700,
-                              fontFamily:
-                                element.fontFamily ??
-                                "Inter, sans-serif",
                               color: element.color ?? "#ffffff",
                               textAlign: element.align ?? "center",
-                              lineHeight:
-                                element.lineHeight ?? 1.15,
-                              letterSpacing: `${element.letterSpacing ?? 0}px`,
-                              opacity: element.opacity ?? 1,
+                              lineHeight: 1.15,
                               textShadow:
                                 "0 3px 20px rgba(0,0,0,.45)",
                             }}
@@ -2580,15 +2117,9 @@ const [resizeState, setResizeState] = useState<{
                             style={{
                               fontSize: `${element.fontSize ?? 16}px`,
                               fontWeight: element.fontWeight ?? 700,
-                              fontFamily:
-                                element.fontFamily ??
-                                "Inter, sans-serif",
                               color: element.color ?? "#ffffff",
                               textAlign: element.align ?? "center",
-                              lineHeight:
-                                element.lineHeight ?? 1.15,
-                              letterSpacing: `${element.letterSpacing ?? 0}px`,
-                              opacity: element.opacity ?? 1,
+                              lineHeight: 1.15,
                               textShadow:
                                 "0 3px 20px rgba(0,0,0,.45)",
                             }}
@@ -2683,63 +2214,86 @@ const [resizeState, setResizeState] = useState<{
               <div className="pointer-events-none absolute inset-0 z-[980] bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.10),transparent_25%),linear-gradient(135deg,rgba(255,255,255,.03),transparent_45%,rgba(0,0,0,.16))]" />
             </div>
 
+            <p className="mt-4 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+              {activeElements.length} editable element
+              {activeElements.length === 1 ? "" : "s"} ·
+              print proportions
+            </p>
           </div>
         </div>
-        </section>
 
-      </main>
+        {/* SURFACE NAV */}
+        <div className="mt-5 space-y-3">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+            <button
+              type="button"
+              data-editor-control="true"
+              onClick={() => navigateSurface(-1)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-lg text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+              aria-label="Previous surface"
+            >
+              ←
+            </button>
 
-      {/* EDITOR */}
-      <section
-        className={`order-2 min-h-0 min-w-0 overflow-y-auto border-l border-white/[0.07] bg-zinc-950 md:order-3 ${
-    isEditorFullscreen
-      ? "md:h-screen md:max-h-screen"
-      : "lg:h-full lg:max-h-full"
-  }`}
-        aria-label="Editor tools"
-      >
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.07] bg-zinc-950/95 px-4 py-2.5 backdrop-blur-xl">
-          <div>
-            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
-              {activeEditorTool === "select"
-                ? "Inspector"
-                : activeEditorTool === "text"
-                  ? "Text"
-                  : activeEditorTool === "image"
-                    ? "Image"
-                    : activeEditorTool === "ai"
-                      ? "AI Studio"
-                      : activeEditorTool === "style"
-                        ? "Style"
-                        : "Layers"}
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <div className="text-sm font-black text-white">
+            <div className="text-center">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-yellow-400">
+                Surface {currentSurfaceIndex + 1} / 4
+              </div>
+
+              <div className="mt-1 text-xs font-bold text-zinc-300">
                 {getCoverSideLabel(side)}
               </div>
-              {selectedElement ? (
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-zinc-500">
-                  {selectedElement.type}
-                </span>
-              ) : null}
+
+              <div className="mt-1 text-[9px] uppercase tracking-wider text-zinc-600">
+                Swipe to navigate
+              </div>
             </div>
+
+            <button
+              type="button"
+              data-editor-control="true"
+              onClick={() => navigateSurface(1)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-lg text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+              aria-label="Next surface"
+            >
+              →
+            </button>
           </div>
 
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => setActiveEditorTool("select")}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:bg-white/[0.08] hover:text-white"
-            aria-label="Close tools"
-            title="Close"
-          >
-            ×
-          </button>
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-1 sm:grid-cols-4">
+            {(
+              [
+                ["front", "Front Cover"],
+                ["insideFront", "Inside Front"],
+                ["back", "Back Cover"],
+                ["insideBack", "Inside Back"],
+              ] as const
+            ).map(([surface, label]) => (
+              <button
+                key={surface}
+                type="button"
+                data-editor-control="true"
+                onClick={() => {
+                  setSide(surface);
+                  setSelectedElementId(null);
+                  setEditingElementId(null);
+                }}
+                className={`rounded-xl px-3 py-3 text-xs font-black transition ${
+                  side === surface
+                    ? "bg-white text-black"
+                    : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* Legacy drawer intro intentionally hidden.
-            The left toolbar + active tool header are now the primary editor UI. */}
-        <div className="hidden">
+      {/* EDITOR */}
+      <section className="rounded-3xl border border-white/10 bg-zinc-950 p-5 sm:p-7">
+        <div className="mb-8">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-400">
             Cover Editor
           </p>
@@ -2754,176 +2308,21 @@ const [resizeState, setResizeState] = useState<{
           </p>
         </div>
 
-        <div className="space-y-4 p-3 sm:p-4">
-          <div className="hidden rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.025] px-4 py-3 text-[10px] leading-5 text-zinc-500">
-            <span className="font-black text-yellow-300">
-              Tip:
-            </span>{" "}
-            Select elements directly on the canvas. Double-click text to edit it.
-          </div>
-
+        <div className="space-y-7">
           {/* ELEMENT TOOLBAR */}
-          <div
-            className={`rounded-2xl border border-white/10 bg-white/[0.025] p-3 ${
-              ["select", "text", "image", "layers"].includes(activeEditorTool)
-                ? ""
-                : "hidden"
-            }`}
-          >
+          <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/[0.025] p-4">
             <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-
-                {/* LAYERS PANEL */}
-                <div
-                  id="custom-cover-layers"
-                  className={`mt-1 overflow-hidden rounded-xl border border-white/10 bg-black/20 ${
-                    activeEditorTool === "layers" ? "" : "hidden"
-                  }`}
-                >
-                  <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-                    <div className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
-                      Layers
-                    </div>
-
-                    <div className="text-[9px] font-bold text-zinc-700">
-                      {(activeElements ?? []).length} element
-                      {(activeElements ?? []).length === 1 ? "" : "s"}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 border-b border-white/10 p-1.5">
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayerToEdge("front")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Bring to front"
-                    >
-                      ⬆ Front
-                    </button>
-
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayer("up")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Bring forward"
-                    >
-                      ↑ Forward
-                    </button>
-
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayer("down")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Send backward"
-                    >
-                      ↓ Back
-                    </button>
-
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayerToEdge("back")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Send to back"
-                    >
-                      ⬇ Back
-                    </button>
-                  </div>
-
-                  <div className="max-h-[260px] overflow-y-auto p-2">
-                    {(activeElements ?? []).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-white/10 px-3 py-6 text-center text-[10px] font-medium text-zinc-700">
-                        No elements yet
-                      </div>
-                    ) : (
-                      activeElements
-                        .slice()
-                        .sort(
-                          (a, b) =>
-                            b.zIndex - a.zIndex
-                        )
-                        .map((element, index) => {
-                          const isSelected =
-                            selectedElementId ===
-                            element.id;
-
-                          const layerLabel =
-                            element.type === "text"
-                              ? (element.text?.trim() ||
-                                  "Text")
-                              : "Image";
-
-                          return (
-                            <button
-                              key={element.id}
-                              type="button"
-                              data-editor-control="true"
-                              onClick={() => {
-                                setSelectedElementId(
-                                  element.id
-                                );
-                                setEditingElementId(
-                                  null
-                                );
-                              }}
-                              className={`group flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition ${
-                                isSelected
-                                  ? "bg-yellow-400/10 ring-1 ring-yellow-400/30"
-                                  : "hover:bg-white/[0.05]"
-                              }`}
-                            >
-                              <span
-                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-black ${
-                                  isSelected
-                                    ? "border-yellow-400/30 bg-yellow-400/10 text-yellow-300"
-                                    : "border-white/10 bg-white/[0.03] text-zinc-600"
-                                }`}
-                              >
-                                {element.type ===
-                                "text"
-                                  ? "T"
-                                  : "▧"}
-                              </span>
-
-                              <span className="min-w-0 flex-1">
-                                <span
-                                  className={`block truncate text-[10px] font-black ${
-                                    isSelected
-                                      ? "text-yellow-200"
-                                      : "text-zinc-400 group-hover:text-zinc-200"
-                                  }`}
-                                >
-                                  {layerLabel}
-                                </span>
-
-                                <span className="mt-0.5 block text-[8px] uppercase tracking-wider text-zinc-700">
-                                  Layer {index + 1}
-                                  {" · "}
-                                  z {element.zIndex}
-                                </span>
-                              </span>
-
-                              {isSelected ? (
-                                <span className="text-[9px] font-black text-yellow-400">
-                                  ●
-                                </span>
-                              ) : null}
-                            </button>
-                          );
-                        })
-                    )}
-                  </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-wider text-yellow-300">
+                  Elements
                 </div>
+
+                <p className="mt-1 text-[10px] leading-4 text-zinc-600">
+                  Select an element on the canvas to edit it.
+                </p>
               </div>
 
-              <div className="hidden flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={undo}
@@ -2970,15 +2369,15 @@ const [resizeState, setResizeState] = useState<{
               <button
                 type="button"
                 onClick={addTextElement}
-                className="hidden rounded-xl bg-white px-3 py-2 text-[10px] font-black text-black transition hover:bg-zinc-200"
+                className="rounded-xl bg-white px-3 py-2 text-[10px] font-black text-black transition hover:bg-zinc-200"
               >
                 + Text
               </button>
             </div>
 
             {selectedElement ? (
-              <div className="mt-3 space-y-3">
-                <div className="hidden grid grid-cols-4 gap-2">
+              <div className="mt-4 space-y-3">
+                <div className="grid grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => rotateSelected(-15)}
@@ -3012,800 +2411,119 @@ const [resizeState, setResizeState] = useState<{
                   </button>
                 </div>
 
-                    {/* IMAGE EDITING PANEL */}
-              {selectedElement?.type === "image" ? (
-                <div
-                  data-editor-control="true"
-                  className="rounded-xl border border-white/10 bg-white/[0.035] p-3"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                        Image
-                      </h3>
-                      <p className="mt-1 text-[10px] text-white/40">
-                        Selected artwork
-                      </p>
-                    </div>
-
-                    <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-white/60">
-                      {selectedElement.width.toFixed(0)} ×{" "}
-                      {selectedElement.height.toFixed(0)}
-                    </span>
-                  </div>
-
-                  {/* IMAGE PREVIEW */}
-                  {(() => {
-                    const selectedAsset = assets.find(
-                      (asset) =>
-                        asset.id === selectedElement.assetId
-                    );
-
-                    return selectedAsset?.previewUrl ? (
-                      <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-black/30">
-                        <img
-                          src={selectedAsset.previewUrl}
-                          alt=""
-                          className="h-24 w-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="mb-4 flex h-28 items-center justify-center rounded-xl border border-dashed border-white/10 bg-black/20 text-xs text-white/35">
-                        Image preview unavailable
-                      </div>
-                    );
-                  })()}
-
-                  {/* FIT / FILL */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                      Image Fit
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        data-editor-control="true"
-                        onClick={() =>
-                          updateElement(selectedElement.id, {
-                            objectFit: "cover",
-                          })
-                        }
-                        className={`rounded-xl border px-3 py-2 text-xs transition ${
-                          (selectedElement.objectFit ?? "cover") ===
-                          "cover"
-                            ? "border-yellow-400/60 bg-yellow-400/10 text-yellow-300"
-                            : "border-white/10 bg-white/[0.03] text-white/60 hover:bg-white/[0.06]"
-                        }`}
-                      >
-                        Fill
-                      </button>
-
-                      <button
-                        type="button"
-                        data-editor-control="true"
-                        onClick={() =>
-                          updateElement(selectedElement.id, {
-                            objectFit: "contain",
-                          })
-                        }
-                        className={`rounded-xl border px-3 py-2 text-xs transition ${
-                          selectedElement.objectFit === "contain"
-                            ? "border-yellow-400/60 bg-yellow-400/10 text-yellow-300"
-                            : "border-white/10 bg-white/[0.03] text-white/60 hover:bg-white/[0.06]"
-                        }`}
-                      >
-                        Fit
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* OPACITY */}
-                  <div className="mb-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                        Opacity
-                      </span>
-                      <span className="text-xs text-white/60">
-                        {Math.round(
-                          (selectedElement.opacity ?? 1) * 100
-                        )}
-                        %
-                      </span>
-                    </div>
-
-                    <input
-                      data-editor-control="true"
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={selectedElement.opacity ?? 1}
-                      onChange={(event) =>
-                        updateElement(selectedElement.id, {
-                          opacity: Number(event.target.value),
-                        })
-                      }
-                      className="w-full accent-yellow-400"
-                    />
-                  </div>
-
-                  {/* POSITION */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                      Position
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          X
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.x.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                x: Math.max(
-                                  0,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.width,
-                                    Number(event.target.value) || 0
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          Y
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.y.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                y: Math.max(
-                                  0,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.height,
-                                    Number(event.target.value) || 0
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* SIZE */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                      Size
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          Width
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="1"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.width.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                width: Math.max(
-                                  1,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.x,
-                                    Number(event.target.value) || 1
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          Height
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="1"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.height.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                height: Math.max(
-                                  1,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.y,
-                                    Number(event.target.value) || 1
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* ROTATION */}
-                  <div className="mb-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                        Rotation
-                      </span>
-                      <span className="text-xs text-white/60">
-                        {Math.round(selectedElement.rotation)}°
-                      </span>
-                    </div>
-
-                    <input
-                      data-editor-control="true"
-                      type="range"
-                      min="-180"
-                      max="180"
-                      step="1"
-                      value={selectedElement.rotation}
-                      onChange={(event) =>
-                        updateElement(selectedElement.id, {
-                          rotation: Number(event.target.value),
-                        })
-                      }
-                      className="w-full accent-yellow-400"
-                    />
-
-                    <div className="mt-2 grid grid-cols-4 gap-2">
-                      {[0, 90, 180, -90].map((angle) => (
-                        <button
-                          key={angle}
-                          type="button"
-                          data-editor-control="true"
-                          onClick={() =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                rotation: angle,
-                              }
-                            )
-                          }
-                          className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[11px] text-white/60 hover:bg-white/[0.07] hover:text-white"
-                        >
-                          {angle}°
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* QUICK ACTIONS */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      onClick={() =>
-                        updateElement(selectedElement.id, {
-                          rotation:
-                            selectedElement.rotation + 15 > 180
-                              ? -180 +
-                                ((selectedElement.rotation + 15) -
-                                  180)
-                              : selectedElement.rotation + 15,
-                        })
-                      }
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/70 hover:bg-white/[0.07]"
-                    >
-                      ↻ Rotate 15°
-                    </button>
-
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      onClick={() =>
-                        updateElement(selectedElement.id, {
-                          rotation:
-                            selectedElement.rotation - 15 < -180
-                              ? 180 -
-                                (Math.abs(
-                                  selectedElement.rotation - 15
-                                ) - 180)
-                              : selectedElement.rotation - 15,
-                        })
-                      }
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/70 hover:bg-white/[0.07]"
-                    >
-                      ↺ Rotate 15°
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-
                 {selectedElement.type === "text" ? (
                   <>
-              {/* TYPOGRAPHY PANEL */}
-                    <div className="space-y-3 rounded-xl border border-white/10 bg-black/20 p-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-300">
-                            Typography
-                          </div>
-                          <div className="mt-1 text-[9px] text-zinc-700">
-                            Edit the selected text directly.
-                          </div>
-                        </div>
+                    <textarea
+                      value={selectedElement.text ?? ""}
+                      maxLength={120}
+                      rows={3}
+                      onChange={(event) =>
+                        updateElement(
+                          selectedElement.id,
+                          {
+                            text: event.target.value,
+                          }
+                        )
+                      }
+                      className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 text-xs leading-5 text-white outline-none focus:border-yellow-400/50"
+                    />
 
-                        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-[8px] font-black uppercase tracking-wider text-zinc-600">
-                          Text
-                        </div>
-                      </div>
-
-                      <textarea
-                        value={selectedElement.text ?? ""}
-                        maxLength={120}
-                        rows={3}
-                        onChange={(event) =>
-                          updateElement(
-                            selectedElement.id,
-                            {
-                              text: event.target.value,
-                            }
-                          )
-                        }
-                        onDoubleClick={(event) =>
-                          event.currentTarget.focus()
-                        }
-                        className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 text-xs leading-5 text-white outline-none transition focus:border-yellow-400/50"
-                        placeholder="Type your text..."
-                      />
-
-                      {/* Font family */}
-                      <label className="block rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                         <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                          Font
+                          Size
+                        </span>
+
+                        <input
+                          type="number"
+                          min={8}
+                          max={120}
+                          value={
+                            selectedElement.fontSize ?? 16
+                          }
+                          onChange={(event) =>
+                            updateElement(
+                              selectedElement.id,
+                              {
+                                fontSize: Math.max(
+                                  8,
+                                  Math.min(
+                                    120,
+                                    Number(event.target.value)
+                                  )
+                                ),
+                              }
+                            )
+                          }
+                          className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
+                        />
+                      </label>
+
+                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                        <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
+                          Weight
                         </span>
 
                         <select
                           value={
-                            selectedElement.fontFamily ??
-                            "Inter, sans-serif"
+                            selectedElement.fontWeight ??
+                            700
                           }
                           onChange={(event) =>
                             updateElement(
                               selectedElement.id,
                               {
-                                fontFamily:
-                                  event.target.value,
+                                fontWeight:
+                                  Number(
+                                    event.target.value
+                                  ),
                               }
                             )
                           }
-                          className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-2 py-2 text-xs font-bold text-white outline-none"
+                          className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
                         >
-                          <option value="Inter, sans-serif">
-                            Inter
+                          <option value={400}>
+                            Regular
                           </option>
-                          <option value="Arial, sans-serif">
-                            Arial
+                          <option value={500}>
+                            Medium
                           </option>
-                          <option value="Georgia, serif">
-                            Georgia
+                          <option value={700}>
+                            Bold
                           </option>
-                          <option value="Times New Roman, serif">
-                            Times New Roman
-                          </option>
-                          <option value="Courier New, monospace">
-                            Courier New
-                          </option>
-                          <option value="Impact, sans-serif">
-                            Impact
+                          <option value={900}>
+                            Black
                           </option>
                         </select>
                       </label>
+                    </div>
 
-                      {/* Size + weight */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Size
-                          </span>
-
-                          <div className="mt-2 flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    fontSize: Math.max(
-                                      8,
-                                      (selectedElement.fontSize ??
-                                        16) - 1
-                                    ),
-                                  }
-                                )
-                              }
-                              className="h-7 w-7 rounded-lg border border-white/10 bg-white/[0.04] text-sm font-black text-zinc-400 hover:text-white"
-                            >
-                              −
-                            </button>
-
-                            <input
-                              type="number"
-                              min={8}
-                              max={120}
-                              value={
-                                selectedElement.fontSize ??
-                                16
-                              }
-                              onChange={(event) =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    fontSize: Math.max(
-                                      8,
-                                      Math.min(
-                                        120,
-                                        Number(
-                                          event.target.value
-                                        )
-                                      )
-                                    ),
-                                  }
-                                )
-                              }
-                              className="min-w-0 flex-1 bg-transparent text-center text-sm font-black text-white outline-none"
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    fontSize: Math.min(
-                                      120,
-                                      (selectedElement.fontSize ??
-                                        16) + 1
-                                    ),
-                                  }
-                                )
-                              }
-                              className="h-7 w-7 rounded-lg border border-white/10 bg-white/[0.04] text-sm font-black text-zinc-400 hover:text-white"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-
-                        <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Weight
-                          </span>
-
-                          <select
-                            value={
-                              selectedElement.fontWeight ??
-                              700
-                            }
-                            onChange={(event) =>
-                              updateElement(
-                                selectedElement.id,
-                                {
-                                  fontWeight: Number(
-                                    event.target.value
-                                  ),
-                                }
-                              )
-                            }
-                            className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
-                          >
-                            <option value={300}>
-                              Light
-                            </option>
-                            <option value={400}>
-                              Regular
-                            </option>
-                            <option value={500}>
-                              Medium
-                            </option>
-                            <option value={700}>
-                              Bold
-                            </option>
-                            <option value={900}>
-                              Black
-                            </option>
-                          </select>
-                        </label>
-                      </div>
-
-                      {/* Weight presets */}
-                      <div className="grid grid-cols-5 gap-1">
-                        {(
-                          [
-                            [300, "L"],
-                            [400, "R"],
-                            [500, "M"],
-                            [700, "B"],
-                            [900, "X"],
-                          ] as const
-                        ).map(([value, label]) => (
-                          <button
-                            key={value}
-                            type="button"
-                            onClick={() =>
-                              updateElement(
-                                selectedElement.id,
-                                {
-                                  fontWeight: value,
-                                }
-                              )
-                            }
-                            className={`rounded-lg border py-2 text-[9px] font-black ${
-                              (selectedElement.fontWeight ??
-                                700) === value
-                                ? "border-yellow-400/50 bg-yellow-400/[0.08] text-yellow-300"
-                                : "border-white/10 bg-white/[0.02] text-zinc-600 hover:text-zinc-300"
-                            }`}
-                            title={
-                              value === 300
-                                ? "Light"
-                                : value === 400
-                                ? "Regular"
-                                : value === 500
-                                ? "Medium"
-                                : value === 700
-                                ? "Bold"
-                                : "Black"
-                            }
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Color + opacity */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Color
-                          </span>
-
-                          <div className="mt-2 flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={
-                                /^#[0-9A-Fa-f]{6}$/.test(
-                                  selectedElement.color ??
-                                    "#ffffff"
-                                )
-                                  ? selectedElement.color ??
-                                    "#ffffff"
-                                  : "#ffffff"
-                              }
-                              onChange={(event) =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    color:
-                                      event.target.value,
-                                  }
-                                )
-                              }
-                              className="h-8 w-10 cursor-pointer rounded-lg border border-white/10 bg-transparent"
-                            />
-
-                            <span className="truncate text-[10px] font-bold text-zinc-400">
-                              {selectedElement.color ??
-                                "#ffffff"}
-                            </span>
-                          </div>
-                        </label>
-
-                        <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Opacity
-                          </span>
-
-                          <div className="mt-2 flex items-center gap-2">
-                            <input
-                              type="range"
-                              min={0}
-                              max={1}
-                              step={0.05}
-                              value={
-                                selectedElement.opacity ??
-                                1
-                              }
-                              onChange={(event) =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    opacity: Number(
-                                      event.target.value
-                                    ),
-                                  }
-                                )
-                              }
-                              className="min-w-0 flex-1 accent-yellow-400"
-                            />
-
-                            <span className="w-8 text-right text-[9px] font-black text-zinc-500">
-                              {Math.round(
-                                (selectedElement.opacity ??
-                                  1) * 100
-                              )}
-                              %
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-
-                      {/* Alignment */}
-                      <div>
-                        <span className="mb-2 block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                          Alignment
-                        </span>
-
-                        <div className="grid grid-cols-3 gap-2">
-                          {(
-                            [
-                              ["left", "←"],
-                              ["center", "↔"],
-                              ["right", "→"],
-                            ] as const
-                          ).map(([value, label]) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    align: value,
-                                  }
-                                )
-                              }
-                              className={`rounded-xl border py-2.5 text-sm font-black ${
-                                (selectedElement.align ??
-                                  "center") === value
-                                  ? "border-yellow-400/50 bg-yellow-400/[0.08] text-yellow-300"
-                                  : "border-white/10 bg-white/[0.02] text-zinc-600 hover:text-zinc-300"
-                              }`}
-                              title={
-                                value === "left"
-                                  ? "Align left"
-                                  : value === "center"
-                                  ? "Align center"
-                                  : "Align right"
-                              }
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Line height */}
-                      <label className="block rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Line Height
-                          </span>
-
-                          <span className="text-[9px] font-black text-zinc-500">
-                            {(
-                              selectedElement.lineHeight ??
-                              1.15
-                            ).toFixed(2)}
-                          </span>
-                        </div>
-
-                        <input
-                          type="range"
-                          min={0.8}
-                          max={2}
-                          step={0.05}
-                          value={
-                            selectedElement.lineHeight ??
-                            1.15
-                          }
-                          onChange={(event) =>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(
+                        [
+                          ["left", "Left"],
+                          ["center", "Center"],
+                          ["right", "Right"],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() =>
                             updateElement(
                               selectedElement.id,
-                              {
-                                lineHeight: Number(
-                                  event.target.value
-                                ),
-                              }
+                              { align: value }
                             )
                           }
-                          className="mt-2 w-full accent-yellow-400"
-                        />
-                      </label>
-
-                      {/* Letter spacing */}
-                      <label className="block rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Letter Spacing
-                          </span>
-
-                          <span className="text-[9px] font-black text-zinc-500">
-                            {(
-                              selectedElement.letterSpacing ??
-                              0
-                            ).toFixed(1)}
-                            px
-                          </span>
-                        </div>
-
-                        <input
-                          type="range"
-                          min={-4}
-                          max={12}
-                          step={0.5}
-                          value={
-                            selectedElement.letterSpacing ??
-                            0
-                          }
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                letterSpacing: Number(
-                                  event.target.value
-                                ),
-                              }
-                            )
-                          }
-                          className="mt-2 w-full accent-yellow-400"
-                        />
-                      </label>
+                          className={`rounded-xl border py-2 text-[10px] font-black ${
+                            selectedElement.align === value
+                              ? "border-yellow-400/50 bg-yellow-400/[0.08] text-yellow-300"
+                              : "border-white/10 text-zinc-500"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   </>
                 ) : null}
@@ -3826,7 +2544,7 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* NAME */}
-          <label className="hidden">
+          <label className="block">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                 Your name
@@ -3849,7 +2567,7 @@ const [resizeState, setResizeState] = useState<{
           </label>
 
           {/* QUOTE */}
-          <label className="hidden">
+          <label className="block">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                 Text / quote
@@ -3873,10 +2591,8 @@ const [resizeState, setResizeState] = useState<{
           </label>
 
           {/* AI GENERATION */}
-          {customization.creationMethod === "ai" &&
-          activeEditorTool === "ai" ? (
-            <div id="custom-cover-ai-tools">
-            <div className="rounded-xl border border-yellow-400/15 bg-yellow-400/[0.025] p-3">
+          {customization.creationMethod === "ai" ? (
+            <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/[0.025] p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-black uppercase tracking-wider text-yellow-300">
@@ -4013,15 +2729,10 @@ const [resizeState, setResizeState] = useState<{
                 </span>
               </div>
             </div>
-            </div>
           ) : null}
 
           {/* UPLOAD ARTWORK */}
-          <div
-            className={`rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 ${
-              activeEditorTool === "image" ? "" : "hidden"
-            }`}
-          >
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-xs font-black uppercase tracking-wider text-zinc-300">
@@ -4096,15 +2807,12 @@ const [resizeState, setResizeState] = useState<{
             ) : null}
 
             <p className="mt-3 text-[9px] leading-4 text-zinc-700">
-              15 MB max · 600×800 minimum · private
+              Maximum 15 MB · Minimum 600×800 px · Your artwork remains private.
             </p>
           </div>
 
           {/* TEMPLATE */}
-          <div
-            id="custom-cover-style-tools"
-            className={activeEditorTool === "style" ? "" : "hidden"}
-          >
+          <div>
             <div className="mb-3">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                 Choose template
@@ -4149,7 +2857,7 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* BRANDING */}
-          <div className="hidden rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <div className="text-xs font-black uppercase tracking-wider text-zinc-300">
               System branding
             </div>
@@ -4172,7 +2880,7 @@ const [resizeState, setResizeState] = useState<{
           </div>
 
           {/* CREATION METHOD */}
-          <div className="hidden rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
             <div className="text-[10px] font-black uppercase tracking-wider text-zinc-600">
               Creation method
             </div>
@@ -4186,7 +2894,40 @@ const [resizeState, setResizeState] = useState<{
             </p>
           </div>
 
-          <div className="text-center text-[9px] font-black uppercase tracking-[0.16em] text-zinc-700">
+          {/* ACTIONS */}
+          <div className="grid gap-2">
+            <button
+              type="button"
+              disabled={saving || approving || generatingAi}
+              onClick={saveDraft}
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Save Draft ✨"}
+            </button>
+
+            <button
+              type="button"
+              disabled={saving || approving || generatingAi}
+              onClick={approveAndAddToCart}
+              className="w-full rounded-2xl bg-yellow-400 px-5 py-4 text-sm font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {approving ? "Approving..." : "Approve & Add to Cart →"}
+            </button>
+          </div>
+
+          {message ? (
+            <p
+              className={`text-center text-xs font-bold ${
+                message.includes("saved")
+                  ? "text-emerald-400"
+                  : "text-red-400"
+              }`}
+            >
+              {message}
+            </p>
+          ) : null}
+
+          <div className="text-center text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-700">
             Status · {approving ? "Approving..." : customization.status}
           </div>
         </div>

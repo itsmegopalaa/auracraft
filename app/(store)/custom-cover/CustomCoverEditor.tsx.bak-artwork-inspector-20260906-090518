@@ -1951,9 +1951,9 @@ const [resizeState, setResizeState] = useState<{
       {/* LEFT EDITOR TOOLBAR */}
       <aside
         data-editor-control="true"
-        className="order-2 min-h-0 h-full lg:order-1 lg:sticky lg:top-0 md:h-full md:max-h-full"
+        className="order-2 min-h-0 h-full lg:order-1 lg:sticky lg:top-0 lg:h-full lg:max-h-full"
       >
-        <div className="flex h-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-zinc-950 p-2 md:flex-col lg:overflow-visible">
+        <div className="flex h-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-zinc-950 p-2 lg:flex-col lg:overflow-visible">
           <div className="hidden items-center justify-center pb-1 lg:flex">
             <div className="h-8 w-8 rounded-xl border border-yellow-400/20 bg-yellow-400/[0.06] text-center text-[9px] font-black leading-8 text-yellow-300">
               M
@@ -2292,7 +2292,7 @@ const [resizeState, setResizeState] = useState<{
 
         {/* EDITOR ACTION BAR */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[130] flex justify-center px-3 pb-2 sm:px-4 sm:pb-3">
-          <div className="pointer-events-auto flex w-full max-w-xl items-center justify-between gap-2 rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl">
+          <div className="pointer-events-auto flex w-full max-w-lg items-center justify-between gap-1.5 rounded-xl border border-white/[0.12] bg-zinc-950/95 p-1.5 shadow-[0_16px_50px_rgba(0,0,0,.55)] backdrop-blur-2xl">
             <button
               type="button"
               disabled={saving || approving || generatingAi}
@@ -2324,7 +2324,7 @@ const [resizeState, setResizeState] = useState<{
               Design Studio
             </p>
 
-            <h2 className="mt-1 text-lg font-black tracking-tight">
+            <h2 className="mt-1 text-xl font-black tracking-tight">
               {getCoverSideLabel(side)}
             </h2>
           </div>
@@ -2332,7 +2332,7 @@ const [resizeState, setResizeState] = useState<{
         </div>
 
         {/* EDITABLE SURFACES */}
-        <div className="flex shrink-0 items-center justify-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-zinc-950/80 px-3 py-2 backdrop-blur-xl">
+        <div className="relative z-20 flex shrink-0 items-center justify-center gap-1 overflow-x-auto border-b border-white/[0.06] bg-[#0b0b0d]/95 px-3 py-1.5 backdrop-blur-xl">
           {(
             [
               ["front", "FRONT"],
@@ -2349,7 +2349,7 @@ const [resizeState, setResizeState] = useState<{
                 setSelectedElementId(null);
                 setEditingElementId(null);
               }}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-[8px] font-black tracking-[0.12em] transition ${
+              className={`shrink-0 rounded-md px-3 py-1.5 text-[8px] font-black tracking-[0.12em] transition ${
                 side === surface
                   ? "bg-white text-black"
                   : "text-zinc-500 hover:text-white"
@@ -2360,13 +2360,13 @@ const [resizeState, setResizeState] = useState<{
           ))}
         </div>
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,rgba(255,255,255,.035),transparent_55%)] px-2 pb-[84px] pt-2 sm:px-4 sm:pb-[92px] sm:pt-3">
+        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,rgba(255,255,255,.045),transparent_58%)] px-2 pb-[78px] pt-2 sm:px-4 sm:pb-[86px] sm:pt-2">
               <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-[60] flex items-center justify-between px-2 sm:px-4">
                 <button
                   type="button"
                   data-editor-control="true"
                   onClick={() => navigateSurface(-1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
+                  className="pointer-events-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/75 text-xl font-light leading-none text-white/65 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
                   aria-label="Previous surface"
                   title="Previous surface"
                 >
@@ -2377,7 +2377,7 @@ const [resizeState, setResizeState] = useState<{
                   type="button"
                   data-editor-control="true"
                   onClick={() => navigateSurface(1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
+                  className="pointer-events-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/75 text-xl font-light leading-none text-white/65 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
                   aria-label="Next surface"
                   title="Next surface"
                 >
@@ -2386,10 +2386,10 @@ const [resizeState, setResizeState] = useState<{
               </div>
 
 
-          <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
+          <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center">
             <div
               key={editorResetVersion}
-              className="relative aspect-[216/279] h-[82%] max-h-full w-auto max-w-[90%] overflow-visible rounded-[8px] border border-white/15 bg-black shadow-[0_24px_64px_rgba(0,0,0,0.62)] select-none"
+              className="relative aspect-[216/279] h-auto max-h-full w-auto max-w-full overflow-visible rounded-[8px] border border-white/15 bg-black shadow-[0_24px_64px_rgba(0,0,0,0.62)] select-none"
               style={{
                 background: previewBackground,
                 touchAction: "none",
@@ -2691,14 +2691,14 @@ const [resizeState, setResizeState] = useState<{
 
       {/* EDITOR */}
       <section
-        className={`order-2 min-h-0 min-w-0 overflow-y-auto border-l border-white/[0.07] bg-zinc-950 md:order-3 ${
+        className={`order-2 min-h-0 min-w-0 overflow-y-auto border-l border-white/10 bg-zinc-950 lg:order-3 ${
     isEditorFullscreen
-      ? "md:h-screen md:max-h-screen"
+      ? "lg:h-screen lg:max-h-screen"
       : "lg:h-full lg:max-h-full"
   }`}
         aria-label="Editor tools"
       >
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.07] bg-zinc-950/95 px-4 py-2.5 backdrop-blur-xl">
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl">
           <div>
             <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
               {activeEditorTool === "select"
@@ -4018,7 +4018,7 @@ const [resizeState, setResizeState] = useState<{
 
           {/* UPLOAD ARTWORK */}
           <div
-            className={`rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 ${
+            className={`rounded-2xl border border-white/10 bg-white/[0.025] p-4 ${
               activeEditorTool === "image" ? "" : "hidden"
             }`}
           >
@@ -4096,7 +4096,7 @@ const [resizeState, setResizeState] = useState<{
             ) : null}
 
             <p className="mt-3 text-[9px] leading-4 text-zinc-700">
-              15 MB max · 600×800 minimum · private
+              Maximum 15 MB · Minimum 600×800 px · Your artwork remains private.
             </p>
           </div>
 
@@ -4186,7 +4186,7 @@ const [resizeState, setResizeState] = useState<{
             </p>
           </div>
 
-          <div className="text-center text-[9px] font-black uppercase tracking-[0.16em] text-zinc-700">
+          <div className="text-center text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-700">
             Status · {approving ? "Approving..." : customization.status}
           </div>
         </div>

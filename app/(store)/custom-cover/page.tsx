@@ -113,9 +113,22 @@ export default async function CustomCoverPage({
     })) ?? [];
 
   return (
-    <main className="min-h-screen bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24">
-      <section className="mx-auto max-w-6xl">
-        <div className="mb-10 max-w-4xl">
+    <main
+      className={
+        selectedProduct
+          ? "min-h-0 bg-black text-white"
+          : "min-h-screen bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24"
+      }
+    >
+      <section
+        className={
+          selectedProduct
+            ? "h-[calc(100vh-7rem)] min-h-0 max-w-none"
+            : "mx-auto max-w-6xl"
+        }
+      >
+        {!selectedProduct && (
+          <div className="mb-10 max-w-4xl">
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/[0.07] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-400">
               ✨ Custom Creation Studio
@@ -148,6 +161,7 @@ export default async function CustomCoverPage({
               : "Start with a blank idea, choose your physical notebook, and create a cover that does not have to look like anything else in our catalogue."}
           </p>
         </div>
+        )}
 
         {!selectedProduct && (
           <div className="mb-8 rounded-[2rem] border border-yellow-400/20 bg-yellow-400/[0.045] p-5 sm:p-7">

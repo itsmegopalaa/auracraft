@@ -63,39 +63,8 @@ export default async function CustomCoverEditorPage({
   }
 
   return (
-    <main className="min-h-screen bg-black px-4 py-12 text-white sm:px-6 sm:py-16 lg:py-20">
-      <section className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <span className="inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/[0.07] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-400">
-              🎨 Cover Editor
-            </span>
-
-            <h1 className="mt-5 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-              Make it{" "}
-              <span className="text-yellow-400">
-                yours.
-              </span>
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-500 sm:text-base">
-              Edit your personal details and preview both sides
-              of your notebook cover. Your draft stays connected
-              to this specific product.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/[0.08] bg-zinc-950 px-5 py-4">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-600">
-              Customization
-            </p>
-
-            <p className="mt-1 break-all font-mono text-xs text-zinc-400">
-              {customization.id}
-            </p>
-          </div>
-        </div>
-
+    <main className="flex h-[calc(100dvh-4rem)] min-h-0 w-full overflow-hidden bg-black text-white">
+      <section className="flex h-full min-h-0 w-full min-w-0 overflow-hidden">
         <CustomCoverEditor
           customization={{
             id: customization.id,

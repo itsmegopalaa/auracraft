@@ -78,7 +78,87 @@ function sanitizeDesign(value: unknown) {
           ? surface.artworkUrl.slice(0, 2000)
           : undefined,
       assets: Array.isArray(surface.assets)
-        ? surface.assets
+        ? surface.assets.slice(0, 50)
+        : [],
+      elements: Array.isArray(surface.elements)
+        ? surface.elements
+            .filter((element) => isPlainObject(element))
+            .slice(0, 50)
+            .map((element) => ({
+              id:
+                typeof element.id === "string"
+                  ? element.id.slice(0, 80)
+                  : crypto.randomUUID(),
+              type:
+                element.type === "image" ||
+                element.type === "text"
+                  ? element.type
+                  : "text",
+              x:
+                typeof element.x === "number" &&
+                Number.isFinite(element.x)
+                  ? Math.max(0, Math.min(100, element.x))
+                  : 50,
+              y:
+                typeof element.y === "number" &&
+                Number.isFinite(element.y)
+                  ? Math.max(0, Math.min(100, element.y))
+                  : 50,
+              width:
+                typeof element.width === "number" &&
+                Number.isFinite(element.width)
+                  ? Math.max(1, Math.min(100, element.width))
+                  : 30,
+              height:
+                typeof element.height === "number" &&
+                Number.isFinite(element.height)
+                  ? Math.max(1, Math.min(100, element.height))
+                  : 10,
+              rotation:
+                typeof element.rotation === "number" &&
+                Number.isFinite(element.rotation)
+                  ? Math.max(-180, Math.min(180, element.rotation))
+                  : 0,
+              zIndex:
+                typeof element.zIndex === "number" &&
+                Number.isFinite(element.zIndex)
+                  ? Math.max(
+                      0,
+                      Math.min(1000, Math.round(element.zIndex))
+                    )
+                  : 1,
+              text:
+                typeof element.text === "string"
+                  ? element.text.slice(0, 120)
+                  : undefined,
+              assetId:
+                typeof element.assetId === "string"
+                  ? element.assetId.slice(0, 100)
+                  : undefined,
+              fontSize:
+                typeof element.fontSize === "number" &&
+                Number.isFinite(element.fontSize)
+                  ? Math.max(8, Math.min(120, element.fontSize))
+                  : undefined,
+              fontWeight:
+                typeof element.fontWeight === "number" &&
+                Number.isFinite(element.fontWeight)
+                  ? Math.max(
+                      300,
+                      Math.min(900, element.fontWeight)
+                    )
+                  : undefined,
+              color:
+                typeof element.color === "string"
+                  ? element.color.slice(0, 50)
+                  : undefined,
+              align:
+                element.align === "left" ||
+                element.align === "center" ||
+                element.align === "right"
+                  ? element.align
+                  : undefined,
+            }))
         : [],
       texts: Array.isArray(surface.texts)
         ? surface.texts

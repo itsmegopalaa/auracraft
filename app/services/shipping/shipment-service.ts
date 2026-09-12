@@ -188,14 +188,7 @@ export async function createShipment(input: CreateShipmentInput) {
       input.rate
     );
 
-    await appendProviderStage(
-      supabase,
-      shipmentId,
-      "push_order",
-      pushed.raw_response
-    );
-
-    await supabase
+    const { error: providerIdError } = await supabase
       .from("shipments")
       .update({
         shipment_id: pushed.shipment_id,
@@ -208,6 +201,19 @@ export async function createShipment(input: CreateShipmentInput) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", shipmentId);
+
+    if (providerIdError) {
+      throw new Error(
+        `Provider shipment was created, but saving shipment ID failed: ${providerIdError.message}`
+      );
+    }
+
+    await appendProviderStage(
+      supabase,
+      shipmentId,
+      "push_order",
+      pushed.raw_response
+    );
 
     const assigned = await provider.assignCourier(
       pushed.shipment_id,
@@ -229,7 +235,7 @@ export async function createShipment(input: CreateShipmentInput) {
       );
     }
 
-    await supabase
+    const { error: awbSaveError } = await supabase
       .from("shipments")
       .update({
         awb,
@@ -242,6 +248,12 @@ export async function createShipment(input: CreateShipmentInput) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", shipmentId);
+
+    if (awbSaveError) {
+      throw new Error(
+        `Courier assigned, but saving AWB failed: ${awbSaveError.message}`
+      );
+    }
 
     const pickup = await provider.schedulePickup(
       pushed.shipment_id
@@ -256,7 +268,7 @@ export async function createShipment(input: CreateShipmentInput) {
 
     const finalAwb = pickup.awb || awb;
 
-    await supabase
+    const { error: readySaveError } = await supabase
       .from("shipments")
       .update({
         awb: finalAwb,
@@ -273,6 +285,12 @@ export async function createShipment(input: CreateShipmentInput) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", shipmentId);
+
+    if (readySaveError) {
+      throw new Error(
+        `Pickup scheduled, but saving shipment state failed: ${readySaveError.message}`
+      );
+    }
 
     try {
       const label = await provider.getLabel(finalAwb);
@@ -373,7 +391,7 @@ export async function createShipment(input: CreateShipmentInput) {
 
     if (orderLinkError) {
       throw new Error(
-        `Shipment was created but order linkage failed: ${orderLinkError.message}`
+        `Shipment created, but linking shipment to order failed: ${orderLinkError.message}`
       );
     }
 
@@ -384,7 +402,7 @@ export async function createShipment(input: CreateShipmentInput) {
         ? error.message
         : "Shipment creation failed.";
 
-    await supabase
+    const { error: failureSaveError } = await supabase
       .from("shipments")
       .update({
         status: "failed",
@@ -392,6 +410,13 @@ export async function createShipment(input: CreateShipmentInput) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", shipmentId);
+
+    if (failureSaveError) {
+      console.error(
+        "FAILED TO SAVE SHIPMENT FAILURE STATE:",
+        failureSaveError.message
+      );
+    }
 
     throw error;
   }

@@ -64,7 +64,7 @@ export async function automateOrderShipping(orderId: string) {
     );
   }
 
-  if (existingShipment.data) {
+  if (existingShipment.data && existingShipment.data.status !== "failed") {
     return {
       created: false,
       reason: "shipment_already_exists",

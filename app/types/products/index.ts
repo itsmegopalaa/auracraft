@@ -10,6 +10,11 @@ export interface Product {
   stock: number;
   active: boolean;
 
+  shipping_weight_grams?: number | null;
+  package_length_cm?: number | null;
+  package_width_cm?: number | null;
+  package_height_cm?: number | null;
+
   rating?: number | null;
   review_count?: number;
 

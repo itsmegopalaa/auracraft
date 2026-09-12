@@ -25,6 +25,13 @@ export default function AdminProductsClient({ products: initialProducts }: Props
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [shippingWeight, setShippingWeight] = useState("");
+  const [packageLength, setPackageLength] = useState("");
+  const [packageWidth, setPackageWidth] = useState("");
+  const [packageHeight, setPackageHeight] = useState("");
+  const [shippingSaving, setShippingSaving] = useState(false);
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: 0,
@@ -51,6 +58,90 @@ export default function AdminProductsClient({ products: initialProducts }: Props
           : product
       )
     );
+  }
+
+  function toggleProductSelection(id: string) {
+    setSelectedProductIds((current) =>
+      current.includes(id)
+        ? current.filter((productId) => productId !== id)
+        : [...current, id]
+    );
+  }
+
+  function toggleAllProducts() {
+    setSelectedProductIds((current) =>
+      current.length === products.length
+        ? []
+        : products.map((product) => product.id)
+    );
+  }
+
+  async function applyBulkShipping() {
+    if (selectedProductIds.length === 0) {
+      setError("Select at least one product.");
+      return;
+    }
+
+    const weight = Number(shippingWeight);
+    const length = Number(packageLength);
+    const width = Number(packageWidth);
+    const height = Number(packageHeight);
+
+    if (![weight, length, width, height].every((value) => Number.isFinite(value) && value > 0)) {
+      setError("Enter positive shipping weight and package dimensions.");
+      return;
+    }
+
+    setShippingSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/products/shipping", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productIds: selectedProductIds,
+          shipping: {
+            shipping_weight_grams: weight,
+            package_length_cm: length,
+            package_width_cm: width,
+            package_height_cm: height,
+          },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Unable to update shipping details.");
+      }
+
+      setProducts((current) =>
+        current.map((product) => {
+          const updated = data.products?.find(
+            (item: Product) => item.id === product.id
+          );
+
+          return updated ?? product;
+        })
+      );
+
+      setSelectedProductIds([]);
+      setShippingWeight("");
+      setPackageLength("");
+      setPackageWidth("");
+      setPackageHeight("");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to update shipping details."
+      );
+    } finally {
+      setShippingSaving(false);
+    }
   }
 
   async function saveProduct() {
@@ -145,6 +236,96 @@ export default function AdminProductsClient({ products: initialProducts }: Props
         </div>
       )}
 
+      {products.length > 0 && (
+        <div className="border-b border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950 sm:p-5">
+          <div className="mb-4">
+            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+              Bulk Shipping Setup
+            </h3>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              Select products and apply their physical shipping weight and package dimensions together.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                Weight (grams)
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={shippingWeight}
+                onChange={(event) => setShippingWeight(event.target.value)}
+                placeholder="e.g. 500"
+                className="min-h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 dark:border-zinc-700 dark:bg-zinc-900"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                Length (cm)
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={packageLength}
+                onChange={(event) => setPackageLength(event.target.value)}
+                placeholder="e.g. 32"
+                className="min-h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 dark:border-zinc-700 dark:bg-zinc-900"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                Width (cm)
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={packageWidth}
+                onChange={(event) => setPackageWidth(event.target.value)}
+                placeholder="e.g. 24"
+                className="min-h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 dark:border-zinc-700 dark:bg-zinc-900"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                Height (cm)
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={packageHeight}
+                onChange={(event) => setPackageHeight(event.target.value)}
+                placeholder="e.g. 5"
+                className="min-h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 dark:border-zinc-700 dark:bg-zinc-900"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {selectedProductIds.length} product{selectedProductIds.length === 1 ? "" : "s"} selected
+            </p>
+
+            <button
+              type="button"
+              onClick={applyBulkShipping}
+              disabled={shippingSaving || selectedProductIds.length === 0}
+              className="min-h-11 rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {shippingSaving ? "Applying..." : "Apply to Selected"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {products.length === 0 ? (
         <div className="p-10 text-center sm:p-12">
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -160,6 +341,18 @@ export default function AdminProductsClient({ products: initialProducts }: Props
           <table className="w-full min-w-[900px] text-left">
             <thead className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
               <tr>
+                <th className="w-12 px-5 py-4">
+                  <input
+                    type="checkbox"
+                    checked={
+                      products.length > 0 &&
+                      selectedProductIds.length === products.length
+                    }
+                    onChange={toggleAllProducts}
+                    aria-label="Select all products"
+                    className="h-4 w-4 rounded border-zinc-300 accent-yellow-400"
+                  />
+                </th>
                 <th className="px-5 py-4 text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
                   Product
                 </th>
@@ -196,6 +389,16 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   key={product.id}
                   className="border-b border-zinc-100 dark:border-zinc-800 last:border-0"
                 >
+                  <td className="w-12 px-5 py-3.5 sm:py-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedProductIds.includes(product.id)}
+                      onChange={() => toggleProductSelection(product.id)}
+                      aria-label={`Select ${product.name}`}
+                      className="h-4 w-4 rounded border-zinc-300 accent-yellow-400"
+                    />
+                  </td>
+
                   <td className="px-4 py-3.5 sm:px-5 sm:py-4">
                     <div className="flex items-center gap-4">
                       {product.image ? (

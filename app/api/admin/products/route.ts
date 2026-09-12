@@ -3,7 +3,7 @@ import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 const PRODUCT_SELECT =
-  "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size, theme, badge, created_at, updated_at";
+  "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size, theme, badge, shipping_weight_grams, package_length_cm, package_width_cm, package_height_cm, created_at, updated_at";
 
 const VALID_BADGES = new Set([
   "best_seller",
@@ -73,6 +73,75 @@ function validateBadge(
   };
 }
 
+function validateShippingField(
+  value: unknown,
+  fieldName: string
+): string | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    value <= 0
+  ) {
+    return `${fieldName} must be a positive number.`;
+  }
+
+  return null;
+}
+
+function validateShippingFields(
+  body: Record<string, unknown>
+): string | null {
+  const fields = [
+    ["shipping_weight_grams", "Shipping weight"],
+    ["package_length_cm", "Package length"],
+    ["package_width_cm", "Package width"],
+    ["package_height_cm", "Package height"],
+  ] as const;
+
+  for (const [field, label] of fields) {
+    const error = validateShippingField(body[field], label);
+
+    if (error) return error;
+  }
+
+  return null;
+}
+
+function buildShippingData(
+  body: Record<string, unknown>
+): Record<string, number | null> {
+  return {
+    shipping_weight_grams:
+      body.shipping_weight_grams === undefined ||
+      body.shipping_weight_grams === null ||
+      body.shipping_weight_grams === ""
+        ? null
+        : body.shipping_weight_grams as number,
+    package_length_cm:
+      body.package_length_cm === undefined ||
+      body.package_length_cm === null ||
+      body.package_length_cm === ""
+        ? null
+        : body.package_length_cm as number,
+    package_width_cm:
+      body.package_width_cm === undefined ||
+      body.package_width_cm === null ||
+      body.package_width_cm === ""
+        ? null
+        : body.package_width_cm as number,
+    package_height_cm:
+      body.package_height_cm === undefined ||
+      body.package_height_cm === null ||
+      body.package_height_cm === ""
+        ? null
+        : body.package_height_cm as number,
+  };
+}
+
 function validateBaseProductFields(
   body: Record<string, unknown>
 ): string | null {
@@ -132,6 +201,7 @@ function buildCreateData(
         typeof body.featured === "boolean"
           ? body.featured
           : false,
+      ...buildShippingData(body),
     },
   };
 }
@@ -194,6 +264,15 @@ function buildUpdateData(
 
   if ("featured" in body) {
     updateData.featured = body.featured;
+  }
+
+  if (
+    "shipping_weight_grams" in body ||
+    "package_length_cm" in body ||
+    "package_width_cm" in body ||
+    "package_height_cm" in body
+  ) {
+    Object.assign(updateData, buildShippingData(body));
   }
 
   updateData.updated_at =
@@ -302,6 +381,15 @@ export async function PATCH(request: Request) {
     );
   }
 
+  const shippingValidationError = validateShippingFields(body);
+
+  if (shippingValidationError) {
+    return NextResponse.json(
+      { error: shippingValidationError },
+      { status: 400 }
+    );
+  }
+
   const productData = buildUpdateData(body);
 
   if ("error" in productData) {
@@ -382,6 +470,15 @@ export async function POST(request: Request) {
   if (validationError) {
     return NextResponse.json(
       { error: validationError },
+      { status: 400 }
+    );
+  }
+
+  const shippingValidationError = validateShippingFields(body);
+
+  if (shippingValidationError) {
+    return NextResponse.json(
+      { error: shippingValidationError },
       { status: 400 }
     );
   }

@@ -3,6 +3,7 @@ import { getServerEnv } from "@/app/config";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
+import { automateOrderShipping } from "@/app/services/shipping/automation";
 
 const supabaseAdmin = createSupabaseAdminClient();
 
@@ -325,7 +326,33 @@ export async function POST(request: Request) {
         );
       }
 
-      
+      /*
+       * SHIPPING AUTOMATION
+       *
+       * Payment is already confirmed successfully.
+       * Shipping failure must not turn a successful
+       * payment into a failed webhook.
+       */
+      try {
+        await automateOrderShipping(existingOrder.order_id);
+
+        console.log(
+          "SHIPPING AUTOMATION STARTED:",
+          existingOrder.order_id
+        );
+      } catch (shippingError) {
+        console.error(
+          "SHIPPING AUTOMATION FAILED:",
+          {
+            orderId: existingOrder.order_id,
+            error:
+              shippingError instanceof Error
+                ? shippingError.message
+                : shippingError,
+          }
+        );
+      }
+
       return NextResponse.json({
         received: true,
         handled: true,

@@ -4,6 +4,7 @@ import { requireAdmin } from "@/app/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 import OrderStatusForm from "./OrderStatusForm";
 import FulfillmentForm from "./FulfillmentForm";
+import ProductionChecklist from "./ProductionChecklist";
 import RefundForm from "./RefundForm";
 import Link from "next/link";
 
@@ -69,6 +70,14 @@ export default async function AdminOrderDetailPage({
   if (!order) {
     notFound();
   }
+
+  const { data: shipment } = await supabase
+    .from("shipments")
+    .select(
+      "id, status, courier_name, awb, tracking_url, label_url, shipping_charge, product_printed, cover_verified, notebook_assembled, quality_checked, packed, handed_over, checklist_updated_at"
+    )
+    .eq("order_id", order.order_id)
+    .maybeSingle();
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 sm:py-8 md:px-8">
@@ -216,20 +225,121 @@ export default async function AdminOrderDetailPage({
             </h2>
 
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Add shipping and tracking details for this order.
+              Automated shipping and production workflow.
             </p>
           </div>
 
-          <div className="mt-5">
-            <FulfillmentForm
-              orderId={order.order_id}
-              shippingPartner={order.shipping_partner}
-              trackingId={order.tracking_id}
-              trackingUrl={order.tracking_url}
-              shippedAt={order.shipped_at}
-              deliveredAt={order.delivered_at}
-            />
-          </div>
+          {shipment ? (
+            <>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    Shipment
+                  </p>
+                  <p className="mt-1 text-sm font-semibold capitalize text-zinc-900 dark:text-zinc-100">
+                    {shipment.status.replaceAll("_", " ")}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    Courier
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    {shipment.courier_name || "Pending"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    AWB
+                  </p>
+                  <p className="mt-1 break-all text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    {shipment.awb || "Pending"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    Shipping Charge
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    {shipment.shipping_charge != null
+                      ? `₹${shipment.shipping_charge}`
+                      : "Pending"}
+                  </p>
+                </div>
+              </div>
+
+              {shipment.tracking_url && (
+                <div className="mt-4">
+                  <a
+                    href={shipment.tracking_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-medium text-zinc-700 underline underline-offset-4 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+                  >
+                    Track Shipment ↗
+                  </a>
+                </div>
+              )}
+
+              {shipment.label_url && (
+                <div className="mt-2">
+                  <a
+                    href={shipment.label_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-medium text-zinc-700 underline underline-offset-4 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+                  >
+                    Open Shipping Label ↗
+                  </a>
+                </div>
+              )}
+
+              <div className="mt-6 border-t border-zinc-100 pt-6 dark:border-zinc-800">
+                <ProductionChecklist
+                  orderId={order.order_id}
+                  shipmentStatus={shipment.status}
+                  checklist={{
+                    product_printed: shipment.product_printed,
+                    cover_verified: shipment.cover_verified,
+                    notebook_assembled: shipment.notebook_assembled,
+                    quality_checked: shipment.quality_checked,
+                    packed: shipment.packed,
+                    handed_over: shipment.handed_over,
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="mt-5 rounded-xl border border-dashed border-zinc-300 p-5 dark:border-zinc-700">
+              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Automated shipment not created yet.
+              </p>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                The system will create the shipment automatically after the
+                order passes payment and shipping validation.
+              </p>
+            </div>
+          )}
+
+          <details className="mt-6">
+            <summary className="cursor-pointer text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
+              Manual fulfillment fallback
+            </summary>
+
+            <div className="mt-4">
+              <FulfillmentForm
+                orderId={order.order_id}
+                shippingPartner={order.shipping_partner}
+                trackingId={order.tracking_id}
+                trackingUrl={order.tracking_url}
+                shippedAt={order.shipped_at}
+                deliveredAt={order.delivered_at}
+              />
+            </div>
+          </details>
         </section>
 
         <section className="mt-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mt-6 sm:p-6">

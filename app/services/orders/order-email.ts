@@ -149,3 +149,115 @@ export async function sendOrderConfirmationEmail(
 
   return true;
 }
+
+interface SendOrderStatusEmailInput {
+  orderId: string;
+  name: string;
+  email: string;
+  paymentMethod: string;
+  orderStatus: string;
+  total: number;
+  delivery: string;
+}
+
+export async function sendOrderStatusEmail(
+  input: SendOrderStatusEmailInput
+): Promise<boolean> {
+  const resendApiKey = getServerEnv().resendApiKey;
+
+  if (!resendApiKey) {
+    console.error(
+      "RESEND_API_KEY is not configured. Status email was not sent."
+    );
+    return false;
+  }
+
+  if (!input.email || !input.email.includes("@")) {
+    console.error(
+      "Invalid customer email. Status email was not sent.",
+      input.email
+    );
+    return false;
+  }
+
+  const resend = new Resend(resendApiKey);
+
+  const safeName = escapeHtml(input.name);
+  const safeOrderId = escapeHtml(input.orderId);
+  const safeStatus = escapeHtml(input.orderStatus);
+  const safeDelivery = escapeHtml(input.delivery);
+
+  const paymentLabel =
+    input.paymentMethod === "Razorpay"
+      ? "Paid online via Razorpay"
+      : "Cash on Delivery";
+
+  const statusMessage =
+    input.orderStatus === "shipped"
+      ? "Your order is now on its way. 📦"
+      : input.orderStatus === "delivered"
+        ? "Thank you for choosing MineNote. ❤️"
+        : "Your MineNote order status has been updated.";
+
+  const { error } = await resend.emails.send({
+    from: "MineNote <orders@minenote.in>",
+    to: [input.email.trim()],
+    subject: getOrderEmailSubject(
+      input.orderStatus,
+      input.orderId
+    ),
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #18181b; max-width: 640px; margin: 0 auto; padding: 24px;">
+        <h1 style="margin-bottom: 8px;">
+          MineNote Order Update
+        </h1>
+
+        <p>
+          Hi ${safeName},
+        </p>
+
+        <p>
+          ${statusMessage}
+        </p>
+
+        <div style="background: #f4f4f5; padding: 16px; border-radius: 12px; margin: 20px 0;">
+          <p style="margin: 4px 0;">
+            <strong>Order ID:</strong>
+            ${safeOrderId}
+          </p>
+
+          <p style="margin: 4px 0;">
+            <strong>Status:</strong>
+            ${safeStatus}
+          </p>
+
+          <p style="margin: 4px 0;">
+            <strong>Payment:</strong>
+            ${paymentLabel}
+          </p>
+
+          <p style="margin: 4px 0;">
+            <strong>Total:</strong>
+            ₹${Number(input.total).toLocaleString("en-IN")}
+          </p>
+
+          <p style="margin: 4px 0;">
+            <strong>Delivery:</strong>
+            ${safeDelivery}
+          </p>
+        </div>
+
+        <p style="margin-top: 28px;">
+          — Team MineNote ❤️
+        </p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("RESEND STATUS EMAIL ERROR:", error);
+    return false;
+  }
+
+  return true;
+}

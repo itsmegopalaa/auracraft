@@ -1,6 +1,6 @@
-const sharp = require("sharp");
-
 async function main() {
+  const { default: sharp } = await import("sharp");
+
   const {
     createProductionCover,
   } = await import(

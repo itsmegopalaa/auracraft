@@ -63,38 +63,38 @@ export default function ContactPage() {
   return (
     <>
 
-      <main className="min-h-screen bg-black px-6 py-24 text-white">
+      <main className="min-h-screen bg-[var(--mn-bg)] px-6 py-24 text-[var(--mn-text)]">
         <section className="mx-auto max-w-6xl">
           <div className="text-center">
-            <p className="inline-flex rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300">
+            <p className="inline-flex rounded-full border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] px-4 py-2 text-sm font-semibold text-[var(--mn-accent)]">
               ✨ Contact MineNote
             </p>
 
-            <p className="mt-2 text-[15px] text-gray-300">
+            <p className="mt-2 text-[15px] text-[var(--mn-text-secondary)]">
               MineNote — a brand by AuraCraft
             </p>
 
             <h1 className="mt-8 text-5xl font-extrabold md:text-7xl">
               Let&apos;s Build
               <br />
-              <span className="text-yellow-400">
+              <span className="text-[var(--mn-accent)]">
                 Your Next Idea
               </span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-400">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[var(--mn-text-muted)]">
               Have a custom notebook idea, collaboration request or any
               question? Our team would love to hear from you.
             </p>
           </div>
 
           <div className="mt-16 grid gap-10 md:grid-cols-2">
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10 transition hover:border-yellow-400">
+            <div className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-10 transition hover:border-[var(--mn-accent)]">
               <h2 className="text-3xl font-bold">
                 Connect With Us
               </h2>
 
-              <div className="mt-8 space-y-5 text-lg text-gray-400">
+              <div className="mt-8 space-y-5 text-lg text-[var(--mn-text-muted)]">
                 <p>📧 orders@minenote.in</p>
 
                 <p>📱 MineNote</p>
@@ -102,19 +102,19 @@ export default function ContactPage() {
                 <p>🇮🇳 Crafted with passion in India</p>
               </div>
 
-              <div className="mt-10 rounded-2xl border border-zinc-700 bg-black p-5">
-                <p className="font-bold text-yellow-400">
+              <div className="mt-10 rounded-[1.5rem] border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] p-5">
+                <p className="font-bold text-[var(--mn-accent)]">
                   MineNote Promise
                 </p>
 
-                <p className="mt-2 text-gray-400">
+                <p className="mt-2 text-[var(--mn-text-muted)]">
                   Premium designs. Meaningful pages. Ideas that deserve a
                   beautiful home.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10">
+            <div className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-10">
               <h2 className="mb-8 text-3xl font-bold">
                 Send Message
               </h2>
@@ -131,7 +131,7 @@ export default function ContactPage() {
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Your Name"
                   autoComplete="name"
-                  className="w-full rounded-xl border border-zinc-700 bg-black p-4 outline-none transition focus:border-yellow-400"
+                  className="w-full rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] p-4 outline-none transition focus:border-[var(--mn-accent)]"
                 />
 
                 <input
@@ -141,7 +141,7 @@ export default function ContactPage() {
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="Your Email"
                   autoComplete="email"
-                  className="w-full rounded-xl border border-zinc-700 bg-black p-4 outline-none transition focus:border-yellow-400"
+                  className="w-full rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] p-4 outline-none transition focus:border-[var(--mn-accent)]"
                 />
 
                 <textarea
@@ -151,7 +151,7 @@ export default function ContactPage() {
                   onChange={(event) => setMessage(event.target.value)}
                   placeholder="Your Message"
                   rows={6}
-                  className="w-full resize-y rounded-xl border border-zinc-700 bg-black p-4 outline-none transition focus:border-yellow-400"
+                  className="w-full resize-y rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] p-4 outline-none transition focus:border-[var(--mn-accent)]"
                 />
 
                 {error && (
@@ -166,7 +166,7 @@ export default function ContactPage() {
                 {success && (
                   <div
                     role="status"
-                    className="rounded-xl border border-yellow-400/30 bg-yellow-950/20 p-4 text-sm text-yellow-200"
+                    className="rounded-xl border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] p-4 text-sm text-[var(--mn-accent)]"
                   >
                     {success}
                   </div>
@@ -175,7 +175,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-full bg-yellow-400 py-4 font-bold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-full bg-[var(--mn-accent)] py-4 font-bold text-[var(--mn-accent-contrast)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? "Sending Message..." : "Send Message →"}
                 </button>

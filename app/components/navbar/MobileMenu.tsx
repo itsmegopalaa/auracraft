@@ -1,15 +1,35 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { createClient } from "@/utils/supabase/client";
+import ThemeSwitcher from "../ThemeSwitcher";
 
 type Props = {
-  setMenuOpen: (value: boolean) => void;
+  setMenuOpen: (open: boolean) => void;
 };
+
+function Arrow() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 12h13M13 6l6 6-6 6"
+      />
+    </svg>
+  );
+}
 
 export default function MobileMenu({ setMenuOpen }: Props) {
   const router = useRouter();
@@ -19,15 +39,26 @@ export default function MobileMenu({ setMenuOpen }: Props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
 
+  const totalItems = cart.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
+  const closeMenu = () => setMenuOpen(false);
+
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(Boolean(data.user));
-      setUserName(
-        data.user?.user_metadata?.full_name?.trim() || ""
-      );
-    });
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setIsLoggedIn(Boolean(user));
+      setUserName(user?.user_metadata?.full_name?.trim() || "");
+    };
+
+    checkUser();
 
     const {
       data: { subscription },
@@ -41,22 +72,26 @@ export default function MobileMenu({ setMenuOpen }: Props) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const totalItems = cart.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
-
-  const closeMenu = () => setMenuOpen(false);
-
   const handleHomeClick = (
     event: React.MouseEvent<HTMLAnchorElement>
   ) => {
     event.preventDefault();
-
     closeMenu();
 
     if (window.location.pathname === "/") {
       window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+
+      document.documentElement.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+
+      document.body.scrollTo({
         top: 0,
         left: 0,
         behavior: "smooth",
@@ -73,160 +108,180 @@ export default function MobileMenu({ setMenuOpen }: Props) {
     ["/products", "Products"],
     ["/about", "Our Story"],
     ["/contact", "Contact"],
-  ];
+  ] as const;
 
   return (
-    <div className="max-h-[calc(100dvh-64px)] overflow-y-auto px-4 pb-7 pt-5">
+    <div className="px-5 pb-7 pt-5 sm:px-7">
+      <div className="mb-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+          MineNote
+        </p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-[var(--mn-text)]">
+          Make something that feels yours.
+        </h2>
+      </div>
 
-      {/* Quick actions */}
       <div className="grid grid-cols-2 gap-3">
-
         <Link
           href="/wishlist"
           onClick={closeMenu}
-          className="group rounded-2xl border border-white/[0.12] bg-white/[0.045] px-4 py-[15px] shadow-[0_10px_30px_rgba(0,0,0,0.22)] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
+          className="group rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--mn-text-muted)]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[21px] font-light text-zinc-200">
-              ♡
-            </span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              className="h-5 w-5 text-[var(--mn-text)]"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M20.8 8.7c0 5.2-8.8 10.1-8.8 10.1S3.2 13.9 3.2 8.7A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.8 2.3Z"
+              />
+            </svg>
 
             {wishlist.length > 0 && (
-              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[10px] font-black text-black">
+              <span className="rounded-full bg-[var(--mn-accent)] px-2 py-0.5 text-[10px] font-bold text-[var(--mn-accent-contrast)]">
                 {wishlist.length > 99 ? "99+" : wishlist.length}
               </span>
             )}
           </div>
 
-          <p className="mt-3 text-[13px] font-semibold text-zinc-50">
+          <p className="mt-5 text-sm font-semibold text-[var(--mn-text)]">
             Wishlist
+          </p>
+          <p className="mt-1 text-xs text-[var(--mn-text-muted)]">
+            Saved favourites
           </p>
         </Link>
 
         <Link
           href="/cart"
           onClick={closeMenu}
-          className="group rounded-2xl border border-white/[0.12] bg-white/[0.045] px-4 py-[15px] shadow-[0_10px_30px_rgba(0,0,0,0.22)] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98]"
+          className="group rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--mn-text-muted)]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[18px] text-zinc-200">
-              🛒
-            </span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              className="h-5 w-5 text-[var(--mn-text)]"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 1.9-1.5L21 8H7"
+              />
+              <circle cx="10" cy="20" r="1" />
+              <circle cx="18" cy="20" r="1" />
+            </svg>
 
             {totalItems > 0 && (
-              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[10px] font-black text-black">
+              <span className="rounded-full bg-[var(--mn-accent)] px-2 py-0.5 text-[10px] font-bold text-[var(--mn-accent-contrast)]">
                 {totalItems > 99 ? "99+" : totalItems}
               </span>
             )}
           </div>
 
-          <p className="mt-3 text-[13px] font-semibold text-zinc-50">
+          <p className="mt-5 text-sm font-semibold text-[var(--mn-text)]">
             Your Bag
           </p>
+          <p className="mt-1 text-xs text-[var(--mn-text-muted)]">
+            {totalItems ? `${totalItems} item${totalItems === 1 ? "" : "s"}` : "Nothing added yet"}
+          </p>
         </Link>
-
       </div>
 
-      {/* Main actions */}
-      <div className="mt-3 space-y-2.5">
+      <Link
+        href="/products"
+        onClick={closeMenu}
+        className="mt-4 flex min-h-14 items-center justify-between rounded-2xl bg-[var(--mn-accent)] px-5 text-[var(--mn-accent-contrast)] transition-all duration-200 hover:opacity-90"
+      >
+        <span>
+          <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] opacity-70">
+            Explore
+          </span>
+          <span className="mt-0.5 block text-base font-semibold">
+            Shop the collection
+          </span>
+        </span>
+        <Arrow />
+      </Link>
 
-        <Link
-          href="/products"
-          onClick={closeMenu}
-          className="flex min-h-[58px] items-center justify-between rounded-2xl bg-yellow-400 px-5 text-[14px] font-bold text-black shadow-[0_10px_30px_rgba(234,179,8,0.12)] outline-none transition-all duration-200 hover:bg-yellow-300 hover:shadow-[0_12px_34px_rgba(234,179,8,0.18)] focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
-        >
-          <span>Shop the Collection</span>
-          <span aria-hidden="true">→</span>
-        </Link>
+      <div className="mt-7 border-t border-[var(--mn-border)] pt-5">
+        <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+          Your MineNote
+        </p>
 
-        <Link
-          href="/account/orders"
-          onClick={closeMenu}
-          className="group flex min-h-[56px] items-center justify-between rounded-2xl border border-white/[0.11] bg-white/[0.045] px-5 shadow-[0_9px_28px_rgba(0,0,0,0.20)] outline-none transition-all duration-200 hover:border-yellow-400/40 hover:bg-yellow-400/[0.04] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-3">
-            <span
-              className="text-base text-zinc-300"
-              aria-hidden="true"
-            >
-              📦
-            </span>
-
-            <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-zinc-500">
-                Orders
-              </p>
-
-              <p className="mt-1 text-[14px] font-semibold text-zinc-100">
-                My Orders
-              </p>
-            </div>
-          </div>
-
-          <span
-            className="text-zinc-600 transition-all duration-150 group-hover:translate-x-1 group-hover:text-yellow-400"
-            aria-hidden="true"
+        <div className="divide-y divide-[var(--mn-border)] rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)]">
+          <Link
+            href="/account/orders"
+            onClick={closeMenu}
+            className="flex items-center justify-between px-4 py-4 text-sm font-medium text-[var(--mn-text)]"
           >
-            →
-          </span>
-        </Link>
+            <span>My Orders</span>
+            <Arrow />
+          </Link>
 
-        <Link
-          href={isLoggedIn ? "/account" : "/login"}
-          onClick={closeMenu}
-          className="flex min-h-[56px] items-center justify-between rounded-2xl border border-yellow-400/30 bg-yellow-400/[0.065] px-5 shadow-[0_9px_30px_rgba(0,0,0,0.22)] outline-none transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.07] focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.99]"
-        >
-          <div className="min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-yellow-400">
-              {isLoggedIn ? "Welcome back" : "Account"}
+          <Link
+            href={isLoggedIn ? "/account" : "/login"}
+            onClick={closeMenu}
+            className="flex items-center justify-between px-4 py-4 text-sm font-medium text-[var(--mn-text)]"
+          >
+            <span>{isLoggedIn ? userName || "My Account" : "Login / Account"}</span>
+            <Arrow />
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-7 border-t border-[var(--mn-border)] pt-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+              Appearance
             </p>
-
-            <p className="mt-1 truncate text-[14px] font-semibold text-white">
-              {isLoggedIn ? userName || "My Account" : "Login / Sign up"}
+            <p className="mt-1 text-xs text-[var(--mn-text-secondary)]">
+              Choose how MineNote looks
             </p>
           </div>
 
-          <span className="ml-4 text-yellow-400" aria-hidden="true">
-            →
-          </span>
-        </Link>
-
+          <ThemeSwitcher />
+        </div>
       </div>
 
-      {/* Navigation */}
-      <div className="mt-7 border-t border-white/[0.14] pt-6">
-
-        <p className="mb-2.5 px-1 text-[9px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+      <div className="mt-7 border-t border-[var(--mn-border)] pt-5">
+        <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
           Explore
         </p>
 
-        <nav aria-label="Mobile navigation" className="space-y-2">
-
+        <div className="grid grid-cols-2 gap-2">
           {navItems.map(([href, label]) => (
             <Link
               key={href}
               href={href}
-              onClick={href === "/" ? handleHomeClick : closeMenu}
-              className="group flex min-h-[50px] items-center justify-between rounded-xl border border-white/[0.10] bg-white/[0.035] px-4 text-[14px] font-medium text-zinc-200 shadow-[0_6px_22px_rgba(0,0,0,0.18)] outline-none transition-all duration-200 hover:border-yellow-400/35 hover:bg-white/[0.065] hover:text-yellow-400 focus-visible:border-yellow-400/50 focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-inset active:scale-[0.99] active:bg-white/[0.06]"
+              onClick={(event) => {
+                if (href === "/") {
+                  handleHomeClick(event);
+                } else {
+                  closeMenu();
+                }
+              }}
+              className="rounded-xl border border-[var(--mn-border)] px-4 py-3 text-sm text-[var(--mn-text-secondary)] transition-colors hover:bg-[var(--mn-bg)] hover:text-[var(--mn-text)]"
             >
-              <span>{label}</span>
-
-              <span
-                className="text-zinc-600 transition-all duration-200 group-hover:translate-x-1 group-hover:text-yellow-400"
-                aria-hidden="true"
-              >
-                →
-              </span>
+              {label}
             </Link>
           ))}
-
-        </nav>
+        </div>
       </div>
 
-      <p className="mt-5 px-1 text-[10px] leading-relaxed text-zinc-600">
+      <p className="mt-7 text-center text-xs leading-5 text-[var(--mn-text-muted)]">
         Premium personalized notebooks by MineNote.
       </p>
-
     </div>
   );
 }

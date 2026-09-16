@@ -25,14 +25,14 @@ export default function WishlistButton({ product }: Props) {
       className="
         rounded-full
         border
-        border-yellow-400
+        border-[var(--mn-accent)]
         px-10
         py-4
         font-bold
-        text-yellow-400
+        text-[var(--mn-accent)]
         transition
-        hover:bg-yellow-400
-        hover:text-black
+        hover:bg-[var(--mn-accent)]
+        hover:text-[var(--mn-accent-contrast)]
       "
     >
       {saved ? "❤️ Added to Wishlist" : "♡ Add to Wishlist"}

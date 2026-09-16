@@ -25,7 +25,7 @@ type GenerateRequestBody = {
 type CustomizationRow = {
   id: string;
   customer_id: string | null;
-  product_id: string;
+  product_id: string | null;
   status: string;
 };
 
@@ -227,45 +227,53 @@ export async function POST(request: Request) {
     }
 
     /*
-     * Verify that the underlying product still exists and is active.
+     * Product selection is optional while designing.
+     *
+     * A customer may generate artwork before choosing a notebook.
+     * The product becomes mandatory later at approval/order time.
+     *
+     * If a product has already been selected, still verify that it
+     * exists and remains active.
      */
-    const { data: product, error: productError } =
-      await supabase
-        .from("products")
-        .select("id, active")
-        .eq("id", customization.product_id)
-        .maybeSingle();
+    if (customization.product_id) {
+      const { data: product, error: productError } =
+        await supabase
+          .from("products")
+          .select("id, active")
+          .eq("id", customization.product_id)
+          .maybeSingle();
 
-    if (productError) {
-      console.error(
-        "CUSTOM COVER GENERATE PRODUCT LOOKUP ERROR:",
-        productError
-      );
+      if (productError) {
+        console.error(
+          "CUSTOM COVER GENERATE PRODUCT LOOKUP ERROR:",
+          productError
+        );
 
-      return NextResponse.json(
-        {
-          error: "Unable to verify the selected product.",
-        },
-        { status: 500 }
-      );
-    }
+        return NextResponse.json(
+          {
+            error: "Unable to verify the selected product.",
+          },
+          { status: 500 }
+        );
+      }
 
-    if (!product) {
-      return NextResponse.json(
-        {
-          error: "The selected notebook product no longer exists.",
-        },
-        { status: 409 }
-      );
-    }
+      if (!product) {
+        return NextResponse.json(
+          {
+            error: "The selected notebook product no longer exists.",
+          },
+          { status: 409 }
+        );
+      }
 
-    if (!product.active) {
-      return NextResponse.json(
-        {
-          error: "The selected notebook product is no longer available.",
-        },
-        { status: 409 }
-      );
+      if (!product.active) {
+        return NextResponse.json(
+          {
+            error: "The selected notebook product is no longer available.",
+          },
+          { status: 409 }
+        );
+      }
     }
 
     /*

@@ -120,14 +120,14 @@ function getStatusClasses(status: string | null) {
       return "border-blue-400/20 bg-blue-400/10 text-blue-300";
 
     case "cancelled":
-      return "border-red-400/20 bg-red-400/10 text-red-300";
+      return "border-[color-mix(in_srgb,var(--mn-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] text-[var(--mn-danger)]";
 
     case "confirmed":
     case "processing":
-      return "border-yellow-400/20 bg-yellow-400/10 text-yellow-300";
+      return "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]";
 
     default:
-      return "border-zinc-700 bg-zinc-800 text-zinc-300";
+      return "border-[var(--mn-border-strong)] bg-[var(--mn-surface-soft)] text-[var(--mn-text-secondary)]";
   }
 }
 
@@ -237,23 +237,23 @@ export default async function CustomerOrderDetailPage({
 
     return (
       <>
-        <main className="min-h-screen overflow-x-hidden bg-black px-6 py-20 text-white md:py-28">
+        <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-6 py-20 text-[var(--mn-text)] md:py-28">
           <div className="mx-auto max-w-4xl">
-            <div className="rounded-3xl border border-red-500/20 bg-zinc-900 p-8 text-center md:p-12">
+            <div className="rounded-3xl border border-[color-mix(in_srgb,var(--mn-danger)_20%,transparent)] bg-[var(--mn-surface)] p-8 text-center md:p-12">
               <div className="text-5xl">⚠️</div>
 
               <h1 className="mt-6 text-3xl font-extrabold">
                 Unable to Load Order
               </h1>
 
-              <p className="mx-auto mt-3 max-w-lg text-zinc-400">
+              <p className="mx-auto mt-3 max-w-lg text-[var(--mn-text-secondary)]">
                 Something went wrong while loading this order.
                 Please try again later.
               </p>
 
               <Link
                 href="/account/orders"
-                className="mt-8 inline-flex rounded-full bg-yellow-400 px-7 py-4 font-bold text-black transition hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="mt-8 inline-flex rounded-full bg-[var(--mn-accent)] px-7 py-4 font-bold text-[var(--mn-accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
               >
                 ← Back to My Orders
               </Link>
@@ -287,14 +287,14 @@ export default async function CustomerOrderDetailPage({
 
   return (
     <>
-      <main className="min-h-screen overflow-x-hidden bg-black px-4 py-10 text-white sm:px-6 sm:py-14 md:py-24">
+      <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-10 text-[var(--mn-text)] sm:px-6 sm:py-14 md:py-24">
         <div className="mx-auto w-full max-w-6xl">
           {/* Header */}
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <Link
                 href="/account/orders"
-                className="text-sm font-semibold text-yellow-400 transition hover:text-yellow-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="text-sm font-semibold text-[var(--mn-accent)] transition hover:text-[var(--mn-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
               >
                 ← Back to My Orders
               </Link>
@@ -313,27 +313,27 @@ export default async function CustomerOrderDetailPage({
                 </span>
               </div>
 
-              <p className="mt-2 break-all text-sm text-zinc-500">
+              <p className="mt-2 break-all text-sm text-[var(--mn-text-muted)]">
                 {typedOrder.order_id}
               </p>
             </div>
 
             <div className="text-left md:text-right">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                 Placed
               </p>
 
-              <p className="mt-1 text-sm font-semibold text-zinc-400">
+              <p className="mt-1 text-sm font-semibold text-[var(--mn-text-secondary)]">
                 {formatDate(typedOrder.created_at)}
               </p>
             </div>
           </div>
 
           {/* Status */}
-          <section className="mt-6 rounded-3xl border border-yellow-400/20 bg-zinc-900 p-5 shadow-2xl shadow-black/30 sm:mt-8 sm:p-6 md:p-8">
+          <section className="mt-6 rounded-3xl border border-[var(--mn-accent)] bg-[var(--mn-surface)] p-5 shadow-[var(--mn-shadow-lg)] sm:mt-8 sm:p-6 md:p-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                   Order Progress
                 </p>
 
@@ -356,18 +356,18 @@ export default async function CustomerOrderDetailPage({
             </div>
 
             {isCancelled ? (
-              <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-950/30 p-5 sm:p-6">
+              <div className="mt-6 rounded-2xl border border-[color-mix(in_srgb,var(--mn-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] p-5 sm:p-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] text-xl">
                     ❌
                   </div>
 
                   <div>
-                    <p className="font-bold text-red-300">
+                    <p className="font-bold text-[var(--mn-danger)]">
                       This order has been cancelled.
                     </p>
 
-                    <p className="mt-1.5 text-sm leading-6 text-red-200/70">
+                    <p className="mt-1.5 text-sm leading-6 text-[var(--mn-danger)]">
                       If you believe this was unexpected, please contact
                       MineNote support with your Order ID.
                     </p>
@@ -377,7 +377,7 @@ export default async function CustomerOrderDetailPage({
             ) : (
               <div className="mt-6 sm:mt-7">
                 <div className="relative">
-                  <div className="absolute left-[19px] top-5 hidden h-[calc(100%-40px)] w-px bg-white/[0.08] sm:block" />
+                  <div className="absolute left-[19px] top-5 hidden h-[calc(100%-40px)] w-px bg-[var(--mn-control-hover)] sm:block" />
 
                   <div className="space-y-5 sm:space-y-0">
                     {STATUS_STEPS.map((step) => {
@@ -398,11 +398,11 @@ export default async function CustomerOrderDetailPage({
                           <div
                             className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-lg transition ${
                               completed
-                                ? "border-yellow-400 bg-yellow-400 text-black shadow-lg shadow-yellow-400/10"
-                                : "border-white/[0.08] bg-black text-zinc-600"
+                                ? "border-[var(--mn-accent)] bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)]"
+                                : "border-[var(--mn-border)] bg-[var(--mn-bg)] text-[var(--mn-text-muted)]"
                             } ${
                               current
-                                ? "ring-4 ring-yellow-400/10"
+                                ? "ring-4 ring-[var(--mn-accent-soft)]"
                                 : ""
                             }`}
                           >
@@ -414,15 +414,15 @@ export default async function CustomerOrderDetailPage({
                               <h3
                                 className={`font-bold ${
                                   completed
-                                    ? "text-white"
-                                    : "text-zinc-500"
+                                    ? "text-[var(--mn-text)]"
+                                    : "text-[var(--mn-text-muted)]"
                                 }`}
                               >
                                 {step.title}
                               </h3>
 
                               {current && (
-                                <span className="rounded-full bg-yellow-400/10 px-3 min-h-10.5 py-1 text-[10px] font-black uppercase tracking-wider text-yellow-400">
+                                <span className="rounded-full bg-[var(--mn-accent-soft)] px-3 min-h-10.5 py-1 text-[10px] font-black uppercase tracking-wider text-[var(--mn-accent)]">
                                   Current
                                 </span>
                               )}
@@ -431,8 +431,8 @@ export default async function CustomerOrderDetailPage({
                             <p
                               className={`mt-1 text-sm ${
                                 completed
-                                  ? "text-zinc-400"
-                                  : "text-zinc-600"
+                                  ? "text-[var(--mn-text-secondary)]"
+                                  : "text-[var(--mn-text-muted)]"
                               }`}
                             >
                               {step.description}
@@ -450,10 +450,10 @@ export default async function CustomerOrderDetailPage({
           {/* Main grid */}
           <div className="mt-5 grid gap-5 sm:mt-6 sm:gap-6 lg:grid-cols-[1.2fr_0.8fr] xl:gap-8">
             {/* Items */}
-            <section className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-4 shadow-xl shadow-black/10 sm:p-6 md:p-7">
+            <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-[var(--mn-shadow-sm)] sm:p-6 md:p-7">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                     Your Purchase
                   </p>
 
@@ -462,7 +462,7 @@ export default async function CustomerOrderDetailPage({
                   </h2>
                 </div>
 
-                <span className="rounded-full bg-black px-4 min-h-10 py-2 text-xs font-bold text-zinc-500">
+                <span className="rounded-full bg-[var(--mn-bg)] px-4 min-h-10 py-2 text-xs font-bold text-[var(--mn-text-muted)]">
                   {items.length}{" "}
                   {items.length === 1 ? "item" : "items"}
                 </span>
@@ -473,9 +473,9 @@ export default async function CustomerOrderDetailPage({
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="flex gap-3 rounded-2xl border border-white/[0.06] bg-black p-3.5 sm:gap-5 sm:p-4"
+                      className="flex gap-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)] p-3.5 sm:gap-5 sm:p-4"
                     >
-                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-zinc-950 sm:h-28 sm:w-24">
+                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-surface-soft)] sm:h-28 sm:w-24">
                         <Image
                           src={item.image}
                           alt={item.name}
@@ -486,11 +486,11 @@ export default async function CustomerOrderDetailPage({
                       </div>
 
                       <div className="min-w-0 flex-1 py-1">
-                        <h3 className="font-bold text-white">
+                        <h3 className="font-bold text-[var(--mn-text)]">
                           {item.name}
                         </h3>
 
-                        <p className="mt-2 text-sm text-zinc-500">
+                        <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
                           ₹
                           {item.price.toLocaleString(
                             "en-IN"
@@ -498,7 +498,7 @@ export default async function CustomerOrderDetailPage({
                           × {item.quantity}
                         </p>
 
-                        <p className="mt-3 text-sm font-bold text-yellow-400">
+                        <p className="mt-3 text-sm font-bold text-[var(--mn-accent)]">
                           ₹
                           {(
                             item.price *
@@ -510,17 +510,17 @@ export default async function CustomerOrderDetailPage({
                   ))}
                 </div>
               ) : (
-                <div className="mt-7 rounded-2xl bg-black p-6 text-[15px] text-zinc-400">
+                <div className="mt-7 rounded-2xl bg-[var(--mn-bg)] p-6 text-[15px] text-[var(--mn-text-secondary)]">
                   No item details are available for this order.
                 </div>
               )}
 
-              <div className="mt-7 flex items-center justify-between border-t border-white/[0.07] pt-6">
-                <span className="font-semibold text-zinc-400">
+              <div className="mt-7 flex items-center justify-between border-t border-[var(--mn-border)] pt-6">
+                <span className="font-semibold text-[var(--mn-text-secondary)]">
                   Order Total
                 </span>
 
-                <span className="text-2xl font-black text-yellow-400">
+                <span className="text-2xl font-black text-[var(--mn-accent)]">
                   ₹
                   {Number(typedOrder.total).toLocaleString(
                     "en-IN"
@@ -530,8 +530,8 @@ export default async function CustomerOrderDetailPage({
             </section>
 
             {/* Payment */}
-            <section className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-4 shadow-xl shadow-black/10 sm:p-6 md:p-7">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+            <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-[var(--mn-shadow-sm)] sm:p-6 md:p-7">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                 Payment
               </p>
 
@@ -541,25 +541,25 @@ export default async function CustomerOrderDetailPage({
 
               <div className="mt-6 space-y-3">
                 {typedOrder.refund_status && (
-                  <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.05] p-4 sm:p-5">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--mn-success)_15%,transparent)] bg-[color-mix(in_srgb,var(--mn-success)_5%,var(--mn-surface))] p-4 sm:p-5">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/10 text-lg">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--mn-success)_10%,var(--mn-surface))] text-lg">
                         ↩️
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">
+                        <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-success)]">
                           Refund Information
                         </p>
 
-                        <p className="mt-1 font-bold text-emerald-200">
+                        <p className="mt-1 font-bold text-[var(--mn-success)]">
                           {typedOrder.refund_status === "processed"
                             ? "Refund Processed"
                             : typedOrder.refund_status}
                         </p>
 
                         {typedOrder.refund_amount != null && (
-                          <p className="mt-1 text-sm text-emerald-200/70">
+                          <p className="mt-1 text-sm text-[var(--mn-success)]/70">
                             ₹
                             {Number(
                               typedOrder.refund_amount
@@ -569,7 +569,7 @@ export default async function CustomerOrderDetailPage({
                         )}
 
                         {typedOrder.refund_processed_at && (
-                          <p className="mt-2 text-xs text-emerald-200/50">
+                          <p className="mt-2 text-xs text-[var(--mn-success)]/50">
                             Processed on{" "}
                             {formatDate(
                               typedOrder.refund_processed_at
@@ -582,8 +582,8 @@ export default async function CustomerOrderDetailPage({
                 )}
 
 
-                <div className="rounded-2xl border border-white/[0.05] bg-black/70 p-4 sm:p-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)]/70 p-4 sm:p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Method
                   </p>
 
@@ -594,8 +594,8 @@ export default async function CustomerOrderDetailPage({
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.05] bg-black/70 p-4 sm:p-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)]/70 p-4 sm:p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Payment Status
                   </p>
 
@@ -605,7 +605,7 @@ export default async function CustomerOrderDetailPage({
                   </p>
 
                   {typedOrder.paid_at && (
-                    <p className="mt-1 text-[12px] text-zinc-400">
+                    <p className="mt-1 text-[12px] text-[var(--mn-text-secondary)]">
                       Received {formatDate(typedOrder.paid_at)}
                     </p>
                   )}
@@ -613,12 +613,12 @@ export default async function CustomerOrderDetailPage({
 
                 {!paymentIsCod &&
                   typedOrder.razorpay_payment_id && (
-                    <div className="rounded-2xl border border-white/[0.05] bg-black/70 p-4 sm:p-5">
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                    <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)]/70 p-4 sm:p-5">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Payment ID
                       </p>
 
-                      <p className="mt-2 break-all font-mono break-all text-xs text-zinc-400">
+                      <p className="mt-2 break-all font-mono break-all text-xs text-[var(--mn-text-secondary)]">
                         {typedOrder.razorpay_payment_id}
                       </p>
                     </div>
@@ -629,8 +629,8 @@ export default async function CustomerOrderDetailPage({
 
           {/* Delivery + shipment */}
           <div className="mt-5 grid gap-5 sm:mt-6 sm:gap-6 md:grid-cols-2 lg:gap-8">
-            <section className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-4 shadow-xl shadow-black/10 sm:p-6 md:p-7">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+            <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-[var(--mn-shadow-sm)] sm:p-6 md:p-7">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                 Delivery
               </p>
 
@@ -640,7 +640,7 @@ export default async function CustomerOrderDetailPage({
 
               <div className="mt-6 space-y-3">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Customer
                   </p>
 
@@ -650,7 +650,7 @@ export default async function CustomerOrderDetailPage({
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Phone
                   </p>
 
@@ -660,7 +660,7 @@ export default async function CustomerOrderDetailPage({
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Email
                   </p>
 
@@ -670,7 +670,7 @@ export default async function CustomerOrderDetailPage({
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Address
                   </p>
 
@@ -683,20 +683,20 @@ export default async function CustomerOrderDetailPage({
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.03] p-4 sm:p-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                <div className="rounded-2xl border border-[var(--mn-accent)]/10 bg-[var(--mn-accent-soft)] p-4 sm:p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Estimated Delivery
                   </p>
 
-                  <p className="mt-2 font-bold text-yellow-400">
+                  <p className="mt-2 font-bold text-[var(--mn-accent)]">
                     {typedOrder.delivery || "Will be updated soon"}
                   </p>
                 </div>
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/[0.07] bg-zinc-900 p-4 shadow-xl shadow-black/10 sm:p-6 md:p-7">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+            <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-[var(--mn-shadow-sm)] sm:p-6 md:p-7">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                 Fulfillment
               </p>
 
@@ -711,7 +711,7 @@ export default async function CustomerOrderDetailPage({
                 <div className="mt-6 space-y-3">
                   {typedOrder.shipping_partner && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Shipping Partner
                       </p>
 
@@ -722,12 +722,12 @@ export default async function CustomerOrderDetailPage({
                   )}
 
                   {typedOrder.tracking_id && (
-                    <div className="rounded-2xl border border-white/[0.05] bg-black/70 p-4 sm:p-5">
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                    <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)]/70 p-4 sm:p-5">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Tracking ID
                       </p>
 
-                      <p className="mt-2 break-all font-mono break-all font-bold text-yellow-400">
+                      <p className="mt-2 break-all font-mono break-all font-bold text-[var(--mn-accent)]">
                         {typedOrder.tracking_id}
                       </p>
                     </div>
@@ -735,7 +735,7 @@ export default async function CustomerOrderDetailPage({
 
                   {typedOrder.shipped_at && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Shipped
                       </p>
 
@@ -747,7 +747,7 @@ export default async function CustomerOrderDetailPage({
 
                   {typedOrder.delivered_at && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Delivered
                       </p>
 
@@ -762,21 +762,21 @@ export default async function CustomerOrderDetailPage({
                       href={typedOrder.tracking_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center rounded-2xl bg-yellow-400 px-6 py-4 font-black text-black transition-all hover:-translate-y-0.5 hover:bg-yellow-300 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                      className="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--mn-accent)] px-6 py-4 font-black text-[var(--mn-accent-contrast)] transition-all hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                     >
                       Track Shipment →
                     </a>
                   )}
                 </div>
               ) : (
-                <div className="mt-7 rounded-2xl border border-white/[0.05] bg-black p-6">
+                <div className="mt-7 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)] p-6">
                   <div className="text-3xl">📦</div>
 
                   <p className="mt-4 font-bold">
                     Shipment details coming soon
                   </p>
 
-                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                  <p className="mt-2 text-sm leading-6 text-[var(--mn-text-muted)]">
                     Tracking information will appear here once your
                     order has been handed over to the shipping partner.
                   </p>
@@ -786,25 +786,25 @@ export default async function CustomerOrderDetailPage({
           </div>
 
           {/* Actions */}
-          <section className="mt-5 rounded-3xl border border-white/[0.07] bg-zinc-900 p-4 sm:mt-6 sm:p-6 md:p-7">
+          <section className="mt-5 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 sm:mt-6 sm:p-6 md:p-7">
             <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
               <Link
                 href="/account/orders"
-                className="rounded-2xl border border-white/[0.08] bg-black py-4 text-center font-bold text-white transition-all hover:-translate-y-0.5 hover:border-yellow-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-bg)] py-4 text-center font-bold text-[var(--mn-text)] transition-all hover:-translate-y-0.5 hover:border-[var(--mn-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
               >
                 ← Back to My Orders
               </Link>
 
               <Link
                 href="/products"
-                className="rounded-2xl bg-yellow-400 py-4 text-center font-black text-black shadow-lg shadow-yellow-400/10 transition-all hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="rounded-2xl bg-[var(--mn-accent)] py-4 text-center font-black text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] transition-all hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
               >
                 Explore More Designs →
               </Link>
             </div>
           </section>
 
-          <p className="mt-6 px-4 text-center text-xs leading-5 text-zinc-700 sm:mt-8">
+          <p className="mt-6 px-4 text-center text-xs leading-5 text-[var(--mn-text-muted)] sm:mt-8">
             Need help with your order? Keep your Order ID ready when
             contacting MineNote support.
           </p>

@@ -13,7 +13,7 @@ import type {
 } from "@/app/lib/customization";
 
 export type CreateCustomizationInput = {
-  productId: string;
+  productId?: string | null;
   creationMethod: CustomCoverCreationMethod;
   customerId?: string;
   templateId?: string;
@@ -29,7 +29,7 @@ export function createDraftCustomization(
   input: CreateCustomizationInput
 ): CustomCoverCustomization {
   const customization: CustomCoverCustomization = {
-    productId: input.productId,
+    productId: input.productId ?? null,
     customerId: input.customerId,
     templateId: input.templateId,
     creationMethod: input.creationMethod,

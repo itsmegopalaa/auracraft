@@ -1,7 +1,4 @@
-import {
-  CUSTOM_COVER_LIMITS,
-  validateAiPrompt,
-} from "@/app/lib/customization";
+import { validateAiPrompt } from "@/app/lib/customization";
 
 import type { CoverSide } from "@/app/lib/customization";
 

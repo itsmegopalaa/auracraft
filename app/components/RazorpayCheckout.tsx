@@ -203,7 +203,7 @@ export default function RazorpayCheckout({
         type="button"
         onClick={openCheckout}
         disabled={loading}
-        className="mt-8 w-full rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-8 w-full rounded-full bg-[var(--mn-accent)] px-6 py-4 font-bold text-[var(--mn-accent-contrast)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading
           ? "Processing Payment..."

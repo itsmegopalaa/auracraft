@@ -149,16 +149,16 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
         aria-label="Search products"
         aria-expanded={open}
         className="
-          flex h-10 w-10 items-center justify-center
+          flex h-11 w-10 items-center justify-center
           rounded-full
-          border border-white/[0.10]
-          bg-white/[0.035]
-          text-zinc-300
-          shadow-sm shadow-black/20
+          border border-[var(--mn-border)]
+          bg-[var(--mn-control-bg)]
+          text-[var(--mn-text-secondary)]
+          shadow-[var(--mn-shadow-sm)]
           transition-all duration-200
-          hover:border-yellow-400/50
-          hover:bg-yellow-400/[0.06]
-          hover:text-yellow-400
+          hover:border-[var(--mn-accent)]
+          hover:bg-[var(--mn-accent-soft)]
+          hover:text-[var(--mn-accent)]
           active:scale-95
         "
       >
@@ -190,7 +190,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
           <div
             className="
               absolute inset-0
-              bg-black/70
+              bg-[var(--mn-overlay)]
               backdrop-blur-md
             "
             aria-hidden="true"
@@ -212,16 +212,16 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
               -translate-x-1/2
               overflow-hidden
               rounded-[24px]
-              border border-white/[0.12]
-              bg-zinc-950
-              shadow-[0_24px_80px_rgba(0,0,0,0.75)]
+              border border-[var(--mn-border-strong)]
+              bg-[var(--mn-surface)]
+              shadow-[var(--mn-shadow-lg)]
             "
           >
             {/* SEARCH INPUT */}
             <div
               className="
-                border-b border-white/[0.08]
-                bg-white/[0.025]
+                border-b border-[var(--mn-border)]
+                bg-[var(--mn-control-bg)]
                 p-3
                 sm:p-4
               "
@@ -230,12 +230,12 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                 className="
                   flex items-center gap-3
                   rounded-2xl
-                  border border-white/[0.10]
-                  bg-black/50
+                  border border-[var(--mn-border)]
+                  bg-[var(--mn-bg)]
                   px-4 py-2
                   transition-colors
-                  focus-within:border-yellow-400/50
-                  focus-within:bg-black/70
+                  focus-within:border-[var(--mn-accent)]
+                  focus-within:bg-[var(--mn-overlay)]
                 "
               >
                 <svg
@@ -243,7 +243,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.8"
-                  className="h-5 w-5 shrink-0 text-zinc-500"
+                  className="h-5 w-5 shrink-0 text-[var(--mn-text-muted)]"
                   aria-hidden="true"
                 >
                   <circle cx="10.8" cy="10.8" r="6.5" />
@@ -269,9 +269,9 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                     py-2
                     text-[16px]
                     font-medium
-                    text-white
+                    text-[var(--mn-text)]
                     outline-none
-                    placeholder:text-zinc-600
+                    placeholder:text-[var(--mn-text-muted)]
                   "
                   aria-label="Search notebooks"
                 />
@@ -289,10 +289,10 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                       flex h-8 w-8 shrink-0
                       items-center justify-center
                       rounded-full
-                      text-zinc-500
+                      text-[var(--mn-text-muted)]
                       transition-colors
-                      hover:bg-white/[0.08]
-                      hover:text-white
+                      hover:bg-[var(--mn-control-hover)]
+                      hover:text-[var(--mn-text)]
                     "
                   >
                     <span aria-hidden="true">×</span>
@@ -307,12 +307,12 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                     flex h-8 w-8 shrink-0
                     items-center justify-center
                     rounded-full
-                    border border-white/[0.08]
-                    text-zinc-500
+                    border border-[var(--mn-border)]
+                    text-[var(--mn-text-muted)]
                     transition-all
-                    hover:border-white/[0.18]
-                    hover:bg-white/[0.06]
-                    hover:text-white
+                    hover:border-[var(--mn-border-strong)]
+                    hover:bg-[var(--mn-control-hover)]
+                    hover:text-[var(--mn-text)]
                   "
                 >
                   <span aria-hidden="true">×</span>
@@ -337,13 +337,13 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                       font-bold
                       uppercase
                       tracking-[0.25em]
-                      text-yellow-400/80
+                      text-[var(--mn-accent)]
                     "
                   >
                     Quick Search
                   </p>
 
-                  <p className="mt-3 text-sm text-zinc-400">
+                  <p className="mt-3 text-sm text-[var(--mn-text-secondary)]">
                     Find the notebook that matches your personality.
                   </p>
                 </div>
@@ -358,12 +358,12 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                       animate-spin
                       rounded-full
                       border-2
-                      border-zinc-700
-                      border-t-yellow-400
+                      border-[var(--mn-border-strong)]
+                      border-t-[var(--mn-accent)]
                     "
                   />
 
-                  <span className="text-sm text-zinc-400">
+                  <span className="text-sm text-[var(--mn-text-secondary)]">
                     Searching notebooks...
                   </span>
                 </div>
@@ -385,7 +385,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                           rounded-2xl
                           px-3 py-3
                           transition-colors
-                          hover:bg-white/[0.045]
+                          hover:bg-[var(--mn-control-bg)]
                         "
                       >
                         <div
@@ -393,8 +393,8 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                             relative h-14 w-14 shrink-0
                             overflow-hidden
                             rounded-xl
-                            border border-white/[0.08]
-                            bg-zinc-900
+                            border border-[var(--mn-border)]
+                            bg-[var(--mn-surface-soft)]
                           "
                         >
                           {product.image ? (
@@ -406,7 +406,7 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                               className="object-cover"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xs text-zinc-600">
+                            <div className="flex h-full w-full items-center justify-center text-xs text-[var(--mn-text-muted)]">
                               —
                             </div>
                           )}
@@ -416,32 +416,32 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                           <p
                             className="
                               truncate text-sm font-semibold
-                              text-zinc-100
+                              text-[var(--mn-text)]
                               transition-colors
-                              group-hover:text-yellow-400
+                              group-hover:text-[var(--mn-accent)]
                             "
                           >
                             {product.name}
                           </p>
 
                           {product.category && (
-                            <p className="mt-1 truncate text-[12px] text-zinc-400">
+                            <p className="mt-1 truncate text-[12px] text-[var(--mn-text-secondary)]">
                               {product.category}
                             </p>
                           )}
                         </div>
 
-                        <div className="shrink-0 text-sm font-semibold text-zinc-300">
+                        <div className="shrink-0 text-sm font-semibold text-[var(--mn-text-secondary)]">
                           ₹{product.price}
                         </div>
 
                         <span
                           className="
                             shrink-0
-                            text-zinc-600
+                            text-[var(--mn-text-muted)]
                             transition-all
                             group-hover:translate-x-1
-                            group-hover:text-yellow-400
+                            group-hover:text-[var(--mn-accent)]
                           "
                           aria-hidden="true"
                         >
@@ -457,11 +457,11 @@ export default function SearchBox({ mobile = false, onOpen }: Props) {
                 !loading &&
                 results.length === 0 && (
                   <div className="px-6 py-10 text-center">
-                    <p className="text-sm font-semibold text-zinc-200">
+                    <p className="text-sm font-semibold text-[var(--mn-text-secondary)]">
                       No notebook found
                     </p>
 
-                    <p className="mt-1 text-[12px] text-zinc-400">
+                    <p className="mt-1 text-[12px] text-[var(--mn-text-secondary)]">
                       Try another name or category.
                     </p>
                   </div>

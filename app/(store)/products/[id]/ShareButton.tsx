@@ -74,16 +74,16 @@ export default function ShareButton({
         gap-3
         rounded-2xl
         border
-        border-zinc-700
-        bg-zinc-900
+        border-[var(--mn-border-strong)]
+        bg-[var(--mn-surface)]
         px-6
         py-4
         font-semibold
-        text-white
+        text-[var(--mn-text)]
         transition-all
         duration-200
-        hover:border-yellow-400
-        hover:bg-zinc-800
+        hover:border-[var(--mn-accent)]
+        hover:bg-[var(--mn-surface-soft)]
         active:scale-[0.98]
         disabled:cursor-not-allowed
         disabled:opacity-60

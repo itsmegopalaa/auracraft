@@ -13,10 +13,6 @@ export default function Navbar() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
 
-  const openMenu = () => {
-    setMenuOpen(true);
-  };
-
   const closeMenu = () => {
     setMenuOpen(false);
 
@@ -25,14 +21,16 @@ export default function Navbar() {
     }, 0);
   };
 
+  const toggleMenu = () => {
+    setMenuOpen((open) => !open);
+  };
+
   const handleHomeClick = (
     event: React.MouseEvent<HTMLAnchorElement>
   ) => {
     event.preventDefault();
     closeMenu();
 
-    // Already on homepage:
-    // smoothly scroll all the way back to the top.
     if (window.location.pathname === "/") {
       window.scrollTo({
         top: 0,
@@ -55,13 +53,10 @@ export default function Navbar() {
       return;
     }
 
-    // Any other page:
-    // navigate to homepage, then the homepage starts at the top.
     router.push("/");
   };
 
   useEffect(() => {
-    // Keep homepage navigation warm so logo/Home taps feel instant.
     router.prefetch("/");
   }, [router]);
 
@@ -73,7 +68,6 @@ export default function Navbar() {
 
     const focusTimer = window.setTimeout(() => {
       const panel = menuPanelRef.current;
-
       if (!panel) return;
 
       const firstFocusable = panel.querySelector<HTMLElement>(
@@ -93,7 +87,6 @@ export default function Navbar() {
       if (event.key !== "Tab") return;
 
       const panel = menuPanelRef.current;
-
       if (!panel) return;
 
       const focusable = Array.from(
@@ -134,23 +127,20 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-black/90 shadow-lg shadow-black/10 backdrop-blur-2xl">
+      <header className="sticky top-0 z-50 border-b border-[var(--mn-border)] bg-[var(--mn-bg)]/95 backdrop-blur-xl">
         <nav aria-label="Main navigation">
-          {/* EXACT SAME CONTAINER AS HOMEPAGE */}
-          <div className="mx-auto max-w-7xl px-6">
-
+          <div className="mn-container-wide">
             {/* DESKTOP */}
-            <div className="hidden h-[72px] items-center gap-7 xl:gap-8 lg:flex">
+            <div className="hidden min-h-[76px] items-center gap-8 lg:flex">
               <Link
                 href="/"
                 aria-label="MineNote Home"
                 onClick={handleHomeClick}
                 className="group shrink-0"
               >
-                <span className="relative inline-flex items-center text-[25px] font-black tracking-[-0.055em] text-white transition-all duration-200 group-hover:text-zinc-100 lg:text-[27px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-                  Mine<span className="text-yellow-400">Note</span>
-
-                  <span className="absolute -bottom-1 left-0 h-[2px] w-0 rounded-full bg-yellow-400 transition-all duration-300 group-hover:w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black" />
+                <span className="relative inline-flex items-center text-[27px] font-black tracking-[-0.065em] text-[var(--mn-text)]">
+                  MineNote
+                  <span className="absolute -bottom-1 left-0 h-px w-0 bg-[var(--mn-accent)] transition-all duration-300 group-hover:w-full" />
                 </span>
               </Link>
 
@@ -159,119 +149,42 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* MOBILE */}
-            <div className="relative flex h-[64px] items-center lg:hidden">
-
-              {/* BLANK HEADER AREAS — MENU TOGGLE */}
-              <button
-                type="button"
-                aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-                onClick={() => {
-                  if (menuOpen) {
-                    closeMenu();
-                  } else {
-                    openMenu();
-                  }
-                }}
-                className="absolute inset-0 z-[50] cursor-pointer bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              />
-
-              {/* HEADER CONTROLS */}
-              <div className="pointer-events-none absolute inset-0 z-[70]">
-
-                {/* Search remains independently clickable */}
-                <div className="pointer-events-auto absolute left-0 top-1/2 -translate-y-1/2">
-                  <MobileSearch
-                    onOpen={() => {
-                      closeMenu();
-                    }}
-                  />
-                </div>
-
-                {/* Logo remains independently clickable */}
-                <Link
-                  href="/"
-                  aria-label="MineNote Home"
-                  onClick={handleHomeClick}
-                  className="pointer-events-auto absolute left-1/2 top-1/2 max-w-[calc(100%-112px)] -translate-x-1/2 -translate-y-1/2 leading-none"
-                >
-                  <span className="relative inline-flex items-center text-[22px] font-extrabold tracking-[-0.055em] text-white">
-                    Mine<span className="text-yellow-400">Note</span>
-
-                    <span className="absolute -bottom-1 left-0 h-[2px] w-5 rounded-full bg-yellow-400" />
-                  </span>
-                </Link>
-
-                {/* Hamburger remains independently clickable */}
-                <button
-                  ref={menuButtonRef}
-                  type="button"
-                  onClick={() => {
-                    if (menuOpen) {
-                      closeMenu();
-                    } else {
-                      openMenu();
-                    }
-                  }}
-                  aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-                  aria-expanded={menuOpen}
-                  aria-controls="mobile-navigation"
-                  className="pointer-events-auto absolute right-0 top-1/2 flex h-10 w-10 shrink-0 -translate-y-1/2 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.035] p-0 text-zinc-200 shadow-sm shadow-black/20 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.05] hover:text-yellow-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                >
-                  <span
-                    className="flex h-5 w-5 items-center justify-center text-[20px] leading-none"
-                    aria-hidden="true"
-                  >
-                    {menuOpen ? "×" : "☰"}
-                  </span>
-                </button>
-
+            {/* TABLET + MOBILE */}
+            <div
+  className="relative flex h-[64px] items-center lg:hidden"
+  onClick={(event) => {
+    if (event.target === event.currentTarget) {
+      toggleMenu();
+    }
+  }}
+>
+              <div className="absolute left-0 top-1/2 z-20 -translate-y-1/2">
+                <MobileSearch onOpen={closeMenu} />
               </div>
 
-              {/* SEARCH — independent control */}
-              <div
-                className="absolute left-0 top-1/2 z-[70] -translate-y-1/2"
-                data-mobile-navbar-control
-              >
-                <MobileSearch
-                  onOpen={() => {
-                    closeMenu();
-                  }}
-                />
-              </div>
-
-              {/* EXACT CENTER LOGO */}
               <Link
                 href="/"
                 aria-label="MineNote Home"
                 onClick={handleHomeClick}
-                className="absolute left-1/2 top-1/2 z-[70] max-w-[calc(100%-112px)] -translate-x-1/2 -translate-y-1/2 leading-none"
+                className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 leading-none"
               >
-                <span className="relative inline-flex items-center text-[22px] font-extrabold tracking-[-0.055em] text-white">
-                  Mine<span className="text-yellow-400">Note</span>
-
-                  <span className="absolute -bottom-1 left-0 h-[2px] w-5 rounded-full bg-yellow-400" />
+                <span className="relative inline-flex items-center text-[22px] font-black tracking-[-0.06em] text-[var(--mn-text)]">
+                  MineNote
+                  <span className="absolute -bottom-1 left-0 h-px w-5 bg-[var(--mn-accent)]" />
                 </span>
               </Link>
 
-              {/* HAMBURGER — ONLY MENU TRIGGER */}
               <button
                 ref={menuButtonRef}
                 type="button"
-                onClick={() => {
-                  if (menuOpen) {
-                    closeMenu();
-                  } else {
-                    openMenu();
-                  }
-                }}
+                onClick={toggleMenu}
                 aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={menuOpen}
                 aria-controls="mobile-navigation"
-                className="absolute right-0 top-1/2 z-[70] flex h-10 w-10 shrink-0 -translate-y-1/2 touch-manipulation items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.035] text-zinc-200 shadow-sm shadow-black/20 transition-all duration-200 hover:border-yellow-400/50 hover:bg-yellow-400/[0.05] hover:text-yellow-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] text-[var(--mn-text)] transition-all duration-200 hover:border-[var(--mn-text)] hover:-translate-y-[52%] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)]"
               >
                 <span
-                  className="flex h-5 w-5 items-center justify-center text-[20px] leading-none"
+                  className="text-xl leading-none"
                   aria-hidden="true"
                 >
                   {menuOpen ? "×" : "☰"}
@@ -282,29 +195,26 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* MOBILE MENU */}
       {menuOpen && (
         <>
-          {/* Outside-menu close layer */}
           <button
             type="button"
             aria-label="Close navigation menu"
             tabIndex={-1}
             onClick={closeMenu}
-            className="fixed inset-x-0 bottom-0 top-[64px] z-[40] cursor-default bg-black/50 outline-none lg:hidden"
+            className="fixed inset-0 z-40 bg-[var(--mn-overlay)] backdrop-blur-[2px] lg:hidden"
           />
 
-          {/* MENU */}
           <div
             ref={menuPanelRef}
             id="mobile-navigation"
             role="dialog"
             aria-label="Mobile navigation menu"
             aria-modal="true"
-            className="fixed left-0 right-0 top-[64px] z-[60] overflow-hidden rounded-b-[1.75rem] border-x border-b border-white/[0.10] bg-zinc-950/98 shadow-2xl shadow-black/70 backdrop-blur-xl lg:hidden"
+            className="fixed left-0 right-0 top-[64px] z-50 max-h-[calc(100vh-64px)] overflow-y-auto rounded-b-3xl border-x border-b border-[var(--mn-border)] bg-[var(--mn-surface)] shadow-[var(--mn-shadow-navbar)] lg:hidden"
           >
-            <div className="mx-auto max-w-7xl px-6">
-              <MobileMenu setMenuOpen={setMenuOpen} />
+            <div className="mn-container-wide">
+              <MobileMenu setMenuOpen={closeMenu} />
             </div>
           </div>
         </>

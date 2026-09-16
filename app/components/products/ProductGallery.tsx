@@ -19,9 +19,9 @@ export default function ProductGallery({
   return (
     <div className="space-y-5">
       {/* Main product showcase */}
-      <div className="group relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-zinc-950 shadow-2xl shadow-black/30">
+      <div className="group relative overflow-hidden rounded-[2rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] shadow-[var(--mn-shadow-lg)]">
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.07),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,var(--mn-product-glow),transparent_55%)]"
           aria-hidden="true"
         />
 
@@ -32,12 +32,12 @@ export default function ProductGallery({
             width={700}
             height={900}
             priority
-            className="relative z-10 h-auto max-h-[400px] w-auto max-w-[88%] object-contain drop-shadow-[0_25px_30px_rgba(0,0,0,0.55)] transition-transform duration-500 group-hover:scale-[1.02] sm:max-h-[480px] sm:max-w-full lg:max-h-[520px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="relative z-10 h-auto max-h-[400px] w-auto max-w-[88%] object-contain drop-shadow-[var(--mn-shadow-gallery)] transition-transform duration-500 group-hover:scale-[1.02] sm:max-h-[480px] sm:max-w-full lg:max-h-[520px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
           />
         </div>
 
         <div
-          className="pointer-events-none absolute inset-x-6 bottom-5 h-px bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent"
+          className="pointer-events-none absolute inset-x-6 bottom-5 h-px bg-gradient-to-r from-transparent via-[var(--mn-accent)]/20 to-transparent"
           aria-hidden="true"
         />
       </div>
@@ -57,8 +57,8 @@ export default function ProductGallery({
                 aria-pressed={isActive}
                 className={`shrink-0 overflow-hidden rounded-2xl border transition-all duration-300 ${
                   isActive
-                    ? "border-yellow-400 shadow-lg shadow-yellow-400/10"
-                    : "border-white/[0.08] opacity-60 hover:border-yellow-400/40 hover:opacity-100"
+                    ? "border-[var(--mn-accent)] shadow-[var(--mn-shadow-sm)]"
+                    : "border-[var(--mn-border)] opacity-60 hover:border-[var(--mn-accent)] hover:opacity-100"
                 }`}
               >
                 <Image

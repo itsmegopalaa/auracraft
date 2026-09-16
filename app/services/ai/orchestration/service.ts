@@ -1,7 +1,4 @@
-import type {
-  AiCoverGenerationRequest,
-  AiCoverGenerationResult,
-} from "../types";
+import type { AiCoverGenerationRequest } from "../types";
 
 import {
   createAiGenerationRecord,

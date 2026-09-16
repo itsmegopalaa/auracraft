@@ -69,7 +69,11 @@ export function validateCustomization(
   const uuidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  if (!uuidPattern.test(customization.productId)) {
+  if (
+    customization.productId !== undefined &&
+    customization.productId !== null &&
+    !uuidPattern.test(customization.productId)
+  ) {
     throw new Error("Invalid product ID.");
   }
 

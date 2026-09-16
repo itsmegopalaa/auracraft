@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import { sendOrderStatusEmail } from "@/app/services/orders/order-email";
+import { automateOrderShipping } from "@/app/services/shipping/automation";
 
-const ALLOWED_FIELDS = [
+const PRODUCTION_FIELDS = [
   "product_printed",
   "cover_verified",
   "notebook_assembled",
   "quality_checked",
   "packed",
-  "handed_over",
 ] as const;
 
-type ChecklistField = (typeof ALLOWED_FIELDS)[number];
+type ProductionField = (typeof PRODUCTION_FIELDS)[number];
 
 export async function PATCH(
   request: Request,
@@ -30,7 +30,6 @@ export async function PATCH(
 
     if (
       !body.field ||
-      !ALLOWED_FIELDS.includes(body.field as ChecklistField) ||
       typeof body.value !== "boolean"
     ) {
       return NextResponse.json(
@@ -44,71 +43,62 @@ export async function PATCH(
 
     const supabase = createSupabaseAdminClient();
 
-    const { data: shipment, error: shipmentError } = await supabase
-      .from("shipments")
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
       .select(
-        "id, status, product_printed, cover_verified, notebook_assembled, quality_checked, packed, handed_over"
+        `
+          id,
+          order_id,
+          name,
+          email,
+          payment_method,
+          payment_status,
+          order_status,
+          total,
+          delivery,
+          product_printed,
+          cover_verified,
+          notebook_assembled,
+          quality_checked,
+          packed,
+          production_completed_at
+        `
       )
       .eq("order_id", orderId)
-      .maybeSingle();
+      .single();
 
-    if (shipmentError) {
+    if (orderError || !order) {
       return NextResponse.json(
         {
           success: false,
-          error: shipmentError.message,
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!shipment) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "No automated shipment exists for this order.",
+          error: orderError?.message || "Order not found.",
         },
         { status: 404 }
       );
     }
 
-    if (
-      shipment.handed_over &&
-      body.field !== "handed_over" &&
-      shipment.status !== "ready_for_pickup"
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Production checklist is locked after courier handover.",
-        },
-        { status: 409 }
-      );
-    }
+    /*
+     * Courier handover is intentionally kept separate from
+     * production. Existing UI can still send this field while
+     * the shipping system is being migrated.
+     */
+    if (body.field === "handed_over") {
+      if (body.value !== true) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Courier handover cannot be reversed.",
+          },
+          { status: 409 }
+        );
+      }
 
-    if (
-      shipment.handed_over &&
-      body.field === "handed_over" &&
-      body.value === false
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Courier handover cannot be reversed after shipment.",
-        },
-        { status: 409 }
-      );
-    }
-
-    if (body.field === "handed_over" && body.value === true) {
       const productionComplete =
-        shipment.product_printed &&
-        shipment.cover_verified &&
-        shipment.notebook_assembled &&
-        shipment.quality_checked &&
-        shipment.packed;
+        order.product_printed &&
+        order.cover_verified &&
+        order.notebook_assembled &&
+        order.quality_checked &&
+        order.packed;
 
       if (!productionComplete) {
         return NextResponse.json(
@@ -121,6 +111,43 @@ export async function PATCH(
         );
       }
 
+      const { data: shipment, error: shipmentError } = await supabase
+        .from("shipments")
+        .select(
+          "id,status,handed_over,shipped_at"
+        )
+        .eq("order_id", order.id)
+        .maybeSingle();
+
+      if (shipmentError) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: shipmentError.message,
+          },
+          { status: 500 }
+        );
+      }
+
+      if (!shipment) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "No shipment exists yet. Complete production and let shipping automation create the shipment first.",
+          },
+          { status: 409 }
+        );
+      }
+
+      if (shipment.handed_over) {
+        return NextResponse.json({
+          success: true,
+          handedOver: true,
+          shipment,
+        });
+      }
+
       if (shipment.status !== "ready_for_pickup") {
         return NextResponse.json(
           {
@@ -131,58 +158,55 @@ export async function PATCH(
           { status: 409 }
         );
       }
-    }
 
-    const now = new Date().toISOString();
+      const now = new Date().toISOString();
 
-    const update: Record<string, unknown> = {
-      [body.field]: body.value,
-      checklist_updated_at: now,
-    };
+      const { data: updatedShipment, error: shipmentUpdateError } =
+        await supabase
+          .from("shipments")
+          .update({
+            handed_over: true,
+            status: "picked_up",
+            shipped_at: now,
+            checklist_updated_at: now,
+          })
+          .eq("id", shipment.id)
+          .select(
+            "id,status,handed_over,shipped_at,tracking_url,awb"
+          )
+          .single();
 
-    if (body.field === "handed_over" && body.value === true) {
-      update.status = "picked_up";
-      update.shipped_at = now;
-    }
-
-    const { data, error } = await supabase
-      .from("shipments")
-      .update(update)
-      .eq("id", shipment.id)
-      .select(
-        "id, status, product_printed, cover_verified, notebook_assembled, quality_checked, packed, handed_over, checklist_updated_at, shipped_at"
-      )
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: error.message,
-        },
-        { status: 500 }
-      );
-    }
-
-    if (body.field === "handed_over" && body.value === true) {
-      const { data: updatedOrder, error: orderError } = await supabase
-        .from("orders")
-        .update({
-          order_status: "shipped",
-          shipped_at: now,
-        })
-        .eq("order_id", orderId)
-        .select(
-          "order_id, name, email, payment_method, total, delivery"
-        )
-        .single();
-
-      if (orderError || !updatedOrder) {
+      if (shipmentUpdateError || !updatedShipment) {
         return NextResponse.json(
           {
             success: false,
             error:
-              orderError?.message ||
+              shipmentUpdateError?.message ||
+              "Unable to update shipment handover.",
+          },
+          { status: 500 }
+        );
+      }
+
+      const { data: updatedOrder, error: updatedOrderError } =
+        await supabase
+          .from("orders")
+          .update({
+            order_status: "shipped",
+            shipped_at: now,
+          })
+          .eq("id", order.id)
+          .select(
+            "order_id,name,email,payment_method,total,delivery"
+          )
+          .single();
+
+      if (updatedOrderError || !updatedOrder) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              updatedOrderError?.message ||
               "Shipment was updated but order status could not be updated.",
           },
           { status: 500 }
@@ -201,14 +225,148 @@ export async function PATCH(
 
       return NextResponse.json({
         success: true,
-        shipment: data,
+        handedOver: true,
+        shipment: updatedShipment,
         emailSent,
       });
     }
 
+    if (
+      !PRODUCTION_FIELDS.includes(
+        body.field as ProductionField
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid production checklist field.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      order.production_completed_at &&
+      body.value === false
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Production is already completed and cannot be reopened.",
+        },
+        { status: 409 }
+      );
+    }
+
+    const now = new Date().toISOString();
+
+    const nextChecklist = {
+      product_printed:
+        body.field === "product_printed"
+          ? body.value
+          : order.product_printed,
+      cover_verified:
+        body.field === "cover_verified"
+          ? body.value
+          : order.cover_verified,
+      notebook_assembled:
+        body.field === "notebook_assembled"
+          ? body.value
+          : order.notebook_assembled,
+      quality_checked:
+        body.field === "quality_checked"
+          ? body.value
+          : order.quality_checked,
+      packed:
+        body.field === "packed"
+          ? body.value
+          : order.packed,
+    };
+
+    const productionComplete =
+      nextChecklist.product_printed &&
+      nextChecklist.cover_verified &&
+      nextChecklist.notebook_assembled &&
+      nextChecklist.quality_checked &&
+      nextChecklist.packed;
+
+    const update: Record<string, unknown> = {
+      [body.field]: body.value,
+      production_checklist_updated_at: now,
+    };
+
+    if (productionComplete) {
+      update.production_completed_at =
+        order.production_completed_at || now;
+    }
+
+    const { data: updatedOrder, error: updateError } =
+      await supabase
+        .from("orders")
+        .update(update)
+        .eq("id", order.id)
+        .select(
+          `
+            id,
+            order_id,
+            order_status,
+            payment_status,
+            product_printed,
+            cover_verified,
+            notebook_assembled,
+            quality_checked,
+            packed,
+            production_checklist_updated_at,
+            production_completed_at
+          `
+        )
+        .single();
+
+    if (updateError || !updatedOrder) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            updateError?.message ||
+            "Unable to update production checklist.",
+        },
+        { status: 500 }
+      );
+    }
+
+    let shippingAttempted = false;
+    let shippingError: string | null = null;
+
+    /*
+     * Production is now complete.
+     * Shipping automation is deliberately triggered AFTER
+     * the production checklist is saved.
+     */
+    if (
+      productionComplete &&
+      !order.production_completed_at &&
+      order.payment_status === "paid" &&
+      ["confirmed", "processing"].includes(order.order_status)
+    ) {
+      shippingAttempted = true;
+
+      try {
+        await automateOrderShipping(order.order_id);
+      } catch (error) {
+        shippingError =
+          error instanceof Error
+            ? error.message
+            : "Shipping automation failed.";
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      shipment: data,
+      order: updatedOrder,
+      productionComplete,
+      shippingAttempted,
+      shippingError,
     });
   } catch (error) {
     return NextResponse.json(

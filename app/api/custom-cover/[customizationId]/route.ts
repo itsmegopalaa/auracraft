@@ -230,11 +230,28 @@ export async function PATCH(
       "Customer text"
     );
 
+    const requestedProductId =
+      body?.productId === undefined ||
+      body?.productId === null ||
+      body?.productId === ""
+        ? null
+        : body?.productId;
+
+    if (
+      requestedProductId !== null &&
+      !isUuid(requestedProductId)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid product ID." },
+        { status: 400 }
+      );
+    }
+
     const { data: existing, error: existingError } =
       await supabase
         .from("custom_cover_customizations")
         .select(
-          "id, customer_id, status, design"
+          "id, customer_id, status, product_id, design"
         )
         .eq("id", customizationId)
         .eq("customer_id", user.id)
@@ -264,12 +281,36 @@ export async function PATCH(
       body?.design ?? existing.design
     );
 
+    let productId = existing.product_id ?? null;
+
+    if (requestedProductId !== null) {
+      const { data: product, error: productError } =
+        await supabase
+          .from("products")
+          .select("id, active")
+          .eq("id", requestedProductId)
+          .eq("active", true)
+          .single();
+
+      if (productError || !product) {
+        return NextResponse.json(
+          { error: "Selected product is unavailable." },
+          { status: 409 }
+        );
+      }
+
+      productId = product.id;
+    } else if (body?.productId === null || body?.productId === "") {
+      productId = null;
+    }
+
     const { data: updated, error: updateError } =
       await supabase
         .from("custom_cover_customizations")
         .update({
           customer_name: customerName,
           customer_text: customerText,
+          product_id: productId,
           design,
           updated_at: new Date().toISOString(),
         })
@@ -277,7 +318,7 @@ export async function PATCH(
         .eq("customer_id", user.id)
         .eq("status", "draft")
         .select(
-          "id, customer_name, customer_text, design, status, updated_at"
+          "id, customer_name, customer_text, product_id, design, status, updated_at"
         )
         .single();
 

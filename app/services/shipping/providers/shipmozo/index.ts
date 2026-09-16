@@ -26,6 +26,37 @@ function toNumber(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function normalizeBoolean(
+  value: unknown,
+  fallback: boolean
+): boolean {
+  if (value === undefined || value === null) {
+    return fallback;
+  }
+
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+
+    if (["true", "1", "yes", "y"].includes(normalized)) {
+      return true;
+    }
+
+    if (["false", "0", "no", "n"].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return fallback;
+}
+
 export class ShipmozoProvider implements ShippingProvider {
   readonly name = "shipmozo" as const;
 
@@ -185,10 +216,10 @@ export class ShipmozoProvider implements ShippingProvider {
           estimated_days:
             toNumber(rateItem.estimated_days) ??
             toNumber(rateItem.etd),
-          serviceable:
-            rateItem.serviceable === undefined
-              ? true
-              : Boolean(rateItem.serviceable),
+          serviceable: normalizeBoolean(
+            rateItem.serviceable,
+            true
+          ),
         };
       })
       .filter(

@@ -15,7 +15,7 @@ export async function automateOrderShipping(orderId: string) {
   const { data: order, error } = await supabase
     .from("orders")
     .select(
-      "order_id, name, phone, email, address, city, state, pin, items, total, payment_method, payment_status, order_status, shipping_snapshot"
+      "id, order_id, name, phone, email, address, city, state, pin, items, total, payment_method, payment_status, order_status, shipping_snapshot"
     )
     .eq("order_id", orderId)
     .maybeSingle();
@@ -55,7 +55,7 @@ export async function automateOrderShipping(orderId: string) {
   const existingShipment = await supabase
     .from("shipments")
     .select("id, status")
-    .eq("order_id", orderId)
+    .eq("order_id", order.id)
     .maybeSingle();
 
   if (existingShipment.error) {
@@ -144,7 +144,8 @@ export async function automateOrderShipping(orderId: string) {
   const selectedRate = availableRates[0];
 
   return createShipment({
-    orderId: order.order_id,
+    orderUuid: order.id,
+    orderNumber: order.order_id,
     address,
     package: packageData,
     orderValue: Number(order.total),

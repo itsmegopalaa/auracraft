@@ -106,7 +106,7 @@ export default function ProductsClient({ products }: Props) {
         onChange={(e) =>
           setSearch(e.target.value)
         }
-        className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-4 text-sm text-white shadow-lg shadow-black/10 outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-yellow-400/60 focus:bg-zinc-900 focus:ring-2 focus:ring-yellow-400/10 sm:px-5 sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        className="w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-4 text-sm text-[var(--mn-text)] shadow-[var(--mn-shadow-sm)] outline-none transition-all duration-300 placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-border-strong)] focus:bg-[var(--mn-surface-soft)] focus:ring-2 focus:ring-[var(--mn-accent-soft)] sm:px-5 sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
       />
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide md:flex-wrap md:overflow-visible">
@@ -118,8 +118,8 @@ export default function ProductsClient({ products }: Props) {
             }
             className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-sm font-bold transition-all duration-200 active:scale-[0.98] ${
               category === item
-                ? "border-yellow-400 bg-yellow-400 text-black shadow-lg shadow-yellow-400/10"
-                : "border-white/[0.08] bg-zinc-950 text-zinc-400 hover:border-yellow-400/40 hover:text-white"
+                ? "border-[var(--mn-accent)] bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)]"
+                : "border-[var(--mn-border)] bg-[var(--mn-surface)] text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
             }`}
           >
             {item}
@@ -133,7 +133,7 @@ export default function ProductsClient({ products }: Props) {
           onChange={(e) =>
             setSort(e.target.value)
           }
-          className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all duration-200 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-3.5 text-sm font-medium text-[var(--mn-text)] outline-none transition-all duration-200 focus:border-[var(--mn-border-strong)] focus:ring-2 focus:ring-[var(--mn-accent-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
         >
           <option>Featured</option>
           <option>Price: Low → High</option>
@@ -146,7 +146,7 @@ export default function ProductsClient({ products }: Props) {
           onChange={(e) =>
             setPriceFilter(e.target.value)
           }
-          className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all duration-200 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-3.5 text-sm font-medium text-[var(--mn-text)] outline-none transition-all duration-200 focus:border-[var(--mn-border-strong)] focus:ring-2 focus:ring-[var(--mn-accent-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
         >
           <option>All</option>
           <option>Under ₹500</option>
@@ -159,7 +159,7 @@ export default function ProductsClient({ products }: Props) {
           onChange={(e) =>
             setRatingFilter(e.target.value)
           }
-          className="w-full rounded-2xl border border-white/[0.08] bg-zinc-950 px-4 py-3.5 text-sm font-medium text-white outline-none transition-all duration-200 focus:border-yellow-400/60 focus:ring-2 focus:ring-yellow-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-3.5 text-sm font-medium text-[var(--mn-text)] outline-none transition-all duration-200 focus:border-[var(--mn-border-strong)] focus:ring-2 focus:ring-[var(--mn-accent-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
         >
           <option>All</option>
           <option>4★+</option>
@@ -168,9 +168,9 @@ export default function ProductsClient({ products }: Props) {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="w-fit rounded-full border border-white/[0.07] bg-zinc-950 px-4 py-2 text-xs font-semibold text-zinc-500 sm:text-sm">
+        <p className="w-fit rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-2 text-xs font-semibold text-[var(--mn-text-muted)] sm:text-sm">
           Showing{" "}
-          <span className="text-yellow-400">
+          <span className="text-[var(--mn-accent)]">
             {filteredProducts.length}
           </span>{" "}
           products
@@ -183,7 +183,7 @@ export default function ProductsClient({ products }: Props) {
           ratingFilter !== "All") && (
           <button
             onClick={clearFilters}
-            className="w-fit rounded-full px-4 min-h-10 py-2 text-sm font-bold text-yellow-400 transition-all hover:bg-yellow-400/10 hover:text-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="w-fit rounded-full px-4 min-h-10 py-2 text-sm font-bold text-[var(--mn-accent)] transition-all hover:bg-[var(--mn-accent-soft)] hover:text-[var(--mn-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
           >
             Clear filters ✕
           </button>
@@ -207,20 +207,20 @@ export default function ProductsClient({ products }: Props) {
           ))}
         </div>
       ) : (
-        <div className="rounded-[2rem] border border-white/[0.08] bg-zinc-950 px-6 py-16 text-center shadow-2xl shadow-black/10 sm:px-10">
+        <div className="rounded-[2rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] px-6 py-16 text-center shadow-[var(--mn-shadow-sm)] sm:px-10">
           <div className="text-4xl">🔍</div>
 
-          <h3 className="mt-4 text-xl font-semibold text-white">
+          <h3 className="mt-4 text-xl font-semibold text-[var(--mn-text)]">
             No notebooks found
           </h3>
 
-          <p className="mt-2 text-gray-400">
+          <p className="mt-2 text-[var(--mn-text-muted)]">
             Try changing your search or filters.
           </p>
 
           <button
             onClick={clearFilters}
-            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-yellow-400 px-6 py-3 font-black text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[var(--mn-accent)] px-6 py-3 font-black text-[var(--mn-accent-contrast)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
           >
             Clear filters
           </button>

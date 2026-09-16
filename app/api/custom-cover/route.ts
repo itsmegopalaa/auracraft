@@ -67,14 +67,21 @@ export async function POST(request: Request) {
       theme,
     } = body;
 
-    if (!isValidUuid(productId)) {
+    const normalizedCreationMethod =
+      creationMethod === undefined ? "upload" : creationMethod;
+
+    if (
+      productId !== undefined &&
+      productId !== null &&
+      !isValidUuid(productId)
+    ) {
       return NextResponse.json(
-        { error: "A valid productId is required." },
+        { error: "productId must be a valid UUID when provided." },
         { status: 400 }
       );
     }
 
-    if (!isCreationMethod(creationMethod)) {
+    if (!isCreationMethod(normalizedCreationMethod)) {
       return NextResponse.json(
         { error: "Invalid creation method." },
         { status: 400 }
@@ -130,22 +137,17 @@ export async function POST(request: Request) {
     const normalizedTheme =
       typeof theme === "string" ? theme.trim() : "";
 
-    if (!normalizedCategory || !normalizedTheme) {
-      return NextResponse.json(
-        { error: "Choose a category and theme first." },
-        { status: 400 }
-      );
-    }
-
-
-    if (creationMethod === "template" && !templateId) {
+    if (normalizedCreationMethod === "template" && !templateId) {
       return NextResponse.json(
         { error: "templateId is required for template customization." },
         { status: 400 }
       );
     }
 
-    if (creationMethod !== "template" && templateId !== undefined) {
+    if (
+      normalizedCreationMethod !== "template" &&
+      templateId !== undefined
+    ) {
       return NextResponse.json(
         {
           error:
@@ -155,40 +157,53 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: product, error: productError } = await supabase
-      .from("products")
-      .select("id, active")
-      .eq("id", productId)
-      .eq("active", true)
-      .maybeSingle();
+    let verifiedProductId: string | null = null;
 
-    if (productError) {
-      console.error("Custom cover product lookup failed:", productError);
+    if (productId) {
+      const { data: product, error: productError } = await supabase
+        .from("products")
+        .select("id, active")
+        .eq("id", productId)
+        .eq("active", true)
+        .maybeSingle();
 
-      return NextResponse.json(
-        { error: "Unable to verify product." },
-        { status: 500 }
-      );
-    }
+      if (productError) {
+        console.error(
+          "Custom cover product lookup failed:",
+          productError
+        );
 
-    if (!product) {
-      return NextResponse.json(
-        { error: "Product not found or unavailable." },
-        { status: 404 }
-      );
+        return NextResponse.json(
+          { error: "Unable to verify product." },
+          { status: 500 }
+        );
+      }
+
+      if (!product) {
+        return NextResponse.json(
+          { error: "Product not found or unavailable." },
+          { status: 404 }
+        );
+      }
+
+      verifiedProductId = product.id;
     }
 
     const input: CreateCustomizationInput = {
-      productId: product.id,
-      creationMethod,
+      productId: verifiedProductId,
+      creationMethod: normalizedCreationMethod,
       customerId: user.id,
       customerName,
       customerText,
       templateId,
-      creativeDirection: {
-        category: normalizedCategory,
-        theme: normalizedTheme,
-      },
+      ...(normalizedCategory && normalizedTheme
+        ? {
+            creativeDirection: {
+              category: normalizedCategory,
+              theme: normalizedTheme,
+            },
+          }
+        : {}),
     };
 
     const customization = createDraftCustomization(input);

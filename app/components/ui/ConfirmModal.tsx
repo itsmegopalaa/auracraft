@@ -22,14 +22,14 @@ export default function ConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6">
-      <div className="w-full max-w-md rounded-3xl border border-yellow-400 bg-zinc-900 p-8 shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--mn-overlay)] backdrop-blur-sm px-6">
+      <div className="w-full max-w-md rounded-3xl border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] p-8 shadow-[var(--mn-shadow-lg)] animate-in fade-in zoom-in duration-200">
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--mn-text)]">
           {title}
         </h2>
 
-        <p className="mt-4 leading-7 text-gray-400">
+        <p className="mt-4 leading-7 text-[var(--mn-text-secondary)]">
           {message}
         </p>
 
@@ -37,14 +37,14 @@ export default function ConfirmModal({
 
           <button
             onClick={onCancel}
-            className="rounded-full border border-zinc-700 px-6 py-3 text-white transition hover:border-white"
+            className="rounded-full border border-[var(--mn-border)] px-6 py-3 text-[var(--mn-text)] transition hover:border-[var(--mn-border-strong)]"
           >
             {cancelText}
           </button>
 
           <button
             onClick={onConfirm}
-            className="rounded-full bg-yellow-400 px-6 py-3 font-bold text-black transition hover:scale-105"
+            className="rounded-full bg-[var(--mn-accent)] px-6 py-3 font-bold text-[var(--mn-accent-contrast)] transition hover:scale-105"
           >
             {confirmText}
           </button>

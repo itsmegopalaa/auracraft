@@ -44,3 +44,7 @@ app/checkout/page.backup.tsx
 
 # Supabase local temporary files
 /supabase/.temp/
+
+# Editor/AI backup files
+*.bak
+*.bak-*

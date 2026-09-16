@@ -257,18 +257,18 @@ export default function SuccessPage() {
   if (!checked) {
     return (
       <>
-        <main className="min-h-screen overflow-x-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-24">
+        <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-16 text-[var(--mn-text)] sm:px-6 sm:py-24">
           <div className="mx-auto flex min-h-[55vh] max-w-xl items-center justify-center sm:min-h-[60vh]">
-            <div className="w-full rounded-[1.5rem] border border-white/[0.08] bg-zinc-950 p-6 text-center shadow-2xl sm:rounded-[2rem] sm:p-10">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-yellow-400/30 bg-yellow-400/10 text-2xl">
+            <div className="w-full rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-[var(--mn-space-card)] text-center shadow-[var(--mn-shadow-lg)] sm:rounded-[2rem] sm:p-10">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-2xl">
                 ⏳
               </div>
 
-              <h1 className="mt-6 text-2xl font-black">
+              <h1 className="mt-6 mn-h3">
                 Loading your order
               </h1>
 
-              <p className="mt-3 text-sm leading-6 text-zinc-500">
+              <p className="mt-3 text-sm leading-6 text-[var(--mn-text-muted)]">
                 We&apos;re securely retrieving your MineNote order details.
               </p>
             </div>
@@ -283,25 +283,25 @@ export default function SuccessPage() {
   if (!order) {
     return (
       <>
-        <main className="min-h-screen overflow-x-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-24">
+        <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-16 text-[var(--mn-text)] sm:px-6 sm:py-24">
           <div className="mx-auto flex min-h-[55vh] max-w-xl items-center justify-center sm:min-h-[60vh]">
-            <div className="w-full rounded-[1.5rem] border border-white/[0.08] bg-zinc-950 p-6 text-center shadow-2xl sm:rounded-[2rem] sm:p-10">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-yellow-400/20 bg-yellow-400/[0.06] text-4xl">
+            <div className="w-full rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-[var(--mn-space-card)] text-center shadow-[var(--mn-shadow-lg)] sm:rounded-[2rem] sm:p-10">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-4xl">
                 🧾
               </div>
 
-              <h1 className="mt-7 text-3xl font-black">
+              <h1 className="mt-7 mn-h2">
                 Order Details Not Found
               </h1>
 
-              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-zinc-500">
+              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-[var(--mn-text-muted)]">
                 We couldn&apos;t find a recent MineNote order on this device.
                 Your order may still exist in your account.
               </p>
 
               <Link
                 href="/products"
-                className="mt-8 inline-flex rounded-full bg-yellow-400 px-8 py-4 font-black text-black transition-all hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="mt-8 inline-flex rounded-full bg-[var(--mn-accent)] px-8 py-4 font-black text-[var(--mn-accent-contrast)] transition-all hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
               >
                 Explore Products →
               </Link>
@@ -333,48 +333,48 @@ export default function SuccessPage() {
 
   return (
     <>
-      <main className="min-h-screen overflow-x-hidden bg-black px-4 py-12 text-white sm:px-6 md:py-20 sm:px-6 sm:py-16 md:py-24">
+      <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-12 text-[var(--mn-text)] sm:px-6 md:py-[clamp(5rem,8vw,7.5rem)] sm:px-6 sm:py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
 
           {/* =========================================================
               HERO / CONFIRMATION
           ========================================================= */}
-          <section className="relative overflow-hidden rounded-[1.5rem] border border-yellow-400/20 bg-zinc-950 px-5 py-10 text-center shadow-2xl sm:rounded-[2rem] sm:px-10 sm:py-12 md:py-16">
-            <div className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full bg-yellow-400/10 blur-3xl" />
+          <section className="relative overflow-hidden rounded-[1.5rem] border border-[var(--mn-accent)] bg-[var(--mn-surface-soft)] px-5 py-10 text-center shadow-[var(--mn-shadow-lg)] sm:rounded-[2rem] sm:px-10 sm:py-12 md:py-16">
+            <div className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full bg-[var(--mn-accent-soft)] blur-3xl" />
 
             <div className="relative">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-yellow-400/30 bg-yellow-400 text-3xl font-black text-black shadow-xl shadow-yellow-400/10 sm:h-20 sm:w-20 sm:text-4xl">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--mn-accent)] bg-[var(--mn-accent)] mn-h2 text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] sm:h-20 sm:w-20 sm:text-4xl">
                 ✓
               </div>
 
-              <div className="mt-6 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-400 sm:mt-7 sm:text-xs sm:tracking-[0.25em]">
+              <div className="mt-6 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--mn-accent)] sm:mt-7 sm:text-xs sm:tracking-[0.25em]">
                 Order Confirmed
               </div>
 
-              <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl md:text-6xl">
+              <h1 className="mt-3 mn-h2 tracking-tight sm:text-5xl md:text-6xl">
                 Thank You,{" "}
-                <span className="text-yellow-400">
+                <span className="text-[var(--mn-accent)]">
                   {order.name.split(" ")[0]}
                 </span>
                 .
               </h1>
 
-              <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:mt-5 sm:text-lg sm:leading-7">
+              <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[var(--mn-text-secondary)] sm:mt-5 sm:text-lg sm:leading-7">
                 Your MineNote order has been successfully received.
                 We&apos;ll take care of the rest. ✨
               </p>
 
-              <div className="mx-auto mt-7 flex w-full max-w-full flex-col items-center gap-2 rounded-2xl border border-white/[0.08] bg-black/60 px-4 py-3.5 sm:mt-8 sm:w-fit sm:px-6 sm:py-4 sm:flex-row sm:gap-4">
-                <span className="text-xs font-bold uppercase tracking-[0.15em] text-zinc-600">
+              <div className="mx-auto mt-7 flex w-full max-w-full flex-col items-center gap-2 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)]/60 px-4 py-3.5 sm:mt-8 sm:w-fit sm:px-6 sm:py-4 sm:flex-row sm:gap-4">
+                <span className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--mn-text-muted)]">
                   Order ID
                 </span>
 
-                <span className="max-w-full break-all font-mono break-all text-xs font-bold text-yellow-400 sm:text-base">
+                <span className="max-w-full break-all font-mono break-all text-xs font-bold text-[var(--mn-accent)] sm:text-base">
                   {order.orderId}
                 </span>
               </div>
 
-              <p className="mt-5 text-xs text-zinc-600">
+              <p className="mt-5 text-xs text-[var(--mn-text-muted)]">
                 Keep this ID handy for order support and tracking.
               </p>
             </div>
@@ -383,22 +383,22 @@ export default function SuccessPage() {
           {/* =========================================================
               ORDER OVERVIEW
           ========================================================= */}
-          <section className="mt-6 grid gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+          <section className="mt-6 grid gap-[var(--mn-space-card)] sm:mt-8 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr]">
 
             {/* PRODUCTS */}
-            <div className="rounded-[1.5rem] border border-white/[0.08] bg-zinc-950 p-5 shadow-2xl sm:rounded-[2rem] sm:p-8">
+            <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-5 shadow-[var(--mn-shadow-lg)] sm:rounded-[2rem] sm:p-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                  <div className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                     Order Contents
                   </div>
 
-                  <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                  <h2 className="mt-2 mn-h3 sm:text-3xl">
                     Your Notebooks 📦
                   </h2>
                 </div>
 
-                <span className="rounded-full border border-white/[0.08] bg-black px-4 min-h-10 py-1.5 text-xs font-bold text-zinc-400">
+                <span className="rounded-full border border-[var(--mn-border)] bg-[var(--mn-bg)] px-4 min-h-10 py-1.5 text-xs font-bold text-[var(--mn-text-secondary)]">
                   {itemCount} {itemCount === 1 ? "item" : "items"}
                 </span>
               </div>
@@ -407,9 +407,9 @@ export default function SuccessPage() {
                 {order.items.map((item) => (
                   <div
                     key={item.id}
-                    className="group flex gap-3 rounded-2xl border border-white/[0.06] bg-black/60 p-3 transition-colors hover:border-yellow-400/20 sm:gap-4 sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    className="group flex gap-3 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)]/60 p-3 transition-colors hover:border-[var(--mn-accent)] sm:gap-4 sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                   >
-                    <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-zinc-950 sm:h-28 sm:w-24">
+                    <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-surface-soft)] sm:h-28 sm:w-24">
                       {item.image &&
                       !imageErrors[item.id] ? (
                         <Image
@@ -417,7 +417,7 @@ export default function SuccessPage() {
                           alt={item.name}
                           fill
                           sizes="96px"
-                          className="object-contain p-2 transition-transform duration-300 group-hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                          className="object-contain p-2 transition-transform duration-300 group-hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                           onError={() =>
                             setImageErrors(
                               (current) => ({
@@ -435,17 +435,17 @@ export default function SuccessPage() {
                     </div>
 
                     <div className="min-w-0 flex-1 py-1">
-                      <p className="truncate font-bold text-white">
+                      <p className="truncate font-bold text-[var(--mn-text)]">
                         {item.name}
                       </p>
 
-                      <p className="mt-2 text-[15px] text-zinc-300">
+                      <p className="mt-2 text-[15px] text-[var(--mn-text-secondary)]">
                         ₹{item.price} × {item.quantity}
                       </p>
                     </div>
 
                     <div className="flex shrink-0 items-center">
-                      <p className="text-base font-black text-yellow-400 sm:text-lg">
+                      <p className="text-base font-black text-[var(--mn-accent)] sm:text-lg">
                         ₹{item.price * item.quantity}
                       </p>
                     </div>
@@ -453,107 +453,107 @@ export default function SuccessPage() {
                 ))}
               </div>
 
-              <div className="my-7 border-t border-white/[0.08]" />
+              <div className="my-7 border-t border-[var(--mn-border)]" />
 
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between text-zinc-500">
+                <div className="flex justify-between text-[var(--mn-text-muted)]">
                   <span>Subtotal</span>
-                  <span className="text-zinc-300">
+                  <span className="text-[var(--mn-text-secondary)]">
                     ₹{order.total}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-zinc-500">
+                <div className="flex justify-between text-[var(--mn-text-muted)]">
                   <span>Delivery</span>
-                  <span className="font-bold text-emerald-400">
+                  <span className="font-bold text-[var(--mn-success)]">
                     FREE
                   </span>
                 </div>
 
-                <div className="flex justify-between text-zinc-500">
-                  <span>Premium Packaging</span>
-                  <span className="font-bold text-emerald-400">
+                <div className="flex justify-between text-[var(--mn-text-muted)]">
+                  <span>Premium packaging</span>
+                  <span className="font-bold text-[var(--mn-success)]">
                     FREE
                   </span>
                 </div>
               </div>
 
-              <div className="my-7 border-t border-white/[0.08]" />
+              <div className="my-7 border-t border-[var(--mn-border)]" />
 
               <div className="flex items-end justify-between">
                 <span className="text-lg font-bold">
                   Total Paid
                 </span>
 
-                <span className="text-2xl font-black text-yellow-400 sm:text-3xl">
+                <span className="mn-h3 text-[var(--mn-accent)] sm:text-3xl">
                   ₹{order.total}
                 </span>
               </div>
             </div>
 
             {/* DELIVERY DETAILS */}
-            <div className="rounded-[1.5rem] border border-white/[0.08] bg-zinc-950 p-5 shadow-2xl sm:rounded-[2rem] sm:p-8">
-              <div className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+            <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-5 shadow-[var(--mn-shadow-lg)] sm:rounded-[2rem] sm:p-8">
+              <div className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                 Delivery
               </div>
 
-              <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+              <h2 className="mt-2 mn-h3 sm:text-3xl">
                 Shipping Details 🚚
               </h2>
 
               <div className="mt-6 space-y-4 sm:mt-7 sm:space-y-5">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Delivering To
                   </p>
 
-                  <p className="mt-2 font-semibold text-white">
+                  <p className="mt-2 font-semibold text-[var(--mn-text)]">
                     {order.name}
                   </p>
 
-                  <p className="mt-1 text-sm leading-6 text-zinc-400">
+                  <p className="mt-1 text-sm leading-6 text-[var(--mn-text-secondary)]">
                     {order.address}
                     <br />
                     {order.city}, {order.state} — {order.pin}
                   </p>
                 </div>
 
-                <div className="border-t border-white/[0.06] pt-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                <div className="border-t border-[var(--mn-border)] pt-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Contact
                   </p>
 
-                  <p className="mt-2 text-sm text-zinc-300">
+                  <p className="mt-2 text-sm text-[var(--mn-text-secondary)]">
                     {order.phone}
                   </p>
 
-                  <p className="mt-1 break-all text-[15px] text-zinc-400">
+                  <p className="mt-1 break-all text-[15px] text-[var(--mn-text-secondary)]">
                     {order.email}
                   </p>
                 </div>
 
-                <div className="border-t border-white/[0.06] pt-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                <div className="border-t border-[var(--mn-border)] pt-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Payment
                   </p>
 
-                  <p className="mt-2 font-semibold text-white">
+                  <p className="mt-2 font-semibold text-[var(--mn-text)]">
                     {paymentLabel}
                   </p>
 
                   {paidDate && (
-                    <p className="mt-1 text-[12px] text-zinc-400">
+                    <p className="mt-1 text-[12px] text-[var(--mn-text-secondary)]">
                       Paid on {paidDate}
                     </p>
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/[0.04] p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                <div className="rounded-[1.5rem] border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                     Estimated Delivery
                   </p>
 
-                  <p className="mt-2 font-bold text-yellow-400">
+                  <p className="mt-2 font-bold text-[var(--mn-accent)]">
                     {order.delivery}
                   </p>
                 </div>
@@ -564,19 +564,19 @@ export default function SuccessPage() {
           {/* =========================================================
               STATUS
           ========================================================= */}
-          <section className="mt-6 rounded-[1.5rem] border border-white/[0.08] bg-zinc-950 p-5 shadow-2xl sm:mt-8 sm:rounded-[2rem] sm:p-8">
+          <section className="mt-6 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-5 shadow-[var(--mn-shadow-lg)] sm:mt-8 sm:rounded-[2rem] sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-600">
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
                   Live Order Progress
                 </div>
 
-                <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                <h2 className="mt-2 mn-h3 sm:text-3xl">
                   Order Status
                 </h2>
               </div>
 
-              <span className="w-fit rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-yellow-400">
+              <span className="w-fit rounded-full border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] px-4 py-2 text-xs font-black uppercase tracking-wider text-[var(--mn-accent)]">
                 {orderStatus}
               </span>
             </div>
@@ -595,17 +595,17 @@ export default function SuccessPage() {
                 return (
                   <div
                     key={step.id}
-                    className={`relative rounded-2xl border p-4 transition-all sm:p-5 ${
+                    className={`relative rounded-[1.5rem] border p-4 transition-all sm:p-5 ${
                       completed
-                        ? "border-yellow-400/25 bg-yellow-400/[0.06]"
-                        : "border-white/[0.06] bg-black/50"
+                        ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
+                        : "border-[var(--mn-border)] bg-[var(--mn-bg)]/50"
                     }`}
                   >
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-black ${
                         completed
-                          ? "bg-yellow-400 text-black"
-                          : "border border-zinc-700 bg-zinc-900 text-zinc-600"
+                          ? "bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)]"
+                          : "border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] text-[var(--mn-text-muted)]"
                       }`}
                     >
                       {step.icon}
@@ -614,8 +614,8 @@ export default function SuccessPage() {
                     <h3
                       className={`mt-4 font-bold ${
                         completed
-                          ? "text-white"
-                          : "text-zinc-500"
+                          ? "text-[var(--mn-text)]"
+                          : "text-[var(--mn-text-muted)]"
                       }`}
                     >
                       {step.title}
@@ -624,15 +624,15 @@ export default function SuccessPage() {
                     <p
                       className={`mt-2 text-sm leading-6 ${
                         completed
-                          ? "text-zinc-400"
-                          : "text-zinc-600"
+                          ? "text-[var(--mn-text-secondary)]"
+                          : "text-[var(--mn-text-muted)]"
                       }`}
                     >
                       {step.description}
                     </p>
 
                     {current && (
-                      <span className="mt-4 inline-flex rounded-full bg-yellow-400/10 px-3 min-h-10.5 py-1 text-[10px] font-black uppercase tracking-wider text-yellow-400">
+                      <span className="mt-4 inline-flex rounded-full bg-[var(--mn-accent-soft)] px-3 min-h-10.5 py-1 text-[10px] font-black uppercase tracking-wider text-[var(--mn-accent)]">
                         Current
                       </span>
                     )}
@@ -642,12 +642,12 @@ export default function SuccessPage() {
             </div>
 
             {orderStatus === "cancelled" && (
-              <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-950/30 p-4 sm:mt-6 sm:p-5">
-                <h3 className="font-bold text-red-300">
+              <div className="mt-5 rounded-[1.5rem] border border-[color-mix(in_srgb,var(--mn-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] p-4 sm:mt-6 sm:p-5">
+                <h3 className="font-bold text-[var(--mn-danger)]">
                   Order Cancelled
                 </h3>
 
-                <p className="mt-2 text-sm leading-6 text-red-200/70">
+                <p className="mt-2 text-sm leading-6 text-[var(--mn-danger)]">
                   This order has been cancelled. Please contact
                   MineNote if you need assistance.
                 </p>
@@ -662,11 +662,11 @@ export default function SuccessPage() {
               order.trackingUrl ||
               order.shippedAt ||
               order.deliveredAt) && (
-              <div className="mt-5 overflow-hidden rounded-2xl border border-yellow-400/15 bg-black/70 sm:mt-6">
-                <div className="border-b border-white/[0.06] px-5 py-4 sm:px-6">
+              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--mn-accent)] bg-[var(--mn-bg)]/70 sm:mt-6">
+                <div className="border-b border-[var(--mn-border)] px-5 py-4 sm:px-6">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-400">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--mn-accent)]">
                         Shipment
                       </p>
 
@@ -681,14 +681,14 @@ export default function SuccessPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 p-4 sm:gap-5 sm:grid-cols-2 sm:p-6">
+                <div className="grid gap-4 p-4 sm:gap-5 sm:grid-cols-2 sm:p-[var(--mn-space-card)]">
                   {order.shippingPartner && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Shipping Partner
                       </p>
 
-                      <p className="mt-2 font-semibold text-white">
+                      <p className="mt-2 font-semibold text-[var(--mn-text)]">
                         {order.shippingPartner}
                       </p>
                     </div>
@@ -696,11 +696,11 @@ export default function SuccessPage() {
 
                   {order.trackingId && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Tracking ID
                       </p>
 
-                      <p className="mt-2 break-all font-mono break-all text-sm font-bold text-yellow-400">
+                      <p className="mt-2 break-all font-mono break-all text-sm font-bold text-[var(--mn-accent)]">
                         {order.trackingId}
                       </p>
                     </div>
@@ -708,11 +708,11 @@ export default function SuccessPage() {
 
                   {shippedDate && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Shipped
                       </p>
 
-                      <p className="mt-2 text-sm font-semibold text-zinc-300">
+                      <p className="mt-2 text-sm font-semibold text-[var(--mn-text-secondary)]">
                         {shippedDate}
                       </p>
                     </div>
@@ -720,11 +720,11 @@ export default function SuccessPage() {
 
                   {deliveredDate && (
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                         Delivered
                       </p>
 
-                      <p className="mt-2 text-sm font-semibold text-emerald-400">
+                      <p className="mt-2 text-sm font-semibold text-[var(--mn-success)]">
                         {deliveredDate}
                       </p>
                     </div>
@@ -732,12 +732,12 @@ export default function SuccessPage() {
                 </div>
 
                 {order.trackingUrl && (
-                  <div className="border-t border-white/[0.06] p-5 sm:p-6">
+                  <div className="border-t border-[var(--mn-border)] p-5 sm:p-[var(--mn-space-card)]">
                     <a
                       href={order.trackingUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-yellow-400 px-6 py-3.5 font-black text-black transition-all hover:-translate-y-0.5 hover:bg-yellow-300 sm:w-auto sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                      className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[var(--mn-accent)] px-6 py-3.5 font-black text-[var(--mn-accent-contrast)] transition-all hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] sm:w-auto sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                     >
                       Track Shipment →
                     </a>
@@ -753,20 +753,20 @@ export default function SuccessPage() {
           <section className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 sm:grid-cols-2">
             <Link
               href="/products"
-              className="flex min-h-12 items-center justify-center rounded-2xl bg-yellow-400 py-3.5 text-center font-black text-black shadow-lg shadow-yellow-400/10 transition-all hover:-translate-y-0.5 hover:bg-yellow-300 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="flex min-h-12 items-center justify-center rounded-[1.5rem] bg-[var(--mn-accent)] py-3.5 text-center font-black text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] transition-all hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
             >
               Explore More Designs →
             </Link>
 
             <Link
               href="/"
-              className="flex min-h-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-zinc-950 py-3.5 text-center font-bold text-white transition-all hover:-translate-y-0.5 hover:border-yellow-400/40 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="flex min-h-12 items-center justify-center rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] py-3.5 text-center font-bold text-[var(--mn-text)] transition-all hover:-translate-y-0.5 hover:border-[var(--mn-accent)] sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
             >
               Back to Home
             </Link>
           </section>
 
-          <p className="mt-8 text-center text-xs text-zinc-700">
+          <p className="mt-8 text-center text-xs text-[var(--mn-text-muted)]">
             Need help with your order? Keep your order ID ready when
             contacting MineNote support.
           </p>

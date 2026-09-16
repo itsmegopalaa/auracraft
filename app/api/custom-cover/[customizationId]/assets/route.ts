@@ -4,7 +4,6 @@ import {
   buildCustomCoverStoragePath,
   getCustomCoverStorageBucket,
 } from "@/app/services/ai/persistence/storage";
-import { createCustomCoverAssetRecord } from "@/app/services/ai/persistence/repository";
 import type { CoverSide } from "@/app/lib/customization";
 
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
@@ -468,7 +467,7 @@ export async function POST(
       .select("id, storage_path")
       .eq("customization_id", customizationId)
       .eq("side", side)
-      .eq("kind", "original");
+      .in("kind", ["original", "preview"]);
 
   if (previousError) {
     console.error(
@@ -631,7 +630,7 @@ export async function GET(
         "id, side, kind, storage_path, width, height, mime_type, file_size, metadata, created_at"
       )
       .eq("customization_id", customizationId)
-      .eq("kind", "original")
+      .in("kind", ["original", "preview"])
       .order("created_at", { ascending: false });
 
   if (assetsError) {
@@ -646,17 +645,22 @@ export async function GET(
     );
   }
 
-  const latestBySide = new Map<string, (typeof assets)[number]>();
+  const latestBySideAndKind = new Map<
+    string,
+    (typeof assets)[number]
+  >();
 
   for (const asset of assets) {
-    if (!latestBySide.has(asset.side)) {
-      latestBySide.set(asset.side, asset);
+    const key = `${asset.side}:${asset.kind}`;
+
+    if (!latestBySideAndKind.has(key)) {
+      latestBySideAndKind.set(key, asset);
     }
   }
 
   const result = [];
 
-  for (const asset of latestBySide.values()) {
+  for (const asset of latestBySideAndKind.values()) {
     const previewUrl = await signedUrl(
       supabase,
       asset.storage_path

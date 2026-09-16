@@ -30,35 +30,30 @@ export default async function NewArrivals() {
   );
 
   return (
-    <section className="relative overflow-hidden border-y border-white/[0.06]">
-      <div
-        className="pointer-events-none absolute right-[-10rem] top-1/2 h-80 w-80 -translate-y-1/2 rounded-full bg-yellow-400/[0.025] blur-3xl sm:h-96 sm:w-96"
-        aria-hidden="true"
-      />
-
-      <div className="relative mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24 lg:py-28">
-        <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:gap-5 md:flex-row md:items-end md:justify-between">
+    <section className="relative overflow-hidden border-b border-[var(--mn-border)] bg-[var(--mn-surface-soft)]">
+      <div className="mn-container-wide py-[clamp(5rem,8vw,7.5rem)] sm:py-[clamp(6rem,9vw,9rem)] lg:py-28">
+        <div className="mb-10 flex flex-col gap-[var(--mn-space-card)] border-b border-[var(--mn-border)] pb-8 sm:mb-12 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-400/80 sm:mb-4 sm:tracking-[0.3em]">
-              Just dropped
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--mn-accent)]">
+              Fresh from the studio
             </p>
 
-            <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-white sm:text-5xl lg:text-6xl">
-              New <span className="text-yellow-400">Arrivals</span>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-[var(--mn-text)] sm:text-5xl lg:text-6xl">
+              New Arrivals
             </h2>
 
-            <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-300 sm:mt-5 sm:text-base sm:leading-8">
-              Fresh AuraNotes designs, recently added for your ideas,
-              creativity, and everyday moments.
+            <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--mn-text-secondary)] sm:text-base">
+              New designs for the next idea, the next plan, and everything
+              waiting to be written down.
             </p>
           </div>
 
-          <span className="w-fit rounded-full border border-white/[0.09] bg-white/[0.025] px-3.5 py-2 text-[12px] font-bold uppercase tracking-[0.14em] text-zinc-300 sm:px-4 sm:tracking-[0.16em]">
-            New designs • Limited rotation
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--mn-text-muted)]">
+            Recently added
           </span>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-7">
+        <div className="grid gap-[var(--mn-space-card)] sm:grid-cols-2 sm:gap-[var(--mn-space-card)] lg:grid-cols-4 lg:gap-7">
           {products?.map((product) => (
             <ProductCard
               key={product.id}

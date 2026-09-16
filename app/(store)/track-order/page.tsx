@@ -154,7 +154,7 @@ export default function TrackOrderPage() {
 
   return (
     <>
-      <main className="min-h-screen bg-black px-6 py-24 text-white">
+      <main className="min-h-screen bg-[var(--mn-bg)] px-6 py-24 text-[var(--mn-text)]">
         <div className="mx-auto max-w-5xl">
           {/* Header */}
           <div className="text-center">
@@ -164,19 +164,19 @@ export default function TrackOrderPage() {
               Track Your Order
             </h1>
 
-            <p className="mx-auto mt-4 max-w-xl text-gray-400">
+            <p className="mx-auto mt-4 max-w-xl text-[var(--mn-text-muted)]">
               Enter your MineNote Order ID and the email address
               used during checkout.
             </p>
           </div>
 
           {/* Search Form */}
-          <div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-zinc-800 bg-zinc-900 p-7 md:p-9">
+          <div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-7 md:p-9">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label
                   htmlFor="orderId"
-                  className="mb-2 block text-sm font-semibold text-gray-300"
+                  className="mb-2 block text-sm font-semibold text-[var(--mn-text-secondary)]"
                 >
                   Order ID
                 </label>
@@ -190,14 +190,14 @@ export default function TrackOrderPage() {
                   }
                   placeholder="e.g. MN12345678"
                   autoComplete="off"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400"
+                  className="w-full rounded-[1.5rem] border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] px-5 py-4 text-[var(--mn-text)] outline-none transition placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-accent)]"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-gray-300"
+                  className="mb-2 block text-sm font-semibold text-[var(--mn-text-secondary)]"
                 >
                   Email Address
                 </label>
@@ -211,12 +211,12 @@ export default function TrackOrderPage() {
                   }
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full rounded-2xl border border-zinc-700 bg-black px-5 py-4 text-white outline-none transition placeholder:text-zinc-600 focus:border-yellow-400"
+                  className="w-full rounded-[1.5rem] border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] px-5 py-4 text-[var(--mn-text)] outline-none transition placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-accent)]"
                 />
               </div>
 
               {error && (
-                <div className="rounded-2xl border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
+                <div className="rounded-[1.5rem] border border-[color-mix(in_srgb,var(--mn-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] p-4 text-sm text-[var(--mn-danger)]">
                   {error}
                 </div>
               )}
@@ -224,7 +224,7 @@ export default function TrackOrderPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-full bg-[var(--mn-accent)] px-6 py-4 font-bold text-[var(--mn-accent-contrast)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Finding Your Order..." : "Track Order →"}
               </button>
@@ -235,26 +235,26 @@ export default function TrackOrderPage() {
           {order && (
             <div className="mt-10 space-y-8">
               {/* Summary */}
-              <div className="rounded-3xl border border-yellow-400/30 bg-zinc-900 p-7 shadow-2xl md:p-9">
+              <div className="rounded-3xl border border-[var(--mn-accent)] bg-[var(--mn-surface)] p-7 shadow-[var(--mn-shadow-lg)] md:p-9">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="text-[15px] text-gray-400">
+                    <p className="text-[15px] text-[var(--mn-text-muted)]">
                       Order ID
                     </p>
 
-                    <h2 className="mt-1 text-2xl font-extrabold text-yellow-400">
+                    <h2 className="mt-1 text-2xl font-extrabold text-[var(--mn-accent)]">
                       {order.order_id}
                     </h2>
                   </div>
 
-                  <span className="w-fit rounded-full bg-yellow-400 px-5 py-2 text-sm font-bold capitalize text-black">
+                  <span className="w-fit rounded-full bg-[var(--mn-accent)] px-5 py-2 text-sm font-bold capitalize text-[var(--mn-accent-contrast)]">
                     {currentStatus}
                   </span>
                 </div>
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-2xl bg-black p-5">
-                    <p className="text-[15px] text-gray-400">
+                  <div className="rounded-[1.5rem] bg-[var(--mn-bg)] p-5">
+                    <p className="text-[15px] text-[var(--mn-text-muted)]">
                       Customer
                     </p>
 
@@ -263,8 +263,8 @@ export default function TrackOrderPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-black p-5">
-                    <p className="text-[15px] text-gray-400">
+                  <div className="rounded-[1.5rem] bg-[var(--mn-bg)] p-5">
+                    <p className="text-[15px] text-[var(--mn-text-muted)]">
                       Payment
                     </p>
 
@@ -275,44 +275,44 @@ export default function TrackOrderPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-black p-5">
-                    <p className="text-[15px] text-gray-400">
+                  <div className="rounded-[1.5rem] bg-[var(--mn-bg)] p-5">
+                    <p className="text-[15px] text-[var(--mn-text-muted)]">
                       Total
                     </p>
 
-                    <p className="mt-1 font-bold text-yellow-400">
+                    <p className="mt-1 font-bold text-[var(--mn-accent)]">
                       ₹{order.total}
                     </p>
                   </div>
                 </div>
 
                 {paidDate && (
-                  <p className="mt-5 text-[15px] text-gray-400">
+                  <p className="mt-5 text-[15px] text-[var(--mn-text-muted)]">
                     Payment received on {paidDate}
                   </p>
                 )}
               </div>
 
               {/* Status Timeline */}
-              <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-7 md:p-9">
+              <div className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-7 md:p-9">
                 <h2 className="text-2xl font-bold">
                   Order Progress 📦
                 </h2>
 
                 {isCancelled ? (
-                  <div className="mt-7 rounded-2xl border border-red-500/30 bg-red-950/40 p-6">
+                  <div className="mt-7 rounded-[1.5rem] border border-[color-mix(in_srgb,var(--mn-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] p-[var(--mn-space-card)]">
                     <div className="text-4xl">❌</div>
 
-                    <h3 className="mt-4 text-xl font-bold text-red-300">
+                    <h3 className="mt-4 text-xl font-bold text-[var(--mn-danger)]">
                       Order Cancelled
                     </h3>
 
-                    <p className="mt-2 text-sm leading-relaxed text-red-200/80">
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--mn-danger)]">
                       This order has been cancelled and will not proceed
                       through the normal delivery process.
                     </p>
 
-                    <p className="mt-4 text-sm text-gray-400">
+                    <p className="mt-4 text-sm text-[var(--mn-text-muted)]">
                       Please contact MineNote if you need assistance
                       regarding this order.
                     </p>
@@ -329,10 +329,10 @@ export default function TrackOrderPage() {
                       return (
                         <div
                           key={step.id}
-                          className={`rounded-2xl p-5 ${
+                          className={`rounded-[1.5rem] p-5 ${
                             completed
-                              ? "bg-yellow-400 text-black"
-                              : "bg-black text-white"
+                              ? "bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)]"
+                              : "bg-[var(--mn-bg)] text-[var(--mn-text)]"
                           }`}
                         >
                           <div className="text-3xl">
@@ -346,8 +346,8 @@ export default function TrackOrderPage() {
                           <p
                             className={`mt-2 text-sm ${
                               completed
-                                ? "text-black/70"
-                                : "text-gray-400"
+                                ? "text-[var(--mn-accent-contrast)]/70"
+                                : "text-[var(--mn-text-muted)]"
                             }`}
                           >
                             {step.description}
@@ -365,7 +365,7 @@ export default function TrackOrderPage() {
                 order.tracking_url ||
                 order.shipped_at ||
                 order.delivered_at) && (
-                <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-7 md:p-9">
+                <div className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-7 md:p-9">
                   <h2 className="text-2xl font-bold">
                     Shipment Tracking 🚚
                   </h2>
@@ -373,7 +373,7 @@ export default function TrackOrderPage() {
                   <div className="mt-6 grid gap-5 sm:grid-cols-2">
                     {order.shipping_partner && (
                       <div>
-                        <p className="text-[15px] text-gray-400">
+                        <p className="text-[15px] text-[var(--mn-text-muted)]">
                           Shipping Partner
                         </p>
 
@@ -385,11 +385,11 @@ export default function TrackOrderPage() {
 
                     {order.tracking_id && (
                       <div>
-                        <p className="text-[15px] text-gray-400">
+                        <p className="text-[15px] text-[var(--mn-text-muted)]">
                           Tracking ID
                         </p>
 
-                        <p className="mt-1 break-all font-semibold text-yellow-400">
+                        <p className="mt-1 break-all font-semibold text-[var(--mn-accent)]">
                           {order.tracking_id}
                         </p>
                       </div>
@@ -397,7 +397,7 @@ export default function TrackOrderPage() {
 
                     {shippedDate && (
                       <div>
-                        <p className="text-[15px] text-gray-400">
+                        <p className="text-[15px] text-[var(--mn-text-muted)]">
                           Shipped
                         </p>
 
@@ -409,7 +409,7 @@ export default function TrackOrderPage() {
 
                     {deliveredDate && (
                       <div>
-                        <p className="text-[15px] text-gray-400">
+                        <p className="text-[15px] text-[var(--mn-text-muted)]">
                           Delivered
                         </p>
 
@@ -425,7 +425,7 @@ export default function TrackOrderPage() {
                       href={order.tracking_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-yellow-400 px-6 py-4 font-bold text-black transition hover:scale-[1.01] sm:w-auto"
+                      className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-[var(--mn-accent)] px-6 py-4 font-bold text-[var(--mn-accent-contrast)] transition hover:scale-[1.01] sm:w-auto"
                     >
                       Track Shipment →
                     </a>
@@ -434,7 +434,7 @@ export default function TrackOrderPage() {
               )}
 
               {/* Items */}
-              <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-7 md:p-9">
+              <div className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-7 md:p-9">
                 <h2 className="text-2xl font-bold">
                   Items in This Order 🛍️
                 </h2>
@@ -443,19 +443,19 @@ export default function TrackOrderPage() {
                   {order.items.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between gap-4 rounded-2xl bg-black p-4"
+                      className="flex items-center justify-between gap-4 rounded-[1.5rem] bg-[var(--mn-bg)] p-4"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-semibold">
                           {item.name}
                         </p>
 
-                        <p className="mt-1 text-[15px] text-gray-400">
+                        <p className="mt-1 text-[15px] text-[var(--mn-text-muted)]">
                           ₹{item.price} × {item.quantity}
                         </p>
                       </div>
 
-                      <p className="shrink-0 font-bold text-yellow-400">
+                      <p className="shrink-0 font-bold text-[var(--mn-accent)]">
                         ₹{item.price * item.quantity}
                       </p>
                     </div>
@@ -472,7 +472,7 @@ export default function TrackOrderPage() {
                     setOrderId("");
                     setEmail("");
                   }}
-                  className="rounded-full border border-zinc-700 bg-zinc-900 px-8 py-4 font-bold text-white transition hover:border-yellow-400"
+                  className="rounded-full border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-8 py-4 font-bold text-[var(--mn-text)] transition hover:border-[var(--mn-accent)]"
                 >
                   Track Another Order
                 </button>
@@ -485,14 +485,14 @@ export default function TrackOrderPage() {
             <div className="mt-8 flex flex-col justify-center gap-4 text-center sm:flex-row">
               <Link
                 href="/products"
-                className="rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-[1.02]"
+                className="rounded-full bg-[var(--mn-accent)] px-8 py-4 font-bold text-[var(--mn-accent-contrast)] transition hover:scale-[1.02]"
               >
                 Explore Products →
               </Link>
 
               <Link
                 href="/"
-                className="rounded-full border border-zinc-700 bg-zinc-900 px-8 py-4 font-bold text-white transition hover:border-yellow-400"
+                className="rounded-full border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-8 py-4 font-bold text-[var(--mn-text)] transition hover:border-[var(--mn-accent)]"
               >
                 Back to Home
               </Link>

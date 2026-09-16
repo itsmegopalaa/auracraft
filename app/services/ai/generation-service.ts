@@ -1,9 +1,6 @@
 import type { CoverSide } from "@/app/lib/customization";
 import { getAiProvider } from "./registry";
-import {
-  validateAiGenerationRequest,
-  type GenerateCoverInput,
-} from "./index";
+import { validateAiGenerationRequest } from "./index";
 import type {
   AiCoverGenerationResult,
   AiProviderId,

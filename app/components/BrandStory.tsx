@@ -1,32 +1,29 @@
 export default function BrandStory() {
   const highlights = [
-    { label: "Designed in India", icon: "🇮🇳" },
-    { label: "Premium Quality Paper", icon: "📖" },
-    { label: "Personalized Covers", icon: "✨" },
-    { label: "Fast Delivery", icon: "🚚" },
+    { label: "Designed in India", icon: "✦" },
+    { label: "Premium Quality Paper", icon: "◌" },
+    { label: "Personalized Covers", icon: "□" },
+    { label: "Fast Delivery", icon: "→" },
   ];
 
   return (
-    <section className="border-y border-white/[0.06] bg-zinc-950/80">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-y-1 px-4 py-4 sm:px-6 sm:py-5 md:gap-y-0 md:py-6">
-        {highlights.map((item, index) => (
-          <div key={item.label} className="flex items-center">
-            {index > 0 && (
-              <span
-                className="mx-2 hidden h-1 w-1 rounded-full bg-yellow-400/50 sm:mx-3 sm:block md:mx-4"
-                aria-hidden="true"
-              />
-            )}
+    <section className="border-b border-[var(--mn-border)] bg-[var(--mn-surface)]">
+      <div className="mn-container-wide flex flex-wrap items-center justify-center divide-x divide-[var(--mn-border)] py-3 sm:py-4">
+        {highlights.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center gap-2 px-3 py-2 sm:px-5"
+          >
+            <span
+              className="text-sm text-[var(--mn-accent)]"
+              aria-hidden="true"
+            >
+              {item.icon}
+            </span>
 
-            <div className="flex items-center gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2">
-              <span className="text-sm opacity-90" aria-hidden="true">
-                {item.icon}
-              </span>
-
-              <span className="text-[12px] font-semibold uppercase tracking-[0.11em] text-zinc-300 sm:text-[13px] sm:tracking-[0.14em] md:text-[13px]">
-                {item.label}
-              </span>
-            </div>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)] sm:text-[11px]">
+              {item.label}
+            </span>
           </div>
         ))}
       </div>

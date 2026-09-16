@@ -1,3203 +1,1789 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import {
   ChangeEvent,
+  CSSProperties,
+  PointerEvent as ReactPointerEvent,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 
-import { useCart } from "@/app/context/CartContext";
-import type { CoverSide } from "@/app/lib/customization";
+type EditorElementType = "text" | "image" | "shape";
 
-
-type TemplateId =
-  | "minimal"
-  | "anime"
-  | "aesthetic"
-  | "adventure"
-  | "gaming"
-  | "premium";
-
-type Customization = {
+type EditorElement = {
   id: string;
-  productId: string;
-  productName: string;
-  productImage: string;
-  creationMethod: "ai" | "upload" | "template";
-  status: string;
-  templateId: string | null;
-  customerName: string | null;
-  customerText: string | null;
-  design: Record<string, unknown>;
-  aiBudget: {
-    total: number;
-    used: number;
-    remaining: number;
-  };
-};
-
-type UploadedAsset = {
-  id: string;
-  side: CoverSide;
-  kind: "original";
-  storagePath: string;
-  width: number;
-  height: number;
-  mimeType: string;
-  fileSize: number | null;
-  previewUrl: string | null;
-};
-
-type CoverElement = {
-  id: string;
-  type: "text" | "image";
+  type: EditorElementType;
   x: number;
   y: number;
   width: number;
   height: number;
   rotation: number;
-  zIndex: number;
+  opacity: number;
   text?: string;
-  assetId?: string;
   fontSize?: number;
-  fontWeight?: number;
-  fontFamily?: string;
+  fontWeight?: string;
+  textAlign?: "left" | "center" | "right";
   color?: string;
-  align?: "left" | "center" | "right";
-  lineHeight?: number;
   letterSpacing?: number;
-  opacity?: number;
-  objectFit?: "cover" | "contain";
+  lineHeight?: number;
+  src?: string;
+  objectFit?: "cover" | "contain" | "fill";
+  imageScale?: number;
+  imageOffsetX?: number;
+  imageOffsetY?: number;
+  shape?: "rectangle" | "circle";
+  fill?: string;
+  borderRadius?: number;
 };
 
-type SurfaceEditorDesign = {
+type DesignState = {
   background: string;
-  elements: CoverElement[];
+  elements: EditorElement[];
 };
 
 type Props = {
-  customization: Customization;
+  customizationId: string;
+  productId?: string;
+  productName?: string;
+  productImage?: string;
 };
 
-const templates: Record<
-  TemplateId,
-  {
-    label: string;
-    emoji: string;
-    front: string;
-    insideFront: string;
-    back: string;
-    insideBack: string;
-    accent: string;
-  }
-> = {
-  minimal: {
-    label: "Minimal",
-    emoji: "◻️",
-    front: "linear-gradient(145deg,#18181b,#27272a)",
-    insideFront: "linear-gradient(145deg,#27272a,#3f3f46)",
-    back: "linear-gradient(145deg,#09090b,#18181b)",
-    insideBack: "linear-gradient(145deg,#18181b,#27272a)",
-    accent: "#f4f4f5",
-  },
-  anime: {
-    label: "Anime",
-    emoji: "🌸",
-    front: "linear-gradient(145deg,#312e81,#be185d,#f472b6)",
-    insideFront: "linear-gradient(145deg,#4338ca,#9d174d)",
-    back: "linear-gradient(145deg,#1e1b4b,#831843)",
-    insideBack: "linear-gradient(145deg,#312e81,#701a75)",
-    accent: "#f9a8d4",
-  },
-  aesthetic: {
-    label: "Aesthetic",
-    emoji: "✨",
-    front: "linear-gradient(145deg,#292524,#78716c,#d6d3d1)",
-    insideFront: "linear-gradient(145deg,#44403c,#57534e)",
-    back: "linear-gradient(145deg,#1c1917,#44403c)",
-    insideBack: "linear-gradient(145deg,#292524,#57534e)",
-    accent: "#e7e5e4",
-  },
-  adventure: {
-    label: "Adventure",
-    emoji: "🏔️",
-    front: "linear-gradient(145deg,#14532d,#166534,#a16207)",
-    insideFront: "linear-gradient(145deg,#166534,#365314)",
-    back: "linear-gradient(145deg,#052e16,#365314)",
-    insideBack: "linear-gradient(145deg,#14532d,#365314)",
-    accent: "#bef264",
-  },
-  gaming: {
-    label: "Gaming",
-    emoji: "🎮",
-    front: "linear-gradient(145deg,#020617,#312e81,#7c3aed)",
-    insideFront: "linear-gradient(145deg,#1e1b4b,#4338ca)",
-    back: "linear-gradient(145deg,#020617,#1e1b4b)",
-    insideBack: "linear-gradient(145deg,#020617,#312e81)",
-    accent: "#a78bfa",
-  },
-  premium: {
-    label: "Premium",
-    emoji: "👑",
-    front: "linear-gradient(145deg,#18181b,#3f3f46,#71717a)",
-    insideFront: "linear-gradient(145deg,#27272a,#52525b)",
-    back: "linear-gradient(145deg,#09090b,#27272a)",
-    insideBack: "linear-gradient(145deg,#18181b,#3f3f46)",
-    accent: "#facc15",
-  },
-};
-
-const COVER_ASPECT = 216 / 279;
-
-const SURFACE_SWITCHER: Array<[CoverSide, string]> = [
-  ["front", "Front"],
-  ["insideFront", "Inside Front"],
-  ["insideBack", "Inside Back"],
-  ["back", "Back"],
-];
-
-function getCoverSideLabel(side: CoverSide): string {
-  switch (side) {
-    case "front":
-      return "Front";
-    case "insideFront":
-      return "Inside Front";
-    case "back":
-      return "Back";
-    case "insideBack":
-      return "Inside Back";
-  }
-}
-
-function fitCoverToViewport(availWidth: number, availHeight: number) {
-  const padX = 16;
-  const padY = 12;
-  const widthLimit = Math.max(168, availWidth - padX);
-  const heightLimit = Math.max(220, availHeight - padY);
-
-  let height = heightLimit;
-  let width = height * COVER_ASPECT;
-
-  if (width > widthLimit) {
-    width = widthLimit;
-    height = width / COVER_ASPECT;
-  }
-
-  return {
-    width: Math.floor(width),
-    height: Math.floor(height),
-  };
-}
-
-function getTemplateId(value: string | null): TemplateId {
-  if (value && value in templates) {
-    return value as TemplateId;
-  }
-
-  return "minimal";
-}
-
-function readDesignBackground(
-  design: Record<string, unknown>,
-  side: CoverSide
-): string | undefined {
-  const sideDesign = design[side];
-
-  if (
-    typeof sideDesign === "object" &&
-    sideDesign !== null &&
-    "background" in sideDesign
-  ) {
-    const background = (sideDesign as { background?: unknown }).background;
-
-    if (typeof background === "string" && background.trim()) {
-      return background;
+type Interaction =
+  | {
+      type: "drag";
+      id: string;
+      startX: number;
+      startY: number;
+      originX: number;
+      originY: number;
     }
-  }
+  | {
+      type: "resize";
+      id: string;
+      handle: "nw" | "ne" | "sw" | "se";
+      startX: number;
+      startY: number;
+      originX: number;
+      originY: number;
+      originWidth: number;
+      originHeight: number;
+    }
+  | {
+      type: "rotate";
+      id: string;
+      centerX: number;
+      centerY: number;
+      startX: number;
+      startY: number;
+      startRotation: number;
+    };
 
-  return undefined;
-}
+const CANVAS_WIDTH = 600;
+const CANVAS_HEIGHT = 760;
 
+const initialDesign: DesignState = {
+  background: "#ffffff",
+  elements: [],
+};
 
-function isElement(value: unknown): value is CoverElement {
-  if (!value || typeof value !== "object") return false;
-
-  const item = value as Record<string, unknown>;
-
-  return (
-    typeof item.id === "string" &&
-    (item.type === "text" || item.type === "image") &&
-    typeof item.x === "number" &&
-    typeof item.y === "number" &&
-    typeof item.width === "number" &&
-    typeof item.height === "number" &&
-    typeof item.rotation === "number" &&
-    typeof item.zIndex === "number"
-  );
-}
-
-function createTextElement(
-  id: string,
-  text: string,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  fontSize: number,
-  fontWeight: number,
-  align: "left" | "center" | "right" = "center"
-): CoverElement {
-  return {
-    id,
-    type: "text",
-    x,
-    y,
-    width,
-    height,
-    rotation: 0,
-    zIndex: 10,
-    text,
-    fontSize,
-    fontWeight,
-    color: "#ffffff",
-    align,
-  };
-}
-
-function createImageElement(
-  assetId: string
-): CoverElement {
-  return {
-    id: `image-${assetId}`,
-    type: "image",
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    rotation: 0,
-    zIndex: 1,
-    assetId,
-  };
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export default function CustomCoverEditor({
-  customization,
+  customizationId,
+  productId,
+  productName,
+  productImage,
 }: Props) {
-  const { addCustomCoverToCart } = useCart();
-
-  const initialTemplate = getTemplateId(customization.templateId);
-
-  const [side, setSide] = useState<CoverSide>("front");
-  const [templateId, setTemplateId] =
-    useState<TemplateId>(initialTemplate);
-
-  const [customerName, setCustomerName] = useState(
-    customization.customerName ?? ""
-  );
-
-  const [customerText, setCustomerText] = useState(
-    customization.customerText ?? ""
-  );
-
+  const [design, setDesign] = useState<DesignState>(initialDesign);
+  const [history, setHistory] = useState<DesignState[]>([]);
+  const [future, setFuture] = useState<DesignState[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [tool, setTool] = useState<
+    "select" | "text" | "image" | "shape" | "ai"
+  >("select");
+  const [zoom, setZoom] = useState(0.72);
+  const [preview, setPreview] = useState(false);
+  const [saved, setSaved] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [approving, setApproving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [assets, setAssets] = useState<UploadedAsset[]>([]);
-  const [uploadingSide, setUploadingSide] = useState<CoverSide | null>(null);
-  const [uploadMessage, setUploadMessage] = useState("");
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [uploadTargetSide, setUploadTargetSide] =
-    useState<CoverSide>("front");
-
+  const [panel, setPanel] = useState<"properties" | "background" | "ai">(
+    "properties",
+  );
   const [aiPrompt, setAiPrompt] = useState("");
-  const [aiNegativePrompt, setAiNegativePrompt] = useState("");
-  const [aiTargetSides, setAiTargetSides] =
-    useState<CoverSide | "all">("front");
-  const [generatingAi, setGeneratingAi] = useState(false);
-  const [generationMessage, setGenerationMessage] =
-    useState("");
-  const [generationNumber, setGenerationNumber] =
-    useState<number | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
 
-  const [selectedElementId, setSelectedElementId] =
-    useState<string | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState(
+    productId ?? "",
+  );
+  const [selectedProductName, setSelectedProductName] = useState(
+    productName ?? "Custom Cover",
+  );
+  const [productQuery, setProductQuery] = useState("");
+  const [productResults, setProductResults] = useState<
+    Array<{
+      id: string;
+      name: string;
+      image: string | null;
+      price: number;
+      category: string | null;
+    }>
+  >([]);
+  const [productSearching, setProductSearching] = useState(false);
 
-  type EditorTool =
-    | "select"
-    | "text"
-    | "image"
-    | "ai"
-    | "style"
-    | "layers";
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+  const interactionRef = useRef<Interaction | null>(null);
 
-  const [activeEditorTool, setActiveEditorTool] =
-    useState<EditorTool>("select");
-
-  const [editingElementId, setEditingElementId] =
-    useState<string | null>(null);
-
-  const [isEditorFullscreen, setIsEditorFullscreen] = useState(false);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
-
-  const surfaceSwipeStartX = useRef<number | null>(null);
-  const workspaceRef = useRef<HTMLDivElement | null>(null);
-  const [coverSize, setCoverSize] = useState({ width: 280, height: 362 });
-
-  const [designElements, setDesignElements] =
-    useState<Record<CoverSide, CoverElement[]>>(() => {
-      const result = {} as Record<CoverSide, CoverElement[]>;
-
-      const surfaces: CoverSide[] = [
-        "front",
-        "insideFront",
-        "back",
-        "insideBack",
-      ];
-
-      for (const surface of surfaces) {
-        const rawSurface = customization.design?.[surface];
-
-        if (
-          rawSurface &&
-          typeof rawSurface === "object" &&
-          "elements" in rawSurface &&
-          Array.isArray(
-            (rawSurface as { elements?: unknown }).elements
-          )
-        ) {
-          result[surface] = (
-            (rawSurface as { elements: unknown[] }).elements
-          ).filter(isElement);
-        } else {
-          result[surface] = [];
-        }
-      }
-
-      return result;
-    });
-
-  const [dragState, setDragState] = useState<{
-    id: string;
-    startX: number;
-    startY: number;
-    originX: number;
-    originY: number;
-  } | null>(null);
-
-  const [alignmentGuides, setAlignmentGuides] = useState<{
-  vertical?: number;
-  horizontal?: number;
-}>({});
-
-const [resizeState, setResizeState] = useState<{
-    id: string;
-    handle:
-      | "nw"
-      | "n"
-      | "ne"
-      | "w"
-      | "e"
-      | "sw"
-      | "s"
-      | "se";
-    startX: number;
-    startY: number;
-    originX: number;
-    originY: number;
-    originWidth: number;
-    originHeight: number;
-    originRotation: number;
-  } | null>(null);
-
-  const [rotationState, setRotationState] = useState<{
-    id: string;
-    centerX: number;
-    centerY: number;
-    startAngle: number;
-    originRotation: number;
-  } | null>(null);
-
-  const [editorResetVersion, setEditorResetVersion] =
-    useState(0);
-
-  const [history, setHistory] = useState<Record<
-    CoverSide,
-    CoverElement[][]
-  >>(() => ({
-    front: [],
-    insideFront: [],
-    back: [],
-    insideBack: [],
-  }));
-
-  const [future, setFuture] = useState<Record<
-    CoverSide,
-    CoverElement[][]
-  >>(() => ({
-    front: [],
-    insideFront: [],
-    back: [],
-    insideBack: [],
-  }));
-
-  const historyInitialized = useRef(false);
-  const historySkipRef = useRef(false);
-
-
-
-  const template = templates[templateId];
-
-  const existingDesign = useMemo(
+  const selectedElement = useMemo(
     () =>
-      customization.design &&
-      typeof customization.design === "object"
-        ? customization.design
-        : {},
-    [customization.design]
+      design.elements.find((element) => element.id === selectedId) ?? null,
+    [design.elements, selectedId],
   );
 
-  const storedBackground = readDesignBackground(
-    existingDesign,
-    side
-  );
-
-  const previewBackground =
-    storedBackground ??
-    template[side];
-
   useEffect(() => {
-    let cancelled = false;
+    const raw = localStorage.getItem(
+      `minenote-custom-cover-${customizationId}`,
+    );
 
-    async function loadAssets() {
-      try {
-        const response = await fetch(
-          `/api/custom-cover/${customization.id}/assets`,
-          {
-            cache: "no-store",
-          }
-        );
+    if (!raw) return;
 
-        if (!response.ok) {
-          return;
-        }
-
-        const data = await response.json();
-
-        if (!cancelled && Array.isArray(data.assets)) {
-          setAssets(data.assets);
-        }
-      } catch {
-        // Preview loading is non-blocking.
-      }
-    }
-
-    void loadAssets();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [customization.id]);
-
-  useEffect(() => {
-    setDesignElements((current) => {
-      const next = { ...current };
-
-      for (const surface of [
-        "front",
-        "insideFront",
-        "back",
-        "insideBack",
-      ] as CoverSide[]) {
-        if (!next[surface]?.length) {
-          next[surface] = [];
-        }
-      }
-
-      return next;
-    });
-  }, []);
-
-  useLayoutEffect(() => {
-    const node = workspaceRef.current;
-
-    if (!node) return;
-
-    const measure = () => {
-      const rect = node.getBoundingClientRect();
-      setCoverSize(fitCoverToViewport(rect.width, rect.height));
-    };
-
-    measure();
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [isEditorFullscreen, isPreviewMode, activeEditorTool]);
-
-  useEffect(() => {
-    setDesignElements((current) => {
-      let changed = false;
-      const next = { ...current };
-
-      for (const asset of assets) {
-        const existing = next[asset.side] ?? [];
-        const imageIndex = existing.findIndex(
-          (element) => element.type === "image"
-        );
-
-        if (imageIndex === -1) {
-          next[asset.side] = [...existing, createImageElement(asset.id)];
-          changed = true;
-          continue;
-        }
-
-        if (existing[imageIndex].assetId === asset.id) {
-          continue;
-        }
-
-        const updated = [...existing];
-        updated[imageIndex] = {
-          ...updated[imageIndex],
-          assetId: asset.id,
-        };
-        next[asset.side] = updated;
-        changed = true;
-      }
-
-      return changed ? next : current;
-    });
-  }, [assets]);
-
-  useEffect(() => {
-    if (side !== "front") return;
-
-    setDesignElements((current) => {
-      const elements = [...(current.front ?? [])];
-
-      const ensureText = (
-        id: string,
-        value: string,
-        defaults: Omit<CoverElement, "id" | "type" | "text">
-      ) => {
-        const index = elements.findIndex(
-          (element) => element.id === id
-        );
-
-        if (index === -1) {
-          elements.push({
-            id,
-            type: "text",
-            text: value,
-            ...defaults,
-          });
-        } else if (
-          elements[index].type === "text" &&
-          elements[index].text !== value
-        ) {
-          elements[index] = {
-            ...elements[index],
-            text: value,
-          };
-        }
-      };
-
-      ensureText("front-name", customerName || "Your Name", {
-        x: 10,
-        y: 38,
-        width: 80,
-        height: 12,
-        rotation: 0,
-        zIndex: 20,
-        fontSize: 28,
-        fontWeight: 900,
-        color: "#ffffff",
-        align: "center",
-      });
-
-      ensureText(
-        "front-quote",
-        customerText || "Your story starts here.",
-        {
-          x: 10,
-          y: 54,
-          width: 80,
-          height: 15,
-          rotation: 0,
-          zIndex: 21,
-          fontSize: 13,
-          fontWeight: 500,
-          color: "#ffffff",
-          align: "center",
-        }
-      );
-
-      return {
-        ...current,
-        front: elements,
-      };
-    });
-  }, [customerName, customerText, side]);
-
-  const uploadedAssetForSide = assets.find(
-    (asset) => asset.side === side
-  );
-
-
-  const activeElements = designElements[side] ?? [];
-
-  const selectedElement =
-    activeElements.find(
-      (element) => element.id === selectedElementId
-    ) ?? null;
-
-  function startInlineEdit(element: CoverElement) {
-    if (element.type !== "text") return;
-
-    setSelectedElementId(element.id);
-    setEditingElementId(element.id);
-  }
-
-  function finishInlineEdit() {
-    setEditingElementId(null);
-  }
-
-  function cancelInlineEdit() {
-    setEditingElementId(null);
-  }
-
-  function handleEditorKeyDown(
-    event: React.KeyboardEvent<HTMLDivElement>
-  ) {
-    if (editingElementId) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        cancelInlineEdit();
-      }
-      return;
-    }
-
-    const modifier = event.metaKey || event.ctrlKey;
-
-    if (
-      modifier &&
-      event.key.toLowerCase() === "z" &&
-      !event.shiftKey
-    ) {
-      event.preventDefault();
-      undo();
-      return;
-    }
-
-    if (
-      modifier &&
-      event.key.toLowerCase() === "z" &&
-      event.shiftKey
-    ) {
-      event.preventDefault();
-      redo();
-      return;
-    }
-
-    if (
-      modifier &&
-      event.key.toLowerCase() === "d" &&
-      selectedElementId
-    ) {
-      event.preventDefault();
-      duplicateSelectedElement();
-      return;
-    }
-
-    if (
-      (event.key === "Delete" || event.key === "Backspace") &&
-      selectedElementId
-    ) {
-      event.preventDefault();
-      deleteSelectedElement();
-    }
-  }
-
-  function pushHistory(
-    surface: CoverSide,
-    snapshot: CoverElement[]
-  ) {
-    setHistory((current) => ({
-      ...current,
-      [surface]: [
-        ...(current[surface] ?? []),
-        structuredClone(snapshot),
-      ].slice(-50),
-    }));
-
-    setFuture((current) => ({
-      ...current,
-      [surface]: [],
-    }));
-  }
-
-  function updateElement(
-    id: string,
-    patch: Partial<CoverElement>
-  ) {
-    setDesignElements((current) => {
-      const existing = current[side] ?? [];
-      const target = existing.find(
-        (element) => element.id === id
-      );
-
-      if (!target) return current;
-
-      pushHistory(side, existing);
-
-      return {
-        ...current,
-        [side]: existing.map((element) =>
-          element.id === id
-            ? { ...element, ...patch }
-            : element
-        ),
-      };
-    });
-
-    if (id === "front-name" && patch.text !== undefined) {
-      setCustomerName(patch.text);
-    }
-
-    if (id === "front-quote" && patch.text !== undefined) {
-      setCustomerText(patch.text);
-    }
-  }
-
-  function deleteSelectedElement() {
-    if (!selectedElementId) return;
-
-    setDesignElements((current) => {
-      const existing = current[side] ?? [];
+    try {
+      const parsed = JSON.parse(raw) as DesignState;
 
       if (
-        !existing.some(
-          (element) => element.id === selectedElementId
-        )
+        parsed &&
+        typeof parsed.background === "string" &&
+        Array.isArray(parsed.elements)
       ) {
-        return current;
+        // Local draft hydration from browser storage.
+        // This intentional state update is needed to restore the saved editor draft.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setDesign(parsed);
+      }
+    } catch {
+      // Ignore malformed local data.
+    }
+  }, [customizationId]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        localStorage.setItem(
+          `minenote-custom-cover-${customizationId}`,
+          JSON.stringify(design),
+        );
+        setSaved(true);
+      } catch {
+        setSaved(false);
+      }
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [design, customizationId]);
+
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSelectedId(null);
       }
 
-      pushHistory(side, existing);
+      if (
+        (event.key === "Backspace" || event.key === "Delete") &&
+        selectedId &&
+        !(event.target instanceof HTMLInputElement) &&
+        !(event.target instanceof HTMLTextAreaElement)
+      ) {
+        deleteSelected();
+      }
+    }
 
-      return {
-        ...current,
-        [side]: existing.filter(
-          (element) => element.id !== selectedElementId
-        ),
-      };
-    });
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  });
 
-    setSelectedElementId(null);
-    setEditingElementId(null);
+  function commit(next: DesignState) {
+    setHistory((current) => [...current.slice(-39), design]);
+    setFuture([]);
+    setDesign(next);
+    setSaved(false);
   }
 
-  function resetCurrentSurface() {
-    setDesignElements((current) => {
-      const existing = current[side] ?? [];
+  function updateElement(id: string, patch: Partial<EditorElement>) {
+    commit({
+      ...design,
+      elements: design.elements.map((element) =>
+        element.id === id ? { ...element, ...patch } : element,
+      ),
+    });
+  }
 
-      if (existing.length === 0) return current;
+  function addText() {
+    const element: EditorElement = {
+      id: makeId("text"),
+      type: "text",
+      x: 120,
+      y: 300,
+      width: 360,
+      height: 90,
+      rotation: 0,
+      opacity: 1,
+      text: "Your Text",
+      fontSize: 42,
+      fontWeight: "600",
+      textAlign: "center",
+      color: "#111111",
+    };
 
-      pushHistory(side, existing);
-
-      return {
-        ...current,
-        [side]: [],
-      };
+    commit({
+      ...design,
+      elements: [...design.elements, element],
     });
 
-    setSelectedElementId(null);
-    setEditingElementId(null);
-    setEditorResetVersion((value) => value + 1);
+    setSelectedId(element.id);
+    setTool("select");
+    setPanel("properties");
+  }
+
+  function addShape(shape: "rectangle" | "circle") {
+    const element: EditorElement = {
+      id: makeId("shape"),
+      type: "shape",
+      x: 175,
+      y: 280,
+      width: 250,
+      height: 180,
+      rotation: 0,
+      opacity: 1,
+      shape,
+      fill: "#111111",
+      borderRadius: shape === "circle" ? 999 : 24,
+    };
+
+    commit({
+      ...design,
+      elements: [...design.elements, element],
+    });
+
+    setSelectedId(element.id);
+    setTool("select");
+    setPanel("properties");
+  }
+
+  function handleImage(file: File) {
+    if (!file.type.startsWith("image/")) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const src = typeof reader.result === "string" ? reader.result : null;
+      if (!src) return;
+
+      const element: EditorElement = {
+        id: makeId("image"),
+        type: "image",
+        x: 100,
+        y: 230,
+        width: 400,
+        height: 300,
+        rotation: 0,
+        opacity: 1,
+        src,
+        objectFit: "contain",
+        imageScale: 1,
+        imageOffsetX: 0,
+        imageOffsetY: 0,
+      };
+
+      commit({
+        ...design,
+        elements: [...design.elements, element],
+      });
+
+      setSelectedId(element.id);
+      setTool("select");
+      setPanel("properties");
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function onImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      event.target.value = "";
+      return;
+    }
+
+    if (selectedElement?.type === "image") {
+      if (!file.type.startsWith("image/")) {
+        event.target.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const src =
+          typeof reader.result === "string" ? reader.result : null;
+
+        if (!src || !selectedElement) return;
+
+        updateElement(selectedElement.id, {
+          src,
+        });
+
+        setTool("select");
+        setPanel("properties");
+      };
+
+      reader.readAsDataURL(file);
+    } else {
+      handleImage(file);
+    }
+
+    event.target.value = "";
+  }
+
+  function deleteSelected() {
+    if (!selectedId) return;
+
+    commit({
+      ...design,
+      elements: design.elements.filter(
+        (element) => element.id !== selectedId,
+      ),
+    });
+
+    setSelectedId(null);
   }
 
   function undo() {
-    const stack = history[side] ?? [];
+    const previous = history[history.length - 1];
+    if (!previous) return;
 
-    if (stack.length === 0) return;
-
-    const previous =
-      stack[stack.length - 1];
-
-    setDesignElements((current) => {
-      const currentElements = current[side] ?? [];
-
-      setFuture((futureCurrent) => ({
-        ...futureCurrent,
-        [side]: [
-          ...(futureCurrent[side] ?? []),
-          structuredClone(currentElements),
-        ].slice(-50),
-      }));
-
-      return {
-        ...current,
-        [side]: structuredClone(previous),
-      };
-    });
-
-    setHistory((current) => ({
-      ...current,
-      [side]: stack.slice(0, -1),
-    }));
-
-    setSelectedElementId(null);
-    setEditingElementId(null);
+    setFuture((current) => [design, ...current]);
+    setHistory((current) => current.slice(0, -1));
+    setDesign(previous);
+    setSelectedId(null);
   }
 
   function redo() {
-    const stack = future[side] ?? [];
+    const next = future[0];
+    if (!next) return;
 
-    if (stack.length === 0) return;
-
-    const next =
-      stack[stack.length - 1];
-
-    setDesignElements((current) => {
-      const currentElements = current[side] ?? [];
-
-      setHistory((historyCurrent) => ({
-        ...historyCurrent,
-        [side]: [
-          ...(historyCurrent[side] ?? []),
-          structuredClone(currentElements),
-        ].slice(-50),
-      }));
-
-      return {
-        ...current,
-        [side]: structuredClone(next),
-      };
-    });
-
-    setFuture((current) => ({
-      ...current,
-      [side]: stack.slice(0, -1),
-    }));
-
-    setSelectedElementId(null);
-    setEditingElementId(null);
+    setHistory((current) => [...current, design]);
+    setFuture((current) => current.slice(1));
+    setDesign(next);
+    setSelectedId(null);
   }
 
-  function duplicateSelectedElement() {
-    if (!selectedElement) return;
-
-    const duplicate: CoverElement = {
-      ...structuredClone(selectedElement),
-      id: `${selectedElement.type}-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 7)}`,
-      x: Math.min(
-        95,
-        selectedElement.x + 4
-      ),
-      y: Math.min(
-        95,
-        selectedElement.y + 4
-      ),
-    };
-
-    setDesignElements((current) => {
-      const existing = current[side] ?? [];
-
-      pushHistory(side, existing);
-
-      return {
-        ...current,
-        [side]: [
-          ...existing,
-          duplicate,
-        ],
-      };
+  function resetDesign() {
+    commit({
+      background: initialDesign.background,
+      elements: [],
     });
 
-    setSelectedElementId(duplicate.id);
-    setEditingElementId(null);
+    setSelectedId(null);
   }
 
-  function moveLayerToEdge(
-    direction: "front" | "back"
-  ) {
-    if (!selectedElement) return;
-
-    setDesignElements((current) => {
-      const existing = current[side] ?? [];
-
-      if (existing.length === 0) {
-        return current;
-      }
-
-      pushHistory(side, existing);
-
-      const sorted = [...existing].sort(
-        (a, b) => a.zIndex - b.zIndex
-      );
-
-      const targetId = selectedElement.id;
-
-      const reordered =
-        direction === "front"
-          ? [
-              ...sorted.filter(
-                (item) => item.id !== targetId
-              ),
-              ...sorted.filter(
-                (item) => item.id === targetId
-              ),
-            ]
-          : [
-              ...sorted.filter(
-                (item) => item.id === targetId
-              ),
-              ...sorted.filter(
-                (item) => item.id !== targetId
-              ),
-            ];
-
-      return {
-        ...current,
-        [side]: reordered.map(
-          (item, index) => ({
-            ...item,
-            zIndex: index + 1,
-          })
-        ),
-      };
+  function changeBackground(value: string) {
+    commit({
+      ...design,
+      background: value,
     });
   }
 
-  function moveLayer(direction: "up" | "down") {
-    if (!selectedElementId) return;
+  function getCanvasPoint(event: ReactPointerEvent) {
+    const rect = canvasRef.current?.getBoundingClientRect();
 
-    setDesignElements((current) => {
-      const elements = [...(current[side] ?? [])];
-      const index = elements.findIndex(
-        (element) => element.id === selectedElementId
-      );
-
-      if (index === -1) return current;
-
-      const target = direction === "up"
-        ? Math.min(elements.length - 1, index + 1)
-        : Math.max(0, index - 1);
-
-      if (target === index) return current;
-
-      const currentElement = elements[index];
-      const targetElement = elements[target];
-
-      elements[index] = {
-        ...currentElement,
-        zIndex: targetElement.zIndex,
-      };
-
-      elements[target] = {
-        ...targetElement,
-        zIndex: currentElement.zIndex,
-      };
-
-      return {
-        ...current,
-        [side]: elements,
-      };
-    });
-  }
-
-  function handleElementPointerDown(
-    event: React.PointerEvent<HTMLDivElement>,
-    element: CoverElement
-  ) {
-    if ((event.target as HTMLElement).dataset.resize === "true") {
-      return;
+    if (!rect) {
+      return { x: 0, y: 0 };
     }
 
-    event.preventDefault();
+    return {
+      x: (event.clientX - rect.left) / zoom,
+      y: (event.clientY - rect.top) / zoom,
+    };
+  }
+
+  function beginDrag(
+    event: ReactPointerEvent,
+    element: EditorElement,
+  ) {
     event.stopPropagation();
 
-    setSelectedElementId(element.id);
+    if (tool !== "select") return;
 
-    if (editingElementId === element.id) {
-      return;
-    }
+    const point = getCanvasPoint(event);
 
-    setDragState({
+    setSelectedId(element.id);
+    setPanel("properties");
+
+    interactionRef.current = {
+      type: "drag",
       id: element.id,
-      startX: event.clientX,
-      startY: event.clientY,
+      startX: point.x,
+      startY: point.y,
       originX: element.x,
       originY: element.y,
-    });
+    };
 
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
-  function handleElementPointerMove(
-    event: React.PointerEvent<HTMLDivElement>
+  function beginResize(
+    event: ReactPointerEvent,
+    element: EditorElement,
+    handle: "nw" | "ne" | "sw" | "se",
   ) {
-    if (!dragState) return;
-
-    const canvas =
-      event.currentTarget.parentElement?.getBoundingClientRect();
-
-    if (!canvas) return;
-
-    const dx =
-      ((event.clientX - dragState.startX) / canvas.width) * 100;
-
-    const dy =
-      ((event.clientY - dragState.startY) / canvas.height) * 100;
-
-    const movingElement = (designElements[side] ?? []).find(
-      (item) => item.id === dragState.id
-    );
-
-    if (!movingElement) return;
-
-    let nextX = dragState.originX + dx;
-    let nextY = dragState.originY + dy;
-
-    const SNAP = 1.5;
-
-    let verticalGuide: number | undefined;
-    let horizontalGuide: number | undefined;
-
-    const movingCenterX =
-      nextX + movingElement.width / 2;
-
-    const movingCenterY =
-      nextY + movingElement.height / 2;
-
-    const movingRight =
-      nextX + movingElement.width;
-
-    const movingBottom =
-      nextY + movingElement.height;
-
-    // ========================================================
-    // CANVAS SNAPPING
-    // ========================================================
-
-    // Canvas center X
-    if (
-      Math.abs(movingCenterX - 50) <= SNAP
-    ) {
-      nextX =
-        50 - movingElement.width / 2;
-
-      verticalGuide = 50;
-    }
-
-    // Canvas center Y
-    if (
-      Math.abs(movingCenterY - 50) <= SNAP
-    ) {
-      nextY =
-        50 - movingElement.height / 2;
-
-      horizontalGuide = 50;
-    }
-
-    // Canvas left edge
-    if (Math.abs(nextX) <= SNAP) {
-      nextX = 0;
-      verticalGuide = 0;
-    }
-
-    // Canvas right edge
-    if (
-      Math.abs(movingRight - 100) <= SNAP
-    ) {
-      nextX =
-        100 - movingElement.width;
-
-      verticalGuide = 100;
-    }
-
-    // Canvas top edge
-    if (Math.abs(nextY) <= SNAP) {
-      nextY = 0;
-      horizontalGuide = 0;
-    }
-
-    // Canvas bottom edge
-    if (
-      Math.abs(movingBottom - 100) <= SNAP
-    ) {
-      nextY =
-        100 - movingElement.height;
-
-      horizontalGuide = 100;
-    }
-
-    // ========================================================
-    // ELEMENT ↔ ELEMENT X SNAP
-    // ========================================================
-
-    for (const other of designElements[side] ?? []) {
-      if (other.id === movingElement.id) continue;
-
-      const otherCenterX =
-        other.x + other.width / 2;
-
-      const otherRight =
-        other.x + other.width;
-
-      const currentCenterX =
-        nextX + movingElement.width / 2;
-
-      const currentRight =
-        nextX + movingElement.width;
-
-      // center ↔ center
-      if (
-        Math.abs(
-          currentCenterX - otherCenterX
-        ) <= SNAP
-      ) {
-        nextX =
-          otherCenterX -
-          movingElement.width / 2;
-
-        verticalGuide = otherCenterX;
-        break;
-      }
-
-      // left ↔ left
-      if (
-        Math.abs(nextX - other.x) <= SNAP
-      ) {
-        nextX = other.x;
-        verticalGuide = other.x;
-        break;
-      }
-
-      // right ↔ right
-      if (
-        Math.abs(
-          currentRight - otherRight
-        ) <= SNAP
-      ) {
-        nextX =
-          otherRight -
-          movingElement.width;
-
-        verticalGuide = otherRight;
-        break;
-      }
-
-      // left ↔ right
-      if (
-        Math.abs(nextX - otherRight) <= SNAP
-      ) {
-        nextX = otherRight;
-        verticalGuide = otherRight;
-        break;
-      }
-
-      // right ↔ left
-      if (
-        Math.abs(
-          currentRight - other.x
-        ) <= SNAP
-      ) {
-        nextX =
-          other.x -
-          movingElement.width;
-
-        verticalGuide = other.x;
-        break;
-      }
-    }
-
-    // ========================================================
-    // ELEMENT ↔ ELEMENT Y SNAP
-    // ========================================================
-
-    for (const other of designElements[side] ?? []) {
-      if (other.id === movingElement.id) continue;
-
-      const otherCenterY =
-        other.y + other.height / 2;
-
-      const otherBottom =
-        other.y + other.height;
-
-      const currentCenterY =
-        nextY + movingElement.height / 2;
-
-      const currentBottom =
-        nextY + movingElement.height;
-
-      // center ↔ center
-      if (
-        Math.abs(
-          currentCenterY - otherCenterY
-        ) <= SNAP
-      ) {
-        nextY =
-          otherCenterY -
-          movingElement.height / 2;
-
-        horizontalGuide = otherCenterY;
-        break;
-      }
-
-      // top ↔ top
-      if (
-        Math.abs(nextY - other.y) <= SNAP
-      ) {
-        nextY = other.y;
-        horizontalGuide = other.y;
-        break;
-      }
-
-      // bottom ↔ bottom
-      if (
-        Math.abs(
-          currentBottom - otherBottom
-        ) <= SNAP
-      ) {
-        nextY =
-          otherBottom -
-          movingElement.height;
-
-        horizontalGuide = otherBottom;
-        break;
-      }
-
-      // top ↔ bottom
-      if (
-        Math.abs(nextY - otherBottom) <= SNAP
-      ) {
-        nextY = otherBottom;
-        horizontalGuide = otherBottom;
-        break;
-      }
-
-      // bottom ↔ top
-      if (
-        Math.abs(
-          currentBottom - other.y
-        ) <= SNAP
-      ) {
-        nextY =
-          other.y -
-          movingElement.height;
-
-        horizontalGuide = other.y;
-        break;
-      }
-    }
-
-    // Final bounds
-    nextX = Math.max(
-      0,
-      Math.min(
-        100 - movingElement.width,
-        nextX
-      )
-    );
-
-    nextY = Math.max(
-      0,
-      Math.min(
-        100 - movingElement.height,
-        nextY
-      )
-    );
-
-    setAlignmentGuides({
-      vertical: verticalGuide,
-      horizontal: horizontalGuide,
-    });
-
-    // IMPORTANT:
-    // Do not call updateElement() during drag.
-    // Dragging directly updates the state so one complete drag
-    // becomes ONE undo step instead of hundreds.
-
-    setDesignElements((current) => ({
-      ...current,
-      [side]: (current[side] ?? []).map(
-        (item) =>
-          item.id === dragState.id
-            ? {
-                ...item,
-                x: nextX,
-                y: nextY,
-              }
-            : item
-      ),
-    }));
-  }
-
-  function handleElementPointerUp() {
-    if (!dragState) return;
-
-    setDesignElements((current) => {
-      const currentElements =
-        current[side] ?? [];
-
-      const movedElement =
-        currentElements.find(
-          (item) => item.id === dragState.id
-        );
-
-      if (!movedElement) {
-        return current;
-      }
-
-      const moved =
-        Math.abs(
-          movedElement.x - dragState.originX
-        ) > 0.001 ||
-        Math.abs(
-          movedElement.y - dragState.originY
-        ) > 0.001;
-
-      if (moved) {
-        const previousElements =
-          currentElements.map(
-            (item) =>
-              item.id === dragState.id
-                ? {
-                    ...item,
-                    x: dragState.originX,
-                    y: dragState.originY,
-                  }
-                : item
-          );
-
-        pushHistory(
-          side,
-          previousElements
-        );
-      }
-
-      return current;
-    });
-
-    setDragState(null);
-    setAlignmentGuides({});
-  }
-
-  function handleResizePointerDown(
-    event: React.PointerEvent<HTMLDivElement>,
-    element: CoverElement,
-    handle:
-      | "nw"
-      | "n"
-      | "ne"
-      | "w"
-      | "e"
-      | "sw"
-      | "s"
-      | "se"
-  ) {
-    event.preventDefault();
     event.stopPropagation();
 
-    setSelectedElementId(element.id);
-    setRotationState(null);
+    const point = getCanvasPoint(event);
 
-    setAlignmentGuides({});
-    setResizeState({
+    interactionRef.current = {
+      type: "resize",
       id: element.id,
       handle,
-      startX: event.clientX,
-      startY: event.clientY,
+      startX: point.x,
+      startY: point.y,
       originX: element.x,
       originY: element.y,
       originWidth: element.width,
       originHeight: element.height,
-      originRotation: element.rotation ?? 0,
-    });
+    };
 
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
-  function handleResizePointerMove(
-    event: React.PointerEvent<HTMLDivElement>
+  function beginRotate(
+    event: ReactPointerEvent,
+    element: EditorElement,
   ) {
-    if (!resizeState) return;
-
-    const element = designElements[side]?.find(
-      (item) => item.id === resizeState.id
-    );
-
-    if (!element) return;
-
-    const canvas =
-      event.currentTarget.parentElement?.parentElement?.getBoundingClientRect();
-
-    if (!canvas) return;
-
-    let dx =
-      ((event.clientX - resizeState.startX) / canvas.width) * 100;
-
-    let dy =
-      ((event.clientY - resizeState.startY) / canvas.height) * 100;
-
-    /*
-     * Convert pointer movement into the element's local
-     * coordinate system so resizing remains sensible after
-     * the element has been rotated.
-     */
-    const radians =
-      (-resizeState.originRotation * Math.PI) / 180;
-
-    const localDx =
-      dx * Math.cos(radians) -
-      dy * Math.sin(radians);
-
-    const localDy =
-      dx * Math.sin(radians) +
-      dy * Math.cos(radians);
-
-    let x = resizeState.originX;
-    let y = resizeState.originY;
-    let width = resizeState.originWidth;
-    let height = resizeState.originHeight;
-
-    const handle = resizeState.handle;
-
-    if (handle.includes("w")) {
-      const nextWidth = resizeState.originWidth - localDx;
-
-      if (nextWidth >= 5) {
-        width = nextWidth;
-        x = resizeState.originX + localDx;
-      }
-    }
-
-    if (handle.includes("e")) {
-      width = resizeState.originWidth + localDx;
-    }
-
-    if (handle.includes("n")) {
-      const nextHeight =
-        resizeState.originHeight - localDy;
-
-      if (nextHeight >= 5) {
-        height = nextHeight;
-        y = resizeState.originY + localDy;
-      }
-    }
-
-    if (handle.includes("s")) {
-      height =
-        resizeState.originHeight + localDy;
-    }
-
-    width = Math.max(5, Math.min(100, width));
-    height = Math.max(5, Math.min(100, height));
-
-    x = Math.max(0, Math.min(100 - width, x));
-    y = Math.max(0, Math.min(100 - height, y));
-
-    updateElement(resizeState.id, {
-      x,
-      y,
-      width,
-      height,
-    });
-  }
-
-  function handleResizePointerUp(
-    event?: React.PointerEvent<HTMLDivElement>
-  ) {
-    if (
-      event &&
-      event.currentTarget.hasPointerCapture(event.pointerId)
-    ) {
-      event.currentTarget.releasePointerCapture(
-        event.pointerId
-      );
-    }
-
-    setResizeState(null);
-  }
-
-  function handleRotationPointerDown(
-    event: React.PointerEvent<HTMLDivElement>,
-    element: CoverElement
-  ) {
-    event.preventDefault();
     event.stopPropagation();
 
-    const canvas =
-      event.currentTarget.parentElement?.parentElement?.getBoundingClientRect();
+    const point = getCanvasPoint(event);
 
-    if (!canvas) return;
-
-    const elementLeft =
-      canvas.left +
-      (element.x / 100) * canvas.width;
-
-    const elementTop =
-      canvas.top +
-      (element.y / 100) * canvas.height;
-
-    const elementWidth =
-      (element.width / 100) * canvas.width;
-
-    const elementHeight =
-      (element.height / 100) * canvas.height;
-
-    const centerX =
-      elementLeft + elementWidth / 2;
-
-    const centerY =
-      elementTop + elementHeight / 2;
-
-    const startAngle =
-      (Math.atan2(
-        event.clientY - centerY,
-        event.clientX - centerX
-      ) *
-        180) /
-      Math.PI;
-
-    setSelectedElementId(element.id);
-    setResizeState(null);
-
-    setAlignmentGuides({});
-    setRotationState({
+    interactionRef.current = {
+      type: "rotate",
       id: element.id,
-      centerX,
-      centerY,
-      startAngle,
-      originRotation: element.rotation ?? 0,
-    });
+      centerX: element.x + element.width / 2,
+      centerY: element.y + element.height / 2,
+      startX: point.x,
+      startY: point.y,
+      startRotation: element.rotation,
+    };
+
+    interactionRef.current.centerX = point.x + (
+      element.x + element.width / 2 - point.x
+    );
+    interactionRef.current.centerY = point.y + (
+      element.y + element.height / 2 - point.y
+    );
+
+    const rect = canvasRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      interactionRef.current.centerX =
+        (rect.left + (element.x + element.width / 2) * zoom - rect.left) /
+        zoom;
+
+      interactionRef.current.centerY =
+        (rect.top + (element.y + element.height / 2) * zoom - rect.top) /
+        zoom;
+    }
 
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
-  function handleRotationPointerMove(
-    event: React.PointerEvent<HTMLDivElement>
-  ) {
-    if (!rotationState) return;
+  function handlePointerMove(event: ReactPointerEvent) {
+    const interaction = interactionRef.current;
+    if (!interaction) return;
 
-    const currentAngle =
-      (Math.atan2(
-        event.clientY - rotationState.centerY,
-        event.clientX - rotationState.centerX
-      ) *
-        180) /
-      Math.PI;
+    const point = getCanvasPoint(event);
 
-    const delta =
-      currentAngle - rotationState.startAngle;
-
-    const rotation =
-      ((rotationState.originRotation + delta + 540) %
-        360) -
-      180;
-
-    updateElement(rotationState.id, {
-      rotation,
-    });
-  }
-
-  function handleRotationPointerUp(
-    event?: React.PointerEvent<HTMLDivElement>
-  ) {
-    if (
-      event &&
-      event.currentTarget.hasPointerCapture(event.pointerId)
-    ) {
-      event.currentTarget.releasePointerCapture(
-        event.pointerId
-      );
-    }
-
-    setRotationState(null);
-  }
-
-  function rotateSelected(amount: number) {
-    if (!selectedElement) return;
-
-    updateElement(selectedElement.id, {
-      rotation:
-        ((selectedElement.rotation + amount + 540) % 360) - 180,
-    });
-  }
-
-  function addTextElement() {
-    const id = `text-${Date.now()}`;
-
-    setDesignElements((current) => ({
+    setDesign((current) => ({
       ...current,
-      [side]: [
-        ...(current[side] ?? []),
-        createTextElement(
-          id,
-          "Double-click / edit me",
-          20,
-          30,
-          60,
-          12,
-          16,
-          700
-        ),
-      ],
-    }));
+      elements: current.elements.map((element) => {
+        if (element.id !== interaction.id) return element;
 
-    setSelectedElementId(id);
-  }
-
-  function openUpload(sideToUpload: CoverSide) {
-    setUploadTargetSide(sideToUpload);
-    setUploadMessage("");
-    fileInputRef.current?.click();
-  }
-
-  async function handleUpload(
-    event: ChangeEvent<HTMLInputElement>
-  ) {
-    const file = event.target.files?.[0];
-
-    event.target.value = "";
-
-    if (!file) {
-      return;
-    }
-
-    setUploadingSide(uploadTargetSide);
-    setUploadMessage("");
-
-    try {
-      const formData = new FormData();
-      formData.append("side", uploadTargetSide);
-      formData.append("file", file);
-
-      const response = await fetch(
-        `/api/custom-cover/${customization.id}/assets`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ?? "Unable to upload your artwork."
-        );
-      }
-
-      const uploaded = data?.asset as UploadedAsset | undefined;
-
-      if (!uploaded) {
-        throw new Error("Upload completed without an asset.");
-      }
-
-      const localPreviewUrl = URL.createObjectURL(file);
-      const previewUrl = uploaded.previewUrl || localPreviewUrl;
-      const placedAsset: UploadedAsset = {
-        ...uploaded,
-        previewUrl,
-      };
-
-      setAssets((current) => [
-        ...current.filter((asset) => asset.side !== placedAsset.side),
-        placedAsset,
-      ]);
-
-      setDesignElements((current) => {
-        const existing = current[placedAsset.side] ?? [];
-        const imageIndex = existing.findIndex(
-          (element) => element.type === "image"
-        );
-        const imageElement = createImageElement(placedAsset.id);
-
-        if (imageIndex === -1) {
+        if (interaction.type === "drag") {
           return {
-            ...current,
-            [placedAsset.side]: [...existing, imageElement],
+            ...element,
+            x: Math.max(
+              -element.width + 20,
+              Math.min(
+                CANVAS_WIDTH - 20,
+                interaction.originX + point.x - interaction.startX,
+              ),
+            ),
+            y: Math.max(
+              -element.height + 20,
+              Math.min(
+                CANVAS_HEIGHT - 20,
+                interaction.originY + point.y - interaction.startY,
+              ),
+            ),
           };
         }
 
-        const updated = [...existing];
-        updated[imageIndex] = {
-          ...updated[imageIndex],
-          ...imageElement,
-          zIndex: updated[imageIndex].zIndex,
-        };
+        if (interaction.type === "resize") {
+          const dx = point.x - interaction.startX;
+          const dy = point.y - interaction.startY;
+
+          const minWidth = 40;
+          const minHeight = 30;
+
+          let x = interaction.originX;
+          let y = interaction.originY;
+          let width = interaction.originWidth;
+          let height = interaction.originHeight;
+
+          if (interaction.handle.includes("e")) {
+            width = Math.max(
+              minWidth,
+              Math.min(
+                CANVAS_WIDTH - x,
+                interaction.originWidth + dx,
+              ),
+            );
+          }
+
+          if (interaction.handle.includes("s")) {
+            height = Math.max(
+              minHeight,
+              Math.min(
+                CANVAS_HEIGHT - y,
+                interaction.originHeight + dy,
+              ),
+            );
+          }
+
+          if (interaction.handle.includes("w")) {
+            const nextX = Math.max(
+              0,
+              Math.min(
+                interaction.originX + interaction.originWidth - minWidth,
+                interaction.originX + dx,
+              ),
+            );
+
+            x = nextX;
+            width = interaction.originX + interaction.originWidth - nextX;
+          }
+
+          if (interaction.handle.includes("n")) {
+            const nextY = Math.max(
+              0,
+              Math.min(
+                interaction.originY + interaction.originHeight - minHeight,
+                interaction.originY + dy,
+              ),
+            );
+
+            y = nextY;
+            height = interaction.originY + interaction.originHeight - nextY;
+          }
+
+          return {
+            ...element,
+            x,
+            y,
+            width,
+            height,
+          };
+        }
+
+        const angle =
+          (Math.atan2(
+            point.y - interaction.centerY,
+            point.x - interaction.centerX,
+          ) *
+            180) /
+          Math.PI;
+
+        const startAngle =
+          (Math.atan2(
+            interaction.startY - interaction.centerY,
+            interaction.startX - interaction.centerX,
+          ) *
+            180) /
+          Math.PI;
 
         return {
-          ...current,
-          [placedAsset.side]: updated,
+          ...element,
+          rotation: interaction.startRotation + angle - startAngle,
         };
-      });
-
-      setSide(placedAsset.side);
-      setSelectedElementId(`image-${placedAsset.id}`);
-      setActiveEditorTool("image");
-      setUploadMessage(`${getCoverSideLabel(placedAsset.side)} artwork on canvas`);
-
-      if (uploaded.previewUrl && localPreviewUrl !== uploaded.previewUrl) {
-        URL.revokeObjectURL(localPreviewUrl);
-      }
-    } catch (error) {
-      setUploadMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to upload your artwork."
-      );
-    } finally {
-      setUploadingSide(null);
-    }
+      }),
+    }));
   }
 
-  async function generateWithAi() {
-    const prompt = aiPrompt.trim();
+  function finishInteraction() {
+    if (!interactionRef.current) return;
 
-    if (!prompt) {
-      setGenerationMessage(
-        "Describe the cover you want before generating."
-      );
+    interactionRef.current = null;
+    setSaved(false);
+  }
+
+  async function searchProducts(query: string) {
+    const normalized = query.trim();
+
+    setProductQuery(query);
+
+    if (!normalized) {
+      setProductResults([]);
       return;
     }
 
-    setGeneratingAi(true);
-    setGenerationMessage("");
+    setProductSearching(true);
 
     try {
-      const sides =
-        aiTargetSides === "all"
-          ? ["front", "insideFront", "back", "insideBack"]
-          : [aiTargetSides];
-
       const response = await fetch(
-        "/api/custom-cover/generate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customizationId: customization.id,
-            prompt,
-            negativePrompt:
-              aiNegativePrompt.trim() || undefined,
-            sides,
-          }),
-        }
+        `/api/products/search?q=${encodeURIComponent(normalized)}`,
       );
-
-      const data = await response
-        .json()
-        .catch(() => null);
 
       if (!response.ok) {
-        throw new Error(
-          data?.error ??
-            "Unable to generate your custom cover."
-        );
+        throw new Error("Unable to search products.");
       }
 
-      if (!data?.success) {
-        throw new Error(
-          data?.error ??
-            "AI generation did not complete."
-        );
-      }
+      const data = await response.json();
 
-      if (
-        typeof data.generationNumber === "number"
-      ) {
-        setGenerationNumber(data.generationNumber);
-      }
-
-      const assetsResponse = await fetch(
-        `/api/custom-cover/${customization.id}/assets`,
-        {
-          cache: "no-store",
-        }
-      );
-
-      if (assetsResponse.ok) {
-        const assetsData =
-          await assetsResponse.json().catch(() => null);
-
-        if (Array.isArray(assetsData?.assets)) {
-          setAssets(assetsData.assets);
-        }
-      }
-
-      setGenerationMessage(
-        `AI generation ${data.generationNumber ?? ""} completed ✓`
-      );
+      setProductResults(Array.isArray(data) ? data : []);
     } catch (error) {
-      setGenerationMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to generate your custom cover."
-      );
+      console.error("PRODUCT SEARCH FAILED:", error);
+      setProductResults([]);
     } finally {
-      setGeneratingAi(false);
+      setProductSearching(false);
     }
   }
 
-  async function saveDraft() {
+  function selectProduct(product: {
+    id: string;
+    name: string;
+  }) {
+    setSelectedProductId(product.id);
+    setSelectedProductName(product.name);
+    setProductQuery("");
+    setProductResults([]);
+    setSaved(false);
+  }
+
+  async function saveCustomization() {
+    if (saving) return;
+
     setSaving(true);
-    setMessage("");
+    setSaved(false);
 
     try {
-      const surfaces: CoverSide[] = [
-        "front",
-        "insideFront",
-        "back",
-        "insideBack",
-      ];
-
-      const design = {
-        ...existingDesign,
-        ...Object.fromEntries(
-          surfaces.map((surface) => {
-            const existingSurface =
-              existingDesign[surface];
-
-            const surfaceObject =
-              existingSurface &&
-              typeof existingSurface === "object"
-                ? (existingSurface as Record<string, unknown>)
-                : {};
-
-            return [
-              surface,
-              {
-                ...surfaceObject,
-                background:
-                  typeof surfaceObject.background === "string" &&
-                  surfaceObject.background.trim()
-                    ? surfaceObject.background
-                    : template[surface],
-                elements:
-                  designElements[surface] ?? [],
-              },
-            ];
-          })
-        ),
-        branding: {
-          ...((existingDesign.branding ?? {}) as Record<
-            string,
-            unknown
-          >),
-          mineNote: true,
-          auraCraft: false,
-          logoVariant:
-            ((existingDesign.branding ?? {}) as Record<
-              string,
-              unknown
-            >).logoVariant ?? "default",
-        },
-        ...(existingDesign.creativeDirection
-          ? {
-              creativeDirection:
-                existingDesign.creativeDirection,
-            }
-          : {}),
-      };
-
       const response = await fetch(
-        `/api/custom-cover/${customization.id}`,
+        `/api/custom-cover/${customizationId}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            customerName,
-            customerText,
             design,
+            productId: selectedProductId || null,
           }),
-        }
+        },
       );
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
+      const data = await response.json();
 
+      if (!response.ok) {
         throw new Error(
-          data?.error ?? "Unable to save your draft."
+          data?.error || "Unable to save customization.",
         );
       }
 
-      setMessage("Draft saved ✓");
-      return true;
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to save your draft."
-      );
+      try {
+        localStorage.setItem(
+          `minenote-custom-cover-${customizationId}`,
+          JSON.stringify(design),
+        );
+      } catch {
+        // Local cache is optional.
+      }
 
-      return false;
+      setSaved(true);
+    } catch (error) {
+      console.error("CUSTOM COVER SAVE FAILED:", error);
+      setSaved(false);
     } finally {
       setSaving(false);
     }
   }
 
-  async function approveAndAddToCart() {
-    if (saving || approving || generatingAi) return;
+  async function runAI() {
+    const prompt = aiPrompt.trim();
 
-    setApproving(true);
-    setMessage("");
+    if (!prompt || aiBusy) return;
+
+    setAiBusy(true);
 
     try {
-      const saved = await saveDraft();
+      const response = await fetch("/api/custom-cover/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customizationId,
+          prompt,
+          sides: ["front"],
+        }),
+      });
 
-      if (!saved) {
-        return;
-      }
-
-      const response = await fetch(
-        `/api/custom-cover/${customization.id}/approve`,
-        {
-          method: "POST",
-        }
-      );
-
-      const data = await response.json().catch(() => null);
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data?.error ?? "Unable to approve your custom cover."
+          data?.error || "Unable to generate the cover with AI.",
         );
       }
 
-      addCustomCoverToCart(
-        {
-          id: data.product.id,
-          name: data.product.name,
-          price: data.product.price,
-          image: customization.productImage,
-        },
-        data.customization.id
+      const assetsResponse = await fetch(
+        `/api/custom-cover/${customizationId}/assets`,
       );
 
-      window.location.href = "/checkout";
+      const assetsData = await assetsResponse.json();
+
+      if (!assetsResponse.ok) {
+        throw new Error(
+          assetsData?.error || "Unable to load the generated cover.",
+        );
+      }
+
+      const generatedAsset = Array.isArray(assetsData?.assets)
+        ? assetsData.assets.find(
+            (asset: {
+              side?: string;
+              kind?: string;
+              previewUrl?: string;
+            }) =>
+              asset.side === "front" &&
+              asset.kind === "preview" &&
+              typeof asset.previewUrl === "string" &&
+              asset.previewUrl.length > 0,
+          )
+        : null;
+
+      if (!generatedAsset?.previewUrl) {
+        throw new Error(
+          "AI generation completed, but the generated preview was not found.",
+        );
+      }
+
+      const element: EditorElement = {
+        id: makeId("ai-image"),
+        type: "image",
+        x: 0,
+        y: 0,
+        width: CANVAS_WIDTH,
+        height: CANVAS_HEIGHT,
+        rotation: 0,
+        opacity: 1,
+        src: generatedAsset.previewUrl,
+        objectFit: "cover",
+        imageScale: 1,
+        imageOffsetX: 0,
+        imageOffsetY: 0,
+      };
+
+      commit({
+        ...design,
+        elements: [
+          ...design.elements.filter(
+            (current) =>
+              !(
+                current.type === "image" &&
+                current.id.startsWith("ai-image-")
+              ),
+          ),
+          element,
+        ],
+      });
+
+      setSelectedId(element.id);
+      setTool("select");
+      setPanel("properties");
+      setAiPrompt("");
+      setSaved(false);
+
+      await saveCustomization();
     } catch (error) {
-      setMessage(
+      console.error("CUSTOM COVER AI GENERATION FAILED:", error);
+
+      window.alert(
         error instanceof Error
           ? error.message
-          : "Unable to approve your custom cover."
+          : "Unable to generate the cover with AI.",
       );
     } finally {
-      setApproving(false);
+      setAiBusy(false);
     }
   }
 
-  const editableSurfaceOrder = [
-    "front",
-    "insideFront",
-    "insideBack",
-    "back",
-  ] as const;
-
-  const currentSurfaceIndex = editableSurfaceOrder.indexOf(side);
-
-  const navigateSurface = (direction: -1 | 1) => {
-    const currentIndex = editableSurfaceOrder.indexOf(side);
-
-    if (currentIndex === -1) return;
-
-    const nextIndex =
-      (currentIndex + direction + editableSurfaceOrder.length) %
-      editableSurfaceOrder.length;
-
-    setSide(editableSurfaceOrder[nextIndex]);
-    setAlignmentGuides({});
-    setSelectedElementId(null);
-    setEditingElementId(null);
+  const canvasStyle: CSSProperties = {
+    width: CANVAS_WIDTH,
+    height: CANVAS_HEIGHT,
+    background: design.background || "#ffffff",
+    transform: `scale(${zoom})`,
+    transformOrigin: "center center",
   };
 
+  const toolbarButton =
+    "flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-[1.5rem] text-[10px] transition";
+
   return (
-    <div
-      className={
-        isEditorFullscreen
-          ? "fixed inset-0 z-[200] grid h-screen w-screen overflow-hidden bg-[#09090b] lg:grid-cols-[64px_minmax(0,1fr)_340px] xl:grid-cols-[72px_minmax(0,1fr)_360px]"
-          : "grid h-full min-h-0 w-full min-w-0 overflow-hidden gap-0 lg:grid-cols-[64px_minmax(0,1fr)_340px] xl:grid-cols-[72px_minmax(0,1fr)_360px]"
-      }
-    >
-      {/* LEFT EDITOR TOOLBAR */}
-      <aside
-        data-editor-control="true"
-        className="order-2 min-h-0 h-full lg:order-1 lg:sticky lg:top-0 md:h-full md:max-h-full"
-      >
-        <div className="flex h-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-zinc-950 p-2 md:flex-col lg:overflow-visible">
-          <div className="hidden items-center justify-center pb-1 lg:flex">
-            <div className="h-8 w-8 rounded-xl border border-yellow-400/20 bg-yellow-400/[0.06] text-center text-[9px] font-black leading-8 text-yellow-300">
-              M
-            </div>
+    <div className="min-h-[100dvh] bg-[var(--mn-bg)] text-[var(--mn-text)]">
+      {/* TOP BAR */}
+      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[var(--mn-border)] bg-[var(--mn-bg)]/95 px-3 backdrop-blur-xl sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="rounded-[1.25rem] border border-[var(--mn-border)] px-3 py-2 text-sm text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
+          >
+            ← Back
+          </button>
+
+          <div className="hidden sm:block">
+            <p className="text-sm font-semibold">MineNote</p>
+            <p className="text-[11px] text-[var(--mn-text-muted)]">Custom Cover</p>
           </div>
+        </div>
+
+        <div className="hidden text-center md:block">
+          <p className="text-sm font-semibold">Design your cover</p>
+          <p className="text-[11px] text-[var(--mn-text-muted)]">
+            {saved ? "✓ Saved" : "Saving..."}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="hidden text-xs text-[var(--mn-text-muted)] lg:block">
+            {productName || "Custom Cover"}
+          </span>
 
           <button
             type="button"
-            data-editor-control="true"
-            onClick={() => setSelectedElementId(null)}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Select"
-            aria-label="Select tool"
+            onClick={() => setPreview(true)}
+            className="rounded-[1.25rem] border border-[var(--mn-border)] px-3 py-2 text-sm text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
           >
-            ↖
-            <span className="text-[7px] font-black uppercase tracking-wider">Select</span>
+            Preview
           </button>
 
           <button
             type="button"
-            data-editor-control="true"
-            onClick={() => {
-              addTextElement();
-              setActiveEditorTool("text");
-            }}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Add text"
-            aria-label="Add text"
+            onClick={saveCustomization}
+            disabled={saving}
+            className="rounded-[1.25rem] bg-[var(--mn-accent)] px-4 py-2 text-sm font-semibold text-[var(--mn-accent-contrast)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            T
-            <span className="text-[7px] font-black uppercase tracking-wider">Text</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              setActiveEditorTool("image");
-              openUpload(side);
-            }}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Upload image"
-            aria-label="Upload image"
-          >
-            ▧
-            <span className="text-[7px] font-black uppercase tracking-wider">Image</span>
-          </button>
-
-          {customization.creationMethod === "ai" ? (
-            <button
-              type="button"
-              data-editor-control="true"
-              onClick={() => {
-                setActiveEditorTool("ai");
-              }}
-              className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-yellow-400/15 bg-yellow-400/[0.04] text-[16px] text-yellow-300 transition hover:border-yellow-400/40 hover:bg-yellow-400/[0.08]"
-              title="AI tools"
-              aria-label="AI tools"
-            >
-              ✨
-              <span className="text-[7px] font-black uppercase tracking-wider">AI</span>
-            </button>
-          ) : null}
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              setActiveEditorTool("style");
-            }}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-white"
-            title="Style and template"
-            aria-label="Style and template"
-          >
-            ◈
-            <span className="text-[7px] font-black uppercase tracking-wider">Style</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => {
-              setActiveEditorTool("layers");
-            }}
-            className={`flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border text-[16px] transition ${
-              selectedElement
-                ? "border-yellow-400/30 bg-yellow-400/[0.06] text-yellow-300"
-                : "border-white/10 bg-white/[0.04] text-zinc-300 hover:border-yellow-400/30 hover:text-white"
-            }`}
-            title="Layers"
-            aria-label="Layers"
-          >
-            ▱
-            <span className="text-[7px] font-black uppercase tracking-wider">Layers</span>
-          </button>
-
-          <div className="hidden flex-1 lg:block" />
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={undo}
-            disabled={(history[side] ?? []).length === 0}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            title="Undo"
-            aria-label="Undo"
-          >
-            ↶
-            <span className="text-[7px] font-black uppercase tracking-wider">Undo</span>
-          </button>
-
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={redo}
-            disabled={(future[side] ?? []).length === 0}
-            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[16px] text-zinc-300 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            title="Redo"
-            aria-label="Redo"
-          >
-            ↷
-            <span className="text-[7px] font-black uppercase tracking-wider">Redo</span>
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
-      </aside>
+      </header>
 
-      {/* PREVIEW MODE OVERLAY */}
-      {isPreviewMode ? (
-        <div className="fixed inset-0 z-[300] flex h-screen w-screen flex-col overflow-hidden bg-[#070707]">
-          {/* PREVIEW HEADER */}
-          <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl sm:px-6">
+      <div className="absolute left-4 top-[4.5rem] z-40 w-[min(360px,calc(100vw-2rem))]">
+        <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-[var(--mn-shadow-lg)] backdrop-blur-xl">
+          <div className="mb-2 flex items-center justify-between">
             <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.22em] text-yellow-400">
-                Final Preview
-              </div>
-              <div className="mt-1 text-sm font-black text-white sm:text-base">
-                Your MineNote Cover
-              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+                Notebook
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-[var(--mn-text)]">
+                {selectedProductName}
+              </p>
             </div>
+            {selectedProductId && (
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--mn-success)_10%,var(--mn-surface))] px-2 py-1 text-[10px] font-semibold text-[var(--mn-success)]">
+                Selected
+              </span>
+            )}
+          </div>
+
+          <input
+            value={productQuery}
+            onChange={(event) => {
+              void searchProducts(event.target.value);
+            }}
+            placeholder="Search notebook..."
+            className="w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm text-[var(--mn-text)] outline-none placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-border-strong)]"
+          />
+
+          {productSearching && (
+            <p className="px-1 py-2 text-xs text-[var(--mn-text-muted)]">
+              Searching...
+            </p>
+          )}
+
+          {productResults.length > 0 && (
+            <div className="mt-2 max-h-56 space-y-1 overflow-y-auto">
+              {productResults.map((product) => (
+                <button
+                  key={product.id}
+                  type="button"
+                  onClick={() => selectProduct(product)}
+                  className="flex w-full items-center gap-3 rounded-[1.25rem] p-2 text-left transition hover:bg-[var(--mn-control-hover)]"
+                >
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt=""
+                      className="h-11 w-10 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="h-11 w-10 rounded-lg bg-[var(--mn-control-hover)]" />
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold text-[var(--mn-text)]">
+                      {product.name}
+                    </p>
+                    <p className="text-[11px] text-[var(--mn-text-muted)]">
+                      ₹{product.price}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!selectedProductId && !productQuery && (
+            <p className="mt-2 text-[11px] leading-4 text-[var(--mn-warning)]">
+              You can design without a notebook. Select one before approval.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <main className="flex min-h-[calc(100dvh-4rem)] flex-col lg:flex-row">
+        {/* TOOLBAR */}
+        <aside className="order-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:order-1 lg:w-[92px] lg:border-r lg:border-t-0">
+          <div className="flex items-center justify-center gap-2 overflow-x-auto p-2 lg:h-full lg:flex-col lg:justify-start lg:gap-3 lg:py-5">
+            <button
+              type="button"
+              onClick={() => setTool("select")}
+              className={`${toolbarButton} ${
+                tool === "select"
+                  ? "bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)]"
+                  : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+              }`}
+            >
+              <span className="text-lg">↖</span>
+              Select
+            </button>
 
             <button
               type="button"
-              onClick={() => setIsPreviewMode(false)}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-black text-zinc-300 transition hover:bg-white/[0.08] hover:text-white"
+              onClick={addText}
+              className={`${toolbarButton} ${
+                tool === "text"
+                  ? "bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)]"
+                  : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+              }`}
             >
-              ← Back to Editor
+              <span className="text-lg font-semibold">T</span>
+              Text
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className={`${toolbarButton} text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]`}
+            >
+              <span className="text-lg">▧</span>
+              {selectedElement?.type === "image" ? "Replace" : "Image"}
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onImageChange}
+            />
+
+            <button
+              type="button"
+              onClick={() => addShape("rectangle")}
+              className={`${toolbarButton} text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]`}
+            >
+              <span className="text-lg">□</span>
+              Shape
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setPanel("background");
+                setTool("select");
+              }}
+              className={`${toolbarButton} text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]`}
+            >
+              <span className="text-lg">◐</span>
+              Background
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setPanel("ai");
+                setTool("ai");
+              }}
+              className={`${toolbarButton} ${
+                tool === "ai"
+                  ? "bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)]"
+                  : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+              }`}
+            >
+              <span className="text-lg">✦</span>
+              AI
             </button>
           </div>
+        </aside>
 
-          {/* PREVIEW CANVAS */}
-          <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8 sm:py-8">
-            <div className="mx-auto flex min-w-max items-center justify-center gap-3 sm:gap-5 lg:min-w-0">
-              {(
-                [
-                  ["front", "FRONT"],
-                  ["insideFront", "INSIDE FRONT"],
-                  ["insideBack", "INSIDE BACK"],
-                  ["back", "BACK"],
-                ] as const
-              ).map(([surface, label]) => {
-                const surfaceElements = (designElements[surface] ?? [])
-                  .slice()
-                  .sort((a, b) => a.zIndex - b.zIndex);
+        {/* CANVAS */}
+        <section
+        className="order-1 flex min-h-0 min-w-0 flex-1 flex-col lg:order-2"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 12%, #3d4046 0%, #292b30 48%, #18191c 100%)",
+        }}>
+          <div className="flex flex-1 items-center justify-center overflow-hidden p-5 sm:p-10">
+            <div
+              ref={canvasRef}
+              className="relative shrink-0 shadow-[var(--mn-shadow-lg)]"
+              style={canvasStyle}
+              onPointerMove={handlePointerMove}
+              onPointerUp={finishInteraction}
+              onPointerCancel={finishInteraction}
+              onClick={() => setSelectedId(null)}
+            >
+              <div className="pointer-events-none absolute inset-[32px] border border-dashed border-[var(--mn-border-strong)]" />
 
-                const surfaceBackground = readDesignBackground(
-                  customization.design,
-                  surface,
-                );
+              {productImage && design.elements.length === 0 && (
+                <img
+                  src={productImage}
+                  alt={productName || "Product"}
+                  className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.07]"
+                />
+              )}
+
+              {design.elements.map((element) => {
+                const selected = element.id === selectedId;
+
+                const style: CSSProperties = {
+                  position: "absolute",
+                  left: element.x,
+                  top: element.y,
+                  width: element.width,
+                  height: element.height,
+                  transform: `rotate(${element.rotation}deg)`,
+                  opacity: element.opacity,
+                  touchAction: "none",
+                };
 
                 return (
                   <div
-                    key={surface}
-                    className="flex w-[220px] shrink-0 flex-col items-center sm:w-[260px] lg:w-[280px]"
+                    key={element.id}
+                    className={`absolute overflow-visible ${
+                      selected ? "z-30" : "z-10"
+                    }`}
+                    style={style}
+                    onPointerDown={(event) =>
+                      beginDrag(event, element)
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedId(element.id);
+                      setPanel("properties");
+                    }}
                   >
-                    <div className="mb-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                      {label}
-                    </div>
-
-                    <div
-                      className="relative aspect-[216/279] w-full overflow-hidden rounded-[12px] border border-white/15 shadow-[0_25px_70px_rgba(0,0,0,0.6)]"
-                      style={{
-                        background: surfaceBackground,
-                      }}
-                    >
-                      {surfaceElements.map((element) => {
-                        const asset =
-                          element.type === "image"
-                            ? assets.find(
-                                (item) => item.id === element.assetId,
-                              )
-                            : null;
-
-                        return (
-                          <div
-                            key={element.id}
-                            className="absolute overflow-hidden"
-                            style={{
-                              left: `${element.x}%`,
-                              top: `${element.y}%`,
-                              width: `${element.width}%`,
-                              height: `${element.height}%`,
-                              zIndex: element.zIndex,
-                              transform: `rotate(${element.rotation}deg)`,
-                              transformOrigin: "center",
-                              opacity: element.opacity ?? 1,
-                            }}
-                          >
-                            {element.type === "image" &&
-                            asset?.previewUrl ? (
-                              <img
-                                src={asset.previewUrl}
-                                alt=""
-                                draggable={false}
-                                className={`h-full w-full ${
-                                  element.objectFit === "contain"
-                                    ? "object-contain"
-                                    : "object-cover"
-                                }`}
-                              />
-                            ) : element.type === "text" ? (
-                              <div
-                                className="flex h-full w-full items-center justify-center overflow-hidden break-words whitespace-pre-wrap p-1"
-                                style={{
-                                  fontSize: `${element.fontSize ?? 16}px`,
-                                  fontWeight: element.fontWeight ?? 700,
-                                  fontFamily:
-                                    element.fontFamily ??
-                                    "Inter, sans-serif",
-                                  color: element.color ?? "#ffffff",
-                                  textAlign: element.align ?? "center",
-                                  lineHeight:
-                                    element.lineHeight ?? 1.15,
-                                  letterSpacing: `${
-                                    element.letterSpacing ?? 0
-                                  }px`,
-                                  textShadow:
-                                    "0 3px 20px rgba(0,0,0,.45)",
-                                }}
-                              >
-                                {element.text || ""}
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-
-                      <div className="pointer-events-none absolute left-1/2 top-[4%] z-[900] -translate-x-1/2 text-[7px] font-black uppercase tracking-[0.3em] text-white/50">
-                        MineNote
+                    {element.type === "text" && (
+                      <div
+                        className="flex h-full w-full items-center justify-center break-words"
+                        style={{
+                          fontSize: element.fontSize,
+                          fontWeight: element.fontWeight,
+                          color: element.color,
+                          textAlign: element.textAlign,
+                          lineHeight: element.lineHeight ?? 1.2,
+                          letterSpacing: `${element.letterSpacing ?? 0}px`,
+                        }}
+                      >
+                        {element.text}
                       </div>
+                    )}
 
-                      <div className="pointer-events-none absolute inset-[5%] z-[950] rounded-[7px] border border-dashed border-white/10" />
+                    {element.type === "image" && element.src && (
+                      <img
+                        src={element.src}
+                        alt=""
+                        draggable={false}
+                        className="h-full w-full select-none"
+                        style={{
+                          objectFit: element.objectFit ?? "contain",
+                          transform: `translate(${element.imageOffsetX ?? 0}px, ${
+                            element.imageOffsetY ?? 0
+                          }px) scale(${element.imageScale ?? 1})`,
+                          transformOrigin: "center center",
+                        }}
+                      />
+                    )}
 
-                      <div className="pointer-events-none absolute inset-0 z-[980] bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.10),transparent_25%),linear-gradient(135deg,rgba(255,255,255,.03),transparent_45%,rgba(0,0,0,.16))]" />
-                    </div>
+                    {element.type === "shape" && (
+                      <div
+                        className="h-full w-full"
+                        style={{
+                          background: element.fill,
+                          borderRadius:
+                            element.shape === "circle"
+                              ? "50%"
+                              : element.borderRadius,
+                        }}
+                      />
+                    )}
+
+                    {selected && (
+                      <>
+                        <div className="pointer-events-none absolute inset-0 border-2 border-black" />
+
+                        <button
+                          type="button"
+                          aria-label="Resize top left"
+                          className="absolute -left-2 -top-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-black bg-white"
+                          onPointerDown={(event) =>
+                            beginResize(event, element, "nw")
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          aria-label="Resize top right"
+                          className="absolute -right-2 -top-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-black bg-white"
+                          onPointerDown={(event) =>
+                            beginResize(event, element, "ne")
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          aria-label="Resize bottom left"
+                          className="absolute -bottom-2 -left-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-black bg-white"
+                          onPointerDown={(event) =>
+                            beginResize(event, element, "sw")
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          aria-label="Resize bottom right"
+                          className="absolute -bottom-2 -right-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-black bg-white"
+                          onPointerDown={(event) =>
+                            beginResize(event, element, "se")
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          aria-label="Rotate element"
+                          className="absolute -top-10 left-1/2 h-7 w-7 -translate-x-1/2 cursor-grab rounded-full border-2 border-black bg-white text-xs text-black shadow"
+                          onPointerDown={(event) =>
+                            beginRotate(event, element)
+                          }
+                        >
+                          ↻
+                        </button>
+
+                        <button
+                          type="button"
+                          aria-label="Delete element"
+                          className="absolute -right-9 -top-9 h-7 w-7 rounded-full bg-transparent text-xs text-[var(--mn-text)] shadow"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            deleteSelected();
+                          }}
+                        >
+                          ×
+                        </button>
+                      </>
+                    )}
                   </div>
                 );
               })}
             </div>
-
-            <div className="mx-auto mt-8 max-w-xl text-center">
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600">
-                Final review
-              </div>
-              <p className="mt-2 text-xs leading-5 text-zinc-500">
-                Check all four cover surfaces before approving your custom
-                notebook.
-              </p>
-            </div>
           </div>
 
-          {/* PREVIEW ACTIONS */}
-          <div className="flex shrink-0 items-center justify-center border-t border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl sm:px-6">
-            <div className="flex w-full max-w-xl items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsPreviewMode(false)}
-                className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-xs font-black text-white transition hover:bg-white/[0.08]"
-              >
-                ← Edit Again
-              </button>
-
-              <button
-                type="button"
-                disabled={saving || approving || generatingAi}
-                onClick={approveAndAddToCart}
-                className="flex-[1.4] rounded-xl bg-yellow-400 px-4 py-3.5 text-xs font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {approving ? "Approving..." : "Approve & Add to Cart →"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {/* MAIN WORKSPACE */}
-      <main
-          className={`relative flex min-h-0 min-w-0 flex-col overflow-hidden border-x border-white/10 bg-[#09090b] lg:order-2 ${
-            isEditorFullscreen ? "h-screen" : "h-full"
-          }`}
-        >
-      <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur-xl">
-        <div>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
-            Surface {currentSurfaceIndex + 1} / 4
-          </div>
-          <div className="mt-1 text-sm font-black text-white">
-            {getCoverSideLabel(side)}
-          </div>
-        </div>
-
-        {!isEditorFullscreen ? (
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => setIsEditorFullscreen(true)}
-            className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-black text-zinc-200 transition hover:bg-white/[0.1] hover:text-white"
-            aria-label="Enter fullscreen editor"
-            title="Fullscreen"
-          >
-            ⛶ Fullscreen
-          </button>
-        ) : null}
-      </div>
-
-      {/* PREVIEW / DESIGN CANVAS */}
-              {isEditorFullscreen ? (
-          <button
-            type="button"
-            onClick={() => setIsEditorFullscreen(false)}
-            className="fixed right-4 top-4 z-[240] rounded-xl border border-white/10 bg-zinc-950/95 px-3 py-2 text-xs font-black text-white shadow-xl backdrop-blur-xl transition hover:bg-zinc-900"
-            aria-label="Exit fullscreen editor"
-          >
-            ✕ Exit Fullscreen
-          </button>
-        ) : null}
-
-        {/* EDITOR ACTION BAR */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[130] flex justify-center px-3 pb-2 sm:px-4 sm:pb-3">
-          <div className="pointer-events-auto flex w-full max-w-xl items-center justify-between gap-2 rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl">
+          {/* BOTTOM BAR */}
+          <div className="flex flex-wrap items-center justify-center gap-1 border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] px-3 py-2">
             <button
               type="button"
-              disabled={saving || approving || generatingAi}
-              onClick={saveDraft}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-black text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={undo}
+              disabled={!history.length}
+              className="rounded-lg px-3 py-2 text-lg text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] disabled:opacity-20"
             >
-              {saving ? "Saving..." : "Save Draft ✨"}
+              ↶
             </button>
-
-            <div className="min-w-0 flex-1 truncate text-center text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
-              {message || `${getCoverSideLabel(side)} · Surface ${currentSurfaceIndex + 1} / 4`}
-            </div>
 
             <button
               type="button"
-              disabled={saving || approving || generatingAi}
-              onClick={() => setIsPreviewMode(true)}
-              className="rounded-xl bg-yellow-400 px-5 py-3 text-xs font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={redo}
+              disabled={!future.length}
+              className="rounded-lg px-3 py-2 text-lg text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] disabled:opacity-20"
             >
-              Preview →
+              ↷
             </button>
-          </div>
-        </div>
 
-<section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#0b0b0d] p-0">
-        <div className="flex shrink-0 items-start justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-400">
-              Design Studio
-            </p>
+            <div className="mx-2 h-5 w-px bg-[var(--mn-control-hover)]" />
 
-            <h2 className="mt-1 text-lg font-black tracking-tight">
-              {getCoverSideLabel(side)}
-            </h2>
-          </div>
-
-        </div>
-
-        {/* EDITABLE SURFACES */}
-        <div className="flex shrink-0 items-center justify-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-zinc-950/80 px-3 py-2 backdrop-blur-xl">
-          {(
-            [
-              ["front", "FRONT"],
-              ["insideFront", "INSIDE FRONT"],
-              ["insideBack", "INSIDE BACK"],
-              ["back", "BACK"],
-            ] as const
-          ).map(([surface, label]) => (
             <button
-              key={surface}
               type="button"
-              onClick={() => {
-                setSide(surface);
-                setSelectedElementId(null);
-                setEditingElementId(null);
-              }}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-[8px] font-black tracking-[0.12em] transition ${
-                side === surface
-                  ? "bg-white text-black"
-                  : "text-zinc-500 hover:text-white"
-              }`}
+              onClick={() =>
+                setZoom((value) => Math.max(0.4, value - 0.1))
+              }
+              className="rounded-lg px-3 py-2 text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
             >
-              {label}
+              −
             </button>
-          ))}
-        </div>
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,rgba(255,255,255,.035),transparent_55%)] px-2 pb-[84px] pt-2 sm:px-4 sm:pb-[92px] sm:pt-3">
-              <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-[60] flex items-center justify-between px-2 sm:px-4">
-                <button
-                  type="button"
-                  data-editor-control="true"
-                  onClick={() => navigateSurface(-1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
-                  aria-label="Previous surface"
-                  title="Previous surface"
-                >
-                  ‹
-                </button>
-
-                <button
-                  type="button"
-                  data-editor-control="true"
-                  onClick={() => navigateSurface(1)}
-                  className="pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-2xl font-light leading-none text-white/80 shadow-lg backdrop-blur-xl transition hover:scale-105 hover:border-white/20 hover:bg-zinc-900 hover:text-white active:scale-95"
-                  aria-label="Next surface"
-                  title="Next surface"
-                >
-                  ›
-                </button>
-              </div>
-
-
-          <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
-            <div
-              key={editorResetVersion}
-              className="relative aspect-[216/279] h-[82%] max-h-full w-auto max-w-[90%] overflow-visible rounded-[8px] border border-white/15 bg-black shadow-[0_24px_64px_rgba(0,0,0,0.62)] select-none"
-              style={{
-                background: previewBackground,
-                touchAction: "none",
-              }}
-              onPointerDown={(event) => {
-                if (event.target === event.currentTarget) {
-                  setSelectedElementId(null);
-                  setEditingElementId(null);
-                }
-              }}
-              onTouchStart={(event) => {
-                const target = event.target as HTMLElement;
-
-                if (
-                  target.closest("[data-cover-element]") ||
-                  target.closest("[data-editor-control]") ||
-                  target.closest("[data-resize]")
-                ) {
-                  surfaceSwipeStartX.current = null;
-                  return;
-                }
-
-                const touch = event.touches[0];
-
-                if (touch) {
-                  surfaceSwipeStartX.current = touch.clientX;
-                }
-              }}
-              onTouchEnd={(event) => {
-                const startX = surfaceSwipeStartX.current;
-                surfaceSwipeStartX.current = null;
-
-                if (startX == null) return;
-                if (dragState || resizeState || editingElementId) return;
-
-                const touch = event.changedTouches[0];
-
-                if (!touch) return;
-
-                const deltaX = touch.clientX - startX;
-
-                if (Math.abs(deltaX) < 60) return;
-
-                if (deltaX < 0) {
-                  navigateSurface(1);
-                } else {
-                  navigateSurface(-1);
-                }
-              }}
-              onKeyDown={handleEditorKeyDown}
-              tabIndex={0}
-              aria-label="Notebook cover design canvas"
+            <button
+              type="button"
+              onClick={() => setZoom(0.72)}
+              className="min-w-[60px] rounded-lg px-2 py-2 text-xs text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
             >
-              {/* ARTWORK / ELEMENTS */}
-              {alignmentGuides.vertical !== undefined ? (
-                <div
-                  data-editor-control="true"
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0 z-[970] border-l border-dashed border-white/80"
-                  style={{
-                    left: `${alignmentGuides.vertical}%`,
-                  }}
-                />
-              ) : null}
+              {Math.round(zoom * 100)}%
+            </button>
 
-              {alignmentGuides.horizontal !== undefined ? (
-                <div
-                  data-editor-control="true"
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 z-[970] border-t border-dashed border-white/80"
-                  style={{
-                    top: `${alignmentGuides.horizontal}%`,
-                  }}
-                />
-              ) : null}
+            <button
+              type="button"
+              onClick={() =>
+                setZoom((value) => Math.min(1.4, value + 0.1))
+              }
+              className="rounded-lg px-3 py-2 text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+            >
+              +
+            </button>
 
-              {activeElements
-                .slice()
-                .sort((a, b) => a.zIndex - b.zIndex)
-                .map((element) => {
-                  const asset =
-                    element.type === "image"
-                      ? assets.find(
-                          (item) =>
-                            item.id === element.assetId
-                        )
-                      : null;
+            <button
+              type="button"
+              onClick={() => setZoom(0.72)}
+              className="rounded-lg px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+            >
+              Fit
+            </button>
 
-                  const selected =
-                    selectedElementId === element.id;
+            <div className="mx-2 h-5 w-px bg-[var(--mn-control-hover)]" />
 
-                  return (
-                    <div
-                      key={element.id}
-                      onPointerDown={(event) =>
-                        handleElementPointerDown(
-                          event,
-                          element
-                        )
-                      }
-                      onPointerMove={
-                        dragState?.id === element.id
-                          ? handleElementPointerMove
-                          : undefined
-                      }
-                      onPointerUp={
-                        dragState?.id === element.id
-                          ? handleElementPointerUp
-                          : undefined
-                      }
-                      data-cover-element="true"
-                      className={`absolute cursor-move ${
-                        selected
-                          ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-transparent"
-                          : ""
-                      }`}
-                      style={{
-                        left: `${element.x}%`,
-                        top: `${element.y}%`,
-                        width: `${element.width}%`,
-                        height: `${element.height}%`,
-                        zIndex: element.zIndex,
-                        transform: `rotate(${element.rotation}deg)`,
-                        transformOrigin: "center",
-                      }}
-                    >
-                      {element.type === "image" &&
-                      asset?.previewUrl ? (
-                        <img
-                          src={asset.previewUrl}
-                          alt=""
-                          draggable={false}
-                          className={`pointer-events-none h-full w-full ${
-                            element.objectFit === "contain"
-                              ? "object-contain"
-                              : "object-cover"
-                          }`}
-                        />
-                      ) : element.type === "text" ? (
-                        editingElementId === element.id ? (
-                          <textarea
-                            autoFocus
-                            value={element.text ?? ""}
-                            maxLength={120}
-                            onChange={(event) =>
-                              updateElement(element.id, {
-                                text: event.target.value,
-                              })
-                            }
-                            onBlur={finishInlineEdit}
-                            onPointerDown={(event) =>
-                              event.stopPropagation()
-                            }
-                            onKeyDown={(event) => {
-                              if (event.key === "Escape") {
-                                event.preventDefault();
-                                cancelInlineEdit();
-                              }
-                            }}
-                            className="h-full w-full resize-none overflow-hidden border-0 bg-transparent p-1 outline-none"
-                            style={{
-                              fontSize: `${element.fontSize ?? 16}px`,
-                              fontWeight: element.fontWeight ?? 700,
-                              fontFamily:
-                                element.fontFamily ??
-                                "Inter, sans-serif",
-                              color: element.color ?? "#ffffff",
-                              textAlign: element.align ?? "center",
-                              lineHeight:
-                                element.lineHeight ?? 1.15,
-                              letterSpacing: `${element.letterSpacing ?? 0}px`,
-                              opacity: element.opacity ?? 1,
-                              textShadow:
-                                "0 3px 20px rgba(0,0,0,.45)",
-                            }}
-                          />
-                        ) : (
-                          <div
-                            className="flex h-full w-full cursor-text items-center justify-center overflow-hidden break-words whitespace-pre-wrap p-1"
-                            onDoubleClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              startInlineEdit(element);
-                            }}
-                            onPointerDown={(event) =>
-                              event.stopPropagation()
-                            }
-                            style={{
-                              fontSize: `${element.fontSize ?? 16}px`,
-                              fontWeight: element.fontWeight ?? 700,
-                              fontFamily:
-                                element.fontFamily ??
-                                "Inter, sans-serif",
-                              color: element.color ?? "#ffffff",
-                              textAlign: element.align ?? "center",
-                              lineHeight:
-                                element.lineHeight ?? 1.15,
-                              letterSpacing: `${element.letterSpacing ?? 0}px`,
-                              opacity: element.opacity ?? 1,
-                              textShadow:
-                                "0 3px 20px rgba(0,0,0,.45)",
-                            }}
-                          >
-                            {element.text || "Double-click to edit"}
-                          </div>
-                        )
-                      ) : null}
-
-                      {selected ? (
-                        <>
-                          {(
-                            [
-                              ["nw", "-top-2 -left-2", "cursor-nwse-resize"],
-                              ["n", "-top-2 left-1/2 -translate-x-1/2", "cursor-ns-resize"],
-                              ["ne", "-top-2 -right-2", "cursor-nesw-resize"],
-                              ["w", "top-1/2 -left-2 -translate-y-1/2", "cursor-ew-resize"],
-                              ["e", "top-1/2 -right-2 -translate-y-1/2", "cursor-ew-resize"],
-                              ["sw", "-bottom-2 -left-2", "cursor-nesw-resize"],
-                              ["s", "-bottom-2 left-1/2 -translate-x-1/2", "cursor-ns-resize"],
-                              ["se", "-bottom-2 -right-2", "cursor-nwse-resize"],
-                            ] as const
-                          ).map(([handle, position, cursor]) => (
-                            <div
-                              key={handle}
-                              data-resize="true"
-                              data-editor-control="true"
-                              onPointerDown={(event) =>
-                                handleResizePointerDown(
-                                  event,
-                                  element,
-                                  handle
-                                )
-                              }
-                              onPointerMove={
-                                resizeState?.id === element.id &&
-                                resizeState.handle === handle
-                                  ? handleResizePointerMove
-                                  : undefined
-                              }
-                              onPointerUp={
-                                resizeState?.id === element.id &&
-                                resizeState.handle === handle
-                                  ? handleResizePointerUp
-                                  : undefined
-                              }
-                              className={`absolute ${position} z-[20] h-4 w-4 rounded-full border-2 border-yellow-400 bg-black ${cursor}`}
-                            />
-                          ))}
-
-                          <div
-                            data-editor-control="true"
-                            className="absolute left-1/2 -top-10 z-[20] h-8 w-px -translate-x-1/2 bg-yellow-400/70"
-                          />
-
-                          <div
-                            data-editor-control="true"
-                            onPointerDown={(event) =>
-                              handleRotationPointerDown(
-                                event,
-                                element
-                              )
-                            }
-                            onPointerMove={
-                              rotationState?.id === element.id
-                                ? handleRotationPointerMove
-                                : undefined
-                            }
-                            onPointerUp={
-                              rotationState?.id === element.id
-                                ? handleRotationPointerUp
-                                : undefined
-                            }
-                            className="absolute -top-14 left-1/2 z-[21] flex h-7 w-7 -translate-x-1/2 cursor-grab items-center justify-center rounded-full border-2 border-yellow-400 bg-black text-xs font-black text-yellow-300 shadow-lg active:cursor-grabbing"
-                            aria-label="Rotate element"
-                          >
-                            ↻
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  );
-                })}
-
-              {/* SYSTEM BRANDING */}
-              <div className="pointer-events-none absolute left-1/2 top-[4%] z-[900] -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.3em] text-white/60">
-                MineNote
-              </div>
-
-              <div className="pointer-events-none absolute inset-[5%] z-[950] rounded-[8px] border border-dashed border-white/10" />
-
-              <div className="pointer-events-none absolute inset-0 z-[980] bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.10),transparent_25%),linear-gradient(135deg,rgba(255,255,255,.03),transparent_45%,rgba(0,0,0,.16))]" />
-            </div>
-
+            <button
+              type="button"
+              onClick={resetDesign}
+              className="rounded-lg px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+            >
+              Reset
+            </button>
           </div>
-        </div>
         </section>
 
-      </main>
+        {/* RIGHT PANEL */}
+        <aside className="order-3 w-full border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:w-[330px] lg:border-l lg:border-t-0">
+          <div className="h-full overflow-y-auto p-5">
+            {panel === "ai" ? (
+              <div>
+                <div className="mb-7">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+                    MineNote AI
+                  </p>
 
-      {/* EDITOR */}
-      <section
-        className={`order-2 min-h-0 min-w-0 overflow-y-auto border-l border-white/[0.07] bg-zinc-950 md:order-3 ${
-    isEditorFullscreen
-      ? "md:h-screen md:max-h-screen"
-      : "lg:h-full lg:max-h-full"
-  }`}
-        aria-label="Editor tools"
-      >
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.07] bg-zinc-950/95 px-4 py-2.5 backdrop-blur-xl">
-          <div>
-            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400">
-              {activeEditorTool === "select"
-                ? "Inspector"
-                : activeEditorTool === "text"
-                  ? "Text"
-                  : activeEditorTool === "image"
-                    ? "Image"
-                    : activeEditorTool === "ai"
-                      ? "AI Studio"
-                      : activeEditorTool === "style"
-                        ? "Style"
-                        : "Layers"}
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <div className="text-sm font-black text-white">
-                {getCoverSideLabel(side)}
-              </div>
-              {selectedElement ? (
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-zinc-500">
-                  {selectedElement.type}
-                </span>
-              ) : null}
-            </div>
-          </div>
+                  <h2 className="mt-2 text-xl font-semibold">
+                    Design Assistant
+                  </h2>
 
-          <button
-            type="button"
-            data-editor-control="true"
-            onClick={() => setActiveEditorTool("select")}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:bg-white/[0.08] hover:text-white"
-            aria-label="Close tools"
-            title="Close"
-          >
-            ×
-          </button>
-        </div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--mn-text-muted)]">
+                    Describe the cover you want and AI will help build the
+                    concept directly inside the editor.
+                  </p>
+                </div>
 
-        {/* Legacy drawer intro intentionally hidden.
-            The left toolbar + active tool header are now the primary editor UI. */}
-        <div className="hidden">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-400">
-            Cover Editor
-          </p>
+                <label className="text-xs text-[var(--mn-text-muted)]">
+                  Describe your design
+                </label>
 
-          <h2 className="mt-2 text-2xl font-black tracking-tight">
-            Make it personal.
-          </h2>
+                <textarea
+                  value={aiPrompt}
+                  onChange={(event) => setAiPrompt(event.target.value)}
+                  placeholder="A dark anime warrior under a red moon..."
+                  rows={6}
+                  className="mt-2 w-full resize-none rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] p-4 text-sm outline-none placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-border-strong)]"
+                />
 
-          <p className="mt-2 text-sm leading-6 text-zinc-500">
-            Your changes are saved to this customization draft.
-            MineNote branding stays controlled by the system.
-          </p>
-        </div>
-
-        <div className="space-y-4 p-3 sm:p-4">
-          <div className="hidden rounded-2xl border border-yellow-400/10 bg-yellow-400/[0.025] px-4 py-3 text-[10px] leading-5 text-zinc-500">
-            <span className="font-black text-yellow-300">
-              Tip:
-            </span>{" "}
-            Select elements directly on the canvas. Double-click text to edit it.
-          </div>
-
-          {/* ELEMENT TOOLBAR */}
-          <div
-            className={`rounded-2xl border border-white/10 bg-white/[0.025] p-3 ${
-              ["select", "text", "image", "layers"].includes(activeEditorTool)
-                ? ""
-                : "hidden"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-
-                {/* LAYERS PANEL */}
-                <div
-                  id="custom-cover-layers"
-                  className={`mt-1 overflow-hidden rounded-xl border border-white/10 bg-black/20 ${
-                    activeEditorTool === "layers" ? "" : "hidden"
-                  }`}
+                <button
+                  type="button"
+                  disabled={!aiPrompt.trim() || aiBusy}
+                  onClick={runAI}
+                  className="mt-3 w-full rounded-[1.5rem] bg-[var(--mn-accent)] py-3 text-sm font-semibold text-[var(--mn-accent-contrast)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
                 >
-                  <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-                    <div className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-500">
-                      Layers
-                    </div>
+                  {aiBusy ? "Preparing..." : "✦ Generate with AI"}
+                </button>
 
-                    <div className="text-[9px] font-bold text-zinc-700">
-                      {(activeElements ?? []).length} element
-                      {(activeElements ?? []).length === 1 ? "" : "s"}
-                    </div>
+                <div className="mt-7">
+                  <p className="mb-3 text-xs font-semibold text-[var(--mn-text-muted)]">
+                    Quick ideas
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Minimal",
+                      "Anime",
+                      "Gaming",
+                      "Aesthetic",
+                      "Dark",
+                      "Space",
+                    ].map((idea) => (
+                      <button
+                        key={idea}
+                        type="button"
+                        onClick={() =>
+                          setAiPrompt(`Create a ${idea.toLowerCase()} cover`)
+                        }
+                        className="rounded-full border border-[var(--mn-border)] px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
+                      >
+                        {idea}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-8 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] p-4">
+                  <p className="text-xs font-semibold text-[var(--mn-text-secondary)]">
+                    AI workflow
+                  </p>
+
+                  <div className="mt-3 space-y-2 text-xs leading-5 text-[var(--mn-text-muted)]">
+                    <p>01 — Describe your idea</p>
+                    <p>02 — Generate a concept</p>
+                    <p>03 — Review variations</p>
+                    <p>04 — Add the result to your canvas</p>
+                  </div>
+                </div>
+              </div>
+            ) : panel === "background" ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+                  Design
+                </p>
+
+                <h2 className="mt-2 text-xl font-semibold">
+                  Background
+                </h2>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+                  {[
+                    "#ffffff",
+                    "#111111",
+                    "#f5f1e8",
+                    "#e8edf3",
+                    "#efe1e1",
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => changeBackground(color)}
+                      className={`h-12 w-12 rounded-[1.5rem] border-2 ${
+                        design.background === color
+                          ? "border-[var(--mn-accent)]"
+                          : "border-[var(--mn-border)]"
+                      }`}
+                      style={{ background: color }}
+                    />
+                  ))}
+                </div>
+
+                <label className="mt-7 block text-xs text-[var(--mn-text-muted)]">
+                  Custom color
+                </label>
+
+                <input
+                  type="color"
+                  value={design.background}
+                  onChange={(event) =>
+                    changeBackground(event.target.value)
+                  }
+                  className="mt-2 h-12 w-full cursor-pointer rounded-[1.25rem] border border-[var(--mn-border)] bg-transparent"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setPanel("properties")}
+                  className="mt-6 w-full rounded-[1.25rem] border border-[var(--mn-border)] py-3 text-sm text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
+                >
+                  Done
+                </button>
+              </div>
+            ) : selectedElement ? (
+              <div>
+                <div className="mb-7 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-muted)]">
+                      Selected
+                    </p>
+
+                    <h2 className="mt-2 text-xl font-semibold">
+                      {selectedElement.type === "text"
+                        ? "Text"
+                        : selectedElement.type === "image"
+                          ? "Image"
+                          : "Shape"}
+                    </h2>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 border-b border-white/10 p-1.5">
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayerToEdge("front")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Bring to front"
-                    >
-                      ⬆ Front
-                    </button>
+                  <button
+                    type="button"
+                    onClick={deleteSelected}
+                    className="rounded-lg px-2 py-1 text-xs text-[var(--mn-danger)] hover:bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] hover:text-[var(--mn-danger)]"
+                  >
+                    Delete
+                  </button>
+                </div>
 
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayer("up")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Bring forward"
-                    >
-                      ↑ Forward
-                    </button>
+                {selectedElement.type === "text" && (
+                  <>
+                    <label className="text-xs text-[var(--mn-text-muted)]">
+                      Content
+                    </label>
 
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayer("down")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Send backward"
-                    >
-                      ↓ Back
-                    </button>
-
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      disabled={!selectedElement}
-                      onClick={() => moveLayerToEdge("back")}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] font-black text-zinc-400 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      title="Send to back"
-                    >
-                      ⬇ Back
-                    </button>
-                  </div>
-
-                  <div className="max-h-[260px] overflow-y-auto p-2">
-                    {(activeElements ?? []).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-white/10 px-3 py-6 text-center text-[10px] font-medium text-zinc-700">
-                        No elements yet
-                      </div>
-                    ) : (
-                      activeElements
-                        .slice()
-                        .sort(
-                          (a, b) =>
-                            b.zIndex - a.zIndex
-                        )
-                        .map((element, index) => {
-                          const isSelected =
-                            selectedElementId ===
-                            element.id;
-
-                          const layerLabel =
-                            element.type === "text"
-                              ? (element.text?.trim() ||
-                                  "Text")
-                              : "Image";
-
-                          return (
-                            <button
-                              key={element.id}
-                              type="button"
-                              data-editor-control="true"
-                              onClick={() => {
-                                setSelectedElementId(
-                                  element.id
-                                );
-                                setEditingElementId(
-                                  null
-                                );
-                              }}
-                              className={`group flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition ${
-                                isSelected
-                                  ? "bg-yellow-400/10 ring-1 ring-yellow-400/30"
-                                  : "hover:bg-white/[0.05]"
-                              }`}
-                            >
-                              <span
-                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-black ${
-                                  isSelected
-                                    ? "border-yellow-400/30 bg-yellow-400/10 text-yellow-300"
-                                    : "border-white/10 bg-white/[0.03] text-zinc-600"
-                                }`}
-                              >
-                                {element.type ===
-                                "text"
-                                  ? "T"
-                                  : "▧"}
-                              </span>
-
-                              <span className="min-w-0 flex-1">
-                                <span
-                                  className={`block truncate text-[10px] font-black ${
-                                    isSelected
-                                      ? "text-yellow-200"
-                                      : "text-zinc-400 group-hover:text-zinc-200"
-                                  }`}
-                                >
-                                  {layerLabel}
-                                </span>
-
-                                <span className="mt-0.5 block text-[8px] uppercase tracking-wider text-zinc-700">
-                                  Layer {index + 1}
-                                  {" · "}
-                                  z {element.zIndex}
-                                </span>
-                              </span>
-
-                              {isSelected ? (
-                                <span className="text-[9px] font-black text-yellow-400">
-                                  ●
-                                </span>
-                              ) : null}
-                            </button>
-                          );
+                    <textarea
+                      value={selectedElement.text ?? ""}
+                      onChange={(event) =>
+                        updateElement(selectedElement.id, {
+                          text: event.target.value,
                         })
-                    )}
-                  </div>
-                </div>
-              </div>
+                      }
+                      rows={3}
+                      className="mt-2 w-full resize-none rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] p-3 text-sm outline-none focus:border-[var(--mn-border-strong)]"
+                    />
 
-              <div className="hidden flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={undo}
-                  disabled={(history[side] ?? []).length === 0}
-                  className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black text-zinc-300 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                  title="Undo (⌘/Ctrl + Z)"
-                >
-                  ↶ Undo
-                </button>
+                    <div className="mt-5 grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-[var(--mn-text-muted)]">
+                          Size
+                        </label>
 
-                <button
-                  type="button"
-                  onClick={redo}
-                  disabled={(future[side] ?? []).length === 0}
-                  className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black text-zinc-300 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                  title="Redo (⌘/Ctrl + Shift + Z)"
-                >
-                  ↷ Redo
-                </button>
-
-                <div className="mt-3 flex items-center justify-between text-[9px] uppercase tracking-wider text-zinc-600">
-              <span>
-                {(history[side] ?? []).length} undo ·{" "}
-                {(future[side] ?? []).length} redo
-              </span>
-
-              <span>
-                ⌘/Ctrl Z · Shift Z · D
-              </span>
-            </div>
-
-            {selectedElement ? (
-                  <button
-                    type="button"
-                    onClick={duplicateSelectedElement}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black text-zinc-300 transition hover:bg-white/[0.08] hover:text-white"
-                    title="Duplicate (⌘/Ctrl + D)"
-                  >
-                    ⧉ Duplicate
-                  </button>
-                ) : null}
-              </div>
-
-              <button
-                type="button"
-                onClick={addTextElement}
-                className="hidden rounded-xl bg-white px-3 py-2 text-[10px] font-black text-black transition hover:bg-zinc-200"
-              >
-                + Text
-              </button>
-            </div>
-
-            {selectedElement ? (
-              <div className="mt-3 space-y-3">
-                <div className="hidden grid grid-cols-4 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => rotateSelected(-15)}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] py-2 text-[10px] font-black text-zinc-300 hover:text-white"
-                  >
-                    ↶ 15°
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => rotateSelected(15)}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] py-2 text-[10px] font-black text-zinc-300 hover:text-white"
-                  >
-                    ↷ 15°
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => moveLayer("down")}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] py-2 text-[10px] font-black text-zinc-300 hover:text-white"
-                  >
-                    ↓ Layer
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => moveLayer("up")}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] py-2 text-[10px] font-black text-zinc-300 hover:text-white"
-                  >
-                    ↑ Layer
-                  </button>
-                </div>
-
-                    {/* IMAGE EDITING PANEL */}
-              {selectedElement?.type === "image" ? (
-                <div
-                  data-editor-control="true"
-                  className="rounded-xl border border-white/10 bg-white/[0.035] p-3"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                        Image
-                      </h3>
-                      <p className="mt-1 text-[10px] text-white/40">
-                        Selected artwork
-                      </p>
-                    </div>
-
-                    <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-white/60">
-                      {selectedElement.width.toFixed(0)} ×{" "}
-                      {selectedElement.height.toFixed(0)}
-                    </span>
-                  </div>
-
-                  {/* IMAGE PREVIEW */}
-                  {(() => {
-                    const selectedAsset = assets.find(
-                      (asset) =>
-                        asset.id === selectedElement.assetId
-                    );
-
-                    return selectedAsset?.previewUrl ? (
-                      <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-black/30">
-                        <img
-                          src={selectedAsset.previewUrl}
-                          alt=""
-                          className="h-24 w-full object-contain"
+                        <input
+                          type="number"
+                          min="8"
+                          max="160"
+                          value={selectedElement.fontSize ?? 42}
+                          onChange={(event) =>
+                            updateElement(selectedElement.id, {
+                              fontSize: Number(event.target.value),
+                            })
+                          }
+                          className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm outline-none"
                         />
                       </div>
-                    ) : (
-                      <div className="mb-4 flex h-28 items-center justify-center rounded-xl border border-dashed border-white/10 bg-black/20 text-xs text-white/35">
-                        Image preview unavailable
+
+                      <div>
+                        <label className="text-xs text-[var(--mn-text-muted)]">
+                          Weight
+                        </label>
+
+                        <select
+                          value={selectedElement.fontWeight ?? "600"}
+                          onChange={(event) =>
+                            updateElement(selectedElement.id, {
+                              fontWeight: event.target.value,
+                            })
+                          }
+                          className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm outline-none"
+                        >
+                          <option value="400">Regular</option>
+                          <option value="500">Medium</option>
+                          <option value="600">Semibold</option>
+                          <option value="700">Bold</option>
+                        </select>
                       </div>
-                    );
-                  })()}
-
-                  {/* FIT / FILL */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                      Image Fit
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        data-editor-control="true"
-                        onClick={() =>
-                          updateElement(selectedElement.id, {
-                            objectFit: "cover",
-                          })
-                        }
-                        className={`rounded-xl border px-3 py-2 text-xs transition ${
-                          (selectedElement.objectFit ?? "cover") ===
-                          "cover"
-                            ? "border-yellow-400/60 bg-yellow-400/10 text-yellow-300"
-                            : "border-white/10 bg-white/[0.03] text-white/60 hover:bg-white/[0.06]"
-                        }`}
-                      >
-                        Fill
-                      </button>
+                    <div className="mt-5">
+                      <label className="text-xs text-[var(--mn-text-muted)]">
+                        Alignment
+                      </label>
 
-                      <button
-                        type="button"
-                        data-editor-control="true"
-                        onClick={() =>
-                          updateElement(selectedElement.id, {
-                            objectFit: "contain",
-                          })
-                        }
-                        className={`rounded-xl border px-3 py-2 text-xs transition ${
-                          selectedElement.objectFit === "contain"
-                            ? "border-yellow-400/60 bg-yellow-400/10 text-yellow-300"
-                            : "border-white/10 bg-white/[0.03] text-white/60 hover:bg-white/[0.06]"
-                        }`}
-                      >
-                        Fit
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* OPACITY */}
-                  <div className="mb-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                        Opacity
-                      </span>
-                      <span className="text-xs text-white/60">
-                        {Math.round(
-                          (selectedElement.opacity ?? 1) * 100
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {(["left", "center", "right"] as const).map(
+                          (alignment) => (
+                            <button
+                              key={alignment}
+                              type="button"
+                              onClick={() =>
+                                updateElement(selectedElement.id, {
+                                  textAlign: alignment,
+                                })
+                              }
+                              className={`rounded-[1.25rem] border py-2 text-xs capitalize ${
+                                selectedElement.textAlign === alignment
+                                  ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
+                                  : "border-[var(--mn-border)] text-[var(--mn-text-muted)]"
+                              }`}
+                            >
+                              {alignment}
+                            </button>
+                          ),
                         )}
-                        %
+                      </div>
+                    </div>
+
+                    <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                      Color
+                    </label>
+
+                    <input
+                      type="color"
+                      value={selectedElement.color ?? "#111111"}
+                      onChange={(event) =>
+                        updateElement(selectedElement.id, {
+                          color: event.target.value,
+                        })
+                      }
+                      className="mt-2 h-11 w-full cursor-pointer rounded-[1.25rem] border border-[var(--mn-border)] bg-transparent"
+                    />
+
+                    <div className="mt-5 grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-[var(--mn-text-muted)]">
+                          Letter spacing
+                        </label>
+
+                        <input
+                          type="number"
+                          min="-5"
+                          max="20"
+                          step="0.5"
+                          value={selectedElement.letterSpacing ?? 0}
+                          onChange={(event) =>
+                            updateElement(selectedElement.id, {
+                              letterSpacing: Number(event.target.value),
+                            })
+                          }
+                          className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[var(--mn-text-muted)]">
+                          Line height
+                        </label>
+
+                        <input
+                          type="number"
+                          min="0.8"
+                          max="3"
+                          step="0.1"
+                          value={selectedElement.lineHeight ?? 1.2}
+                          onChange={(event) =>
+                            updateElement(selectedElement.id, {
+                              lineHeight: Number(event.target.value),
+                            })
+                          }
+                          className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs text-[var(--mn-text-muted)]">
+                          Opacity
+                        </label>
+
+                        <span className="text-xs text-[var(--mn-text-muted)]">
+                          {Math.round((selectedElement.opacity ?? 1) * 100)}%
+                        </span>
+                      </div>
+
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={selectedElement.opacity ?? 1}
+                        onChange={(event) =>
+                          updateElement(selectedElement.id, {
+                            opacity: Number(event.target.value),
+                          })
+                        }
+                        className="mt-3 w-full"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {selectedElement.type === "image" && (
+                  <>
+                    <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--mn-text-muted)]">
+                        Image
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mt-4 w-full rounded-[1.25rem] bg-[var(--mn-accent)] py-3 text-sm font-semibold text-[var(--mn-accent-contrast)] hover:opacity-90"
+                      >
+                        Replace image
+                      </button>
+
+                      <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                        Fit
+                      </label>
+
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {(["cover", "contain", "fill"] as const).map((fit) => (
+                          <button
+                            key={fit}
+                            type="button"
+                            onClick={() =>
+                              updateElement(selectedElement.id, {
+                                objectFit: fit,
+                              })
+                            }
+                            className={`rounded-[1.25rem] border py-2 text-xs capitalize ${
+                              (selectedElement.objectFit ?? "contain") === fit
+                                ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-text)]"
+                                : "border-[var(--mn-border)] text-[var(--mn-text-muted)] hover:border-[var(--mn-border-strong)]"
+                            }`}
+                          >
+                            {fit}
+                          </button>
+                        ))}
+                      </div>
+
+                      <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                        Border radius · {Math.round(selectedElement.borderRadius ?? 0)}px
+                        <input
+                          type="range"
+                          min="0"
+                          max="120"
+                          value={Math.min(selectedElement.borderRadius ?? 0, 120)}
+                          onChange={(event) =>
+                            updateElement(selectedElement.id, {
+                              borderRadius: Number(event.target.value),
+                            })
+                          }
+                          className="mt-3 w-full"
+                        />
+                      </label>
+
+                      <div className="mt-5 flex items-center justify-between">
+                        <label className="text-xs text-[var(--mn-text-muted)]">
+                          Opacity
+                        </label>
+                        <span className="text-xs text-[var(--mn-text-muted)]">
+                          {Math.round((selectedElement.opacity ?? 1) * 100)}%
+                        </span>
+                      </div>
+
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={selectedElement.opacity ?? 1}
+                        onChange={(event) =>
+                          updateElement(selectedElement.id, {
+                            opacity: Number(event.target.value),
+                          })
+                        }
+                        className="mt-3 w-full"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {selectedElement.type === "shape" && (
+                  <>
+                    <label className="text-xs text-[var(--mn-text-muted)]">
+                      Shape
+                    </label>
+
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateElement(selectedElement.id, {
+                            shape: "rectangle",
+                            borderRadius: 24,
+                          })
+                        }
+                        className="rounded-[1.25rem] border border-[var(--mn-border)] py-3 text-xs text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)]"
+                      >
+                        Rectangle
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateElement(selectedElement.id, {
+                            shape: "circle",
+                            borderRadius: 999,
+                          })
+                        }
+                        className="rounded-[1.25rem] border border-[var(--mn-border)] py-3 text-xs text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)]"
+                      >
+                        Circle
+                      </button>
+                    </div>
+
+                    <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                      Fill
+                    </label>
+
+                    <input
+                      type="color"
+                      value={selectedElement.fill ?? "#111111"}
+                      onChange={(event) =>
+                        updateElement(selectedElement.id, {
+                          fill: event.target.value,
+                        })
+                      }
+                      className="mt-2 h-11 w-full cursor-pointer rounded-[1.25rem] border border-[var(--mn-border)] bg-transparent"
+                    />
+
+                    {selectedElement.shape !== "circle" && (
+                      <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                        Corner radius · {Math.round(selectedElement.borderRadius ?? 0)}px
+                        <input
+                          type="range"
+                          min="0"
+                          max="120"
+                          value={Math.min(selectedElement.borderRadius ?? 0, 120)}
+                          onChange={(event) =>
+                            updateElement(selectedElement.id, {
+                              borderRadius: Number(event.target.value),
+                            })
+                          }
+                          className="mt-3 w-full"
+                        />
+                      </label>
+                    )}
+
+                    <div className="mt-5 flex items-center justify-between">
+                      <label className="text-xs text-[var(--mn-text-muted)]">
+                        Opacity
+                      </label>
+                      <span className="text-xs text-[var(--mn-text-muted)]">
+                        {Math.round((selectedElement.opacity ?? 1) * 100)}%
                       </span>
                     </div>
 
                     <input
-                      data-editor-control="true"
                       type="range"
                       min="0"
                       max="1"
@@ -3208,1071 +1794,234 @@ const [resizeState, setResizeState] = useState<{
                           opacity: Number(event.target.value),
                         })
                       }
-                      className="w-full accent-yellow-400"
+                      className="mt-3 w-full"
                     />
+                  </>
+                )}
+
+                <div className="mt-7 border-t border-[var(--mn-border)] pt-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--mn-text-muted)]">
+                    Transform
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <label className="text-xs text-[var(--mn-text-muted)]">
+                      X
+                      <input
+                        type="number"
+                        value={Math.round(selectedElement.x)}
+                        onChange={(event) =>
+                          updateElement(selectedElement.id, {
+                            x: Number(event.target.value),
+                          })
+                        }
+                        className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm text-[var(--mn-text)] outline-none"
+                      />
+                    </label>
+
+                    <label className="text-xs text-[var(--mn-text-muted)]">
+                      Y
+                      <input
+                        type="number"
+                        value={Math.round(selectedElement.y)}
+                        onChange={(event) =>
+                          updateElement(selectedElement.id, {
+                            y: Number(event.target.value),
+                          })
+                        }
+                        className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm text-[var(--mn-text)] outline-none"
+                      />
+                    </label>
+
+                    <label className="text-xs text-[var(--mn-text-muted)]">
+                      Width
+                      <input
+                        type="number"
+                        min="20"
+                        value={Math.round(selectedElement.width)}
+                        onChange={(event) =>
+                          updateElement(selectedElement.id, {
+                            width: Math.max(
+                              20,
+                              Number(event.target.value),
+                            ),
+                          })
+                        }
+                        className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm text-[var(--mn-text)] outline-none"
+                      />
+                    </label>
+
+                    <label className="text-xs text-[var(--mn-text-muted)]">
+                      Height
+                      <input
+                        type="number"
+                        min="20"
+                        value={Math.round(selectedElement.height)}
+                        onChange={(event) =>
+                          updateElement(selectedElement.id, {
+                            height: Math.max(
+                              20,
+                              Number(event.target.value),
+                            ),
+                          })
+                        }
+                        className="mt-2 w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-3 py-2 text-sm text-[var(--mn-text)] outline-none"
+                      />
+                    </label>
                   </div>
 
-                  {/* POSITION */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                      Position
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          X
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.x.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                x: Math.max(
-                                  0,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.width,
-                                    Number(event.target.value) || 0
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          Y
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.y.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                y: Math.max(
-                                  0,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.height,
-                                    Number(event.target.value) || 0
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* SIZE */}
-                  <div className="mb-3">
-                    <div className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                      Size
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          Width
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="1"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.width.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                width: Math.max(
-                                  1,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.x,
-                                    Number(event.target.value) || 1
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-
-                      <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                        <span className="mb-1 block text-[10px] text-white/35">
-                          Height
-                        </span>
-                        <input
-                          data-editor-control="true"
-                          type="number"
-                          min="1"
-                          max="100"
-                          step="0.5"
-                          value={Number(
-                            selectedElement.height.toFixed(1)
-                          )}
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                height: Math.max(
-                                  1,
-                                  Math.min(
-                                    100 -
-                                      selectedElement.y,
-                                    Number(event.target.value) || 1
-                                  )
-                                ),
-                              }
-                            )
-                          }
-                          className="w-full bg-transparent text-sm text-white outline-none"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* ROTATION */}
-                  <div className="mb-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.16em] text-white/40">
-                        Rotation
-                      </span>
-                      <span className="text-xs text-white/60">
-                        {Math.round(selectedElement.rotation)}°
-                      </span>
-                    </div>
-
+                  <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                    Rotation · {Math.round(selectedElement.rotation)}°
                     <input
-                      data-editor-control="true"
                       type="range"
                       min="-180"
                       max="180"
-                      step="1"
                       value={selectedElement.rotation}
                       onChange={(event) =>
                         updateElement(selectedElement.id, {
                           rotation: Number(event.target.value),
                         })
                       }
-                      className="w-full accent-yellow-400"
+                      className="mt-3 w-full"
                     />
+                  </label>
 
-                    <div className="mt-2 grid grid-cols-4 gap-2">
-                      {[0, 90, 180, -90].map((angle) => (
-                        <button
-                          key={angle}
-                          type="button"
-                          data-editor-control="true"
-                          onClick={() =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                rotation: angle,
-                              }
-                            )
-                          }
-                          className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[11px] text-white/60 hover:bg-white/[0.07] hover:text-white"
-                        >
-                          {angle}°
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* QUICK ACTIONS */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      onClick={() =>
+                  <label className="mt-5 block text-xs text-[var(--mn-text-muted)]">
+                    Opacity · {Math.round(selectedElement.opacity * 100)}%
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={selectedElement.opacity}
+                      onChange={(event) =>
                         updateElement(selectedElement.id, {
-                          rotation:
-                            selectedElement.rotation + 15 > 180
-                              ? -180 +
-                                ((selectedElement.rotation + 15) -
-                                  180)
-                              : selectedElement.rotation + 15,
+                          opacity: Number(event.target.value),
                         })
                       }
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/70 hover:bg-white/[0.07]"
-                    >
-                      ↻ Rotate 15°
-                    </button>
-
-                    <button
-                      type="button"
-                      data-editor-control="true"
-                      onClick={() =>
-                        updateElement(selectedElement.id, {
-                          rotation:
-                            selectedElement.rotation - 15 < -180
-                              ? 180 -
-                                (Math.abs(
-                                  selectedElement.rotation - 15
-                                ) - 180)
-                              : selectedElement.rotation - 15,
-                        })
-                      }
-                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/70 hover:bg-white/[0.07]"
-                    >
-                      ↺ Rotate 15°
-                    </button>
-                  </div>
+                      className="mt-3 w-full"
+                    />
+                  </label>
                 </div>
-              ) : null}
+              </div>
+            ) : (
+              <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
+                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-[var(--mn-control-bg)] text-2xl">
+                  ✦
+                </div>
 
-                {selectedElement.type === "text" ? (
-                  <>
-              {/* TYPOGRAPHY PANEL */}
-                    <div className="space-y-3 rounded-xl border border-white/10 bg-black/20 p-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-yellow-300">
-                            Typography
-                          </div>
-                          <div className="mt-1 text-[9px] text-zinc-700">
-                            Edit the selected text directly.
-                          </div>
-                        </div>
+                <h2 className="text-lg font-semibold">
+                  Build your cover
+                </h2>
 
-                        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-[8px] font-black uppercase tracking-wider text-zinc-600">
-                          Text
-                        </div>
-                      </div>
-
-                      <textarea
-                        value={selectedElement.text ?? ""}
-                        maxLength={120}
-                        rows={3}
-                        onChange={(event) =>
-                          updateElement(
-                            selectedElement.id,
-                            {
-                              text: event.target.value,
-                            }
-                          )
-                        }
-                        onDoubleClick={(event) =>
-                          event.currentTarget.focus()
-                        }
-                        className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 text-xs leading-5 text-white outline-none transition focus:border-yellow-400/50"
-                        placeholder="Type your text..."
-                      />
-
-                      {/* Font family */}
-                      <label className="block rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                        <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                          Font
-                        </span>
-
-                        <select
-                          value={
-                            selectedElement.fontFamily ??
-                            "Inter, sans-serif"
-                          }
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                fontFamily:
-                                  event.target.value,
-                              }
-                            )
-                          }
-                          className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-2 py-2 text-xs font-bold text-white outline-none"
-                        >
-                          <option value="Inter, sans-serif">
-                            Inter
-                          </option>
-                          <option value="Arial, sans-serif">
-                            Arial
-                          </option>
-                          <option value="Georgia, serif">
-                            Georgia
-                          </option>
-                          <option value="Times New Roman, serif">
-                            Times New Roman
-                          </option>
-                          <option value="Courier New, monospace">
-                            Courier New
-                          </option>
-                          <option value="Impact, sans-serif">
-                            Impact
-                          </option>
-                        </select>
-                      </label>
-
-                      {/* Size + weight */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Size
-                          </span>
-
-                          <div className="mt-2 flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    fontSize: Math.max(
-                                      8,
-                                      (selectedElement.fontSize ??
-                                        16) - 1
-                                    ),
-                                  }
-                                )
-                              }
-                              className="h-7 w-7 rounded-lg border border-white/10 bg-white/[0.04] text-sm font-black text-zinc-400 hover:text-white"
-                            >
-                              −
-                            </button>
-
-                            <input
-                              type="number"
-                              min={8}
-                              max={120}
-                              value={
-                                selectedElement.fontSize ??
-                                16
-                              }
-                              onChange={(event) =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    fontSize: Math.max(
-                                      8,
-                                      Math.min(
-                                        120,
-                                        Number(
-                                          event.target.value
-                                        )
-                                      )
-                                    ),
-                                  }
-                                )
-                              }
-                              className="min-w-0 flex-1 bg-transparent text-center text-sm font-black text-white outline-none"
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    fontSize: Math.min(
-                                      120,
-                                      (selectedElement.fontSize ??
-                                        16) + 1
-                                    ),
-                                  }
-                                )
-                              }
-                              className="h-7 w-7 rounded-lg border border-white/10 bg-white/[0.04] text-sm font-black text-zinc-400 hover:text-white"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-
-                        <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Weight
-                          </span>
-
-                          <select
-                            value={
-                              selectedElement.fontWeight ??
-                              700
-                            }
-                            onChange={(event) =>
-                              updateElement(
-                                selectedElement.id,
-                                {
-                                  fontWeight: Number(
-                                    event.target.value
-                                  ),
-                                }
-                              )
-                            }
-                            className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
-                          >
-                            <option value={300}>
-                              Light
-                            </option>
-                            <option value={400}>
-                              Regular
-                            </option>
-                            <option value={500}>
-                              Medium
-                            </option>
-                            <option value={700}>
-                              Bold
-                            </option>
-                            <option value={900}>
-                              Black
-                            </option>
-                          </select>
-                        </label>
-                      </div>
-
-                      {/* Weight presets */}
-                      <div className="grid grid-cols-5 gap-1">
-                        {(
-                          [
-                            [300, "L"],
-                            [400, "R"],
-                            [500, "M"],
-                            [700, "B"],
-                            [900, "X"],
-                          ] as const
-                        ).map(([value, label]) => (
-                          <button
-                            key={value}
-                            type="button"
-                            onClick={() =>
-                              updateElement(
-                                selectedElement.id,
-                                {
-                                  fontWeight: value,
-                                }
-                              )
-                            }
-                            className={`rounded-lg border py-2 text-[9px] font-black ${
-                              (selectedElement.fontWeight ??
-                                700) === value
-                                ? "border-yellow-400/50 bg-yellow-400/[0.08] text-yellow-300"
-                                : "border-white/10 bg-white/[0.02] text-zinc-600 hover:text-zinc-300"
-                            }`}
-                            title={
-                              value === 300
-                                ? "Light"
-                                : value === 400
-                                ? "Regular"
-                                : value === 500
-                                ? "Medium"
-                                : value === 700
-                                ? "Bold"
-                                : "Black"
-                            }
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Color + opacity */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Color
-                          </span>
-
-                          <div className="mt-2 flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={
-                                /^#[0-9A-Fa-f]{6}$/.test(
-                                  selectedElement.color ??
-                                    "#ffffff"
-                                )
-                                  ? selectedElement.color ??
-                                    "#ffffff"
-                                  : "#ffffff"
-                              }
-                              onChange={(event) =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    color:
-                                      event.target.value,
-                                  }
-                                )
-                              }
-                              className="h-8 w-10 cursor-pointer rounded-lg border border-white/10 bg-transparent"
-                            />
-
-                            <span className="truncate text-[10px] font-bold text-zinc-400">
-                              {selectedElement.color ??
-                                "#ffffff"}
-                            </span>
-                          </div>
-                        </label>
-
-                        <label className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                          <span className="block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Opacity
-                          </span>
-
-                          <div className="mt-2 flex items-center gap-2">
-                            <input
-                              type="range"
-                              min={0}
-                              max={1}
-                              step={0.05}
-                              value={
-                                selectedElement.opacity ??
-                                1
-                              }
-                              onChange={(event) =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    opacity: Number(
-                                      event.target.value
-                                    ),
-                                  }
-                                )
-                              }
-                              className="min-w-0 flex-1 accent-yellow-400"
-                            />
-
-                            <span className="w-8 text-right text-[9px] font-black text-zinc-500">
-                              {Math.round(
-                                (selectedElement.opacity ??
-                                  1) * 100
-                              )}
-                              %
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-
-                      {/* Alignment */}
-                      <div>
-                        <span className="mb-2 block text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                          Alignment
-                        </span>
-
-                        <div className="grid grid-cols-3 gap-2">
-                          {(
-                            [
-                              ["left", "←"],
-                              ["center", "↔"],
-                              ["right", "→"],
-                            ] as const
-                          ).map(([value, label]) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() =>
-                                updateElement(
-                                  selectedElement.id,
-                                  {
-                                    align: value,
-                                  }
-                                )
-                              }
-                              className={`rounded-xl border py-2.5 text-sm font-black ${
-                                (selectedElement.align ??
-                                  "center") === value
-                                  ? "border-yellow-400/50 bg-yellow-400/[0.08] text-yellow-300"
-                                  : "border-white/10 bg-white/[0.02] text-zinc-600 hover:text-zinc-300"
-                              }`}
-                              title={
-                                value === "left"
-                                  ? "Align left"
-                                  : value === "center"
-                                  ? "Align center"
-                                  : "Align right"
-                              }
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Line height */}
-                      <label className="block rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Line Height
-                          </span>
-
-                          <span className="text-[9px] font-black text-zinc-500">
-                            {(
-                              selectedElement.lineHeight ??
-                              1.15
-                            ).toFixed(2)}
-                          </span>
-                        </div>
-
-                        <input
-                          type="range"
-                          min={0.8}
-                          max={2}
-                          step={0.05}
-                          value={
-                            selectedElement.lineHeight ??
-                            1.15
-                          }
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                lineHeight: Number(
-                                  event.target.value
-                                ),
-                              }
-                            )
-                          }
-                          className="mt-2 w-full accent-yellow-400"
-                        />
-                      </label>
-
-                      {/* Letter spacing */}
-                      <label className="block rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600">
-                            Letter Spacing
-                          </span>
-
-                          <span className="text-[9px] font-black text-zinc-500">
-                            {(
-                              selectedElement.letterSpacing ??
-                              0
-                            ).toFixed(1)}
-                            px
-                          </span>
-                        </div>
-
-                        <input
-                          type="range"
-                          min={-4}
-                          max={12}
-                          step={0.5}
-                          value={
-                            selectedElement.letterSpacing ??
-                            0
-                          }
-                          onChange={(event) =>
-                            updateElement(
-                              selectedElement.id,
-                              {
-                                letterSpacing: Number(
-                                  event.target.value
-                                ),
-                              }
-                            )
-                          }
-                          className="mt-2 w-full accent-yellow-400"
-                        />
-                      </label>
-                    </div>
-                  </>
-                ) : null}
+                <p className="mt-2 max-w-[230px] text-sm leading-6 text-[var(--mn-text-muted)]">
+                  Select an element on the canvas or use a tool to start
+                  designing.
+                </p>
 
                 <button
                   type="button"
-                  onClick={deleteSelectedElement}
-                  className="w-full rounded-xl border border-red-400/15 bg-red-400/[0.04] py-2.5 text-[10px] font-black uppercase tracking-wider text-red-400 transition hover:bg-red-400/[0.08]"
+                  onClick={() => {
+                    setPanel("ai");
+                    setTool("ai");
+                  }}
+                  className="mt-6 rounded-[1.25rem] border border-[var(--mn-border)] px-4 py-3 text-sm text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
                 >
-                  Delete selected element
+                  ✦ Open AI Assistant
                 </button>
-              </div>
-            ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-white/10 px-3 py-4 text-center text-[10px] font-bold text-zinc-700">
-                Select an element from the preview.
               </div>
             )}
           </div>
+        </aside>
+      </main>
 
-          {/* NAME */}
-          <label className="hidden">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                Your name
-              </span>
+      {/* PREVIEW */}
+      {preview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-transparent/90 p-6 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => setPreview(false)}
+            className="absolute right-5 top-5 rounded-full border border-[var(--mn-border-strong)] px-4 py-2 text-sm text-[var(--mn-text-secondary)] hover:text-[var(--mn-text)]"
+          >
+            Close
+          </button>
 
-              <span className="text-[10px] text-zinc-600">
-                {customerName.length}/120
-              </span>
-            </div>
+          <div
+            className="relative overflow-hidden shadow-[var(--mn-shadow-lg)]"
+            style={{
+              width: 360,
+              height: 456,
+              background: design.background || "#ffffff",
+            }}
+          >
+            {design.elements.map((element) => {
+              const scale = 360 / CANVAS_WIDTH;
 
-            <input
-              value={customerName}
-              maxLength={120}
-              onChange={(event) =>
-                setCustomerName(event.target.value)
-              }
-              placeholder="Enter your name"
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400/50"
-            />
-          </label>
+              const style: CSSProperties = {
+                position: "absolute",
+                left: element.x * scale,
+                top: element.y * scale,
+                width: element.width * scale,
+                height: element.height * scale,
+                transform: `rotate(${element.rotation}deg)`,
+                opacity: element.opacity,
+              };
 
-          {/* QUOTE */}
-          <label className="hidden">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                Text / quote
-              </span>
-
-              <span className="text-[10px] text-zinc-600">
-                {customerText.length}/120
-              </span>
-            </div>
-
-            <textarea
-              value={customerText}
-              maxLength={120}
-              rows={4}
-              onChange={(event) =>
-                setCustomerText(event.target.value)
-              }
-              placeholder="Write something meaningful..."
-              className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm leading-6 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400/50"
-            />
-          </label>
-
-          {/* AI GENERATION */}
-          {customization.creationMethod === "ai" &&
-          activeEditorTool === "ai" ? (
-            <div id="custom-cover-ai-tools">
-            <div className="rounded-xl border border-yellow-400/15 bg-yellow-400/[0.025] p-3">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-xs font-black uppercase tracking-wider text-yellow-300">
-                    Create with AI
-                  </div>
-
-                  <p className="mt-1 text-xs leading-5 text-zinc-600">
-                    Describe the visual style, mood, subject, and
-                    atmosphere you want on your notebook cover.
-                  </p>
-                </div>
-
-                <span className="rounded-full border border-yellow-400/20 bg-yellow-400/[0.06] px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-yellow-300">
-                  {customization.aiBudget.remaining} generations remaining
-                </span>
-              </div>
-
-              <div className="mt-4">
-                <label className="block">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                      Describe your cover
-                    </span>
-
-                    <span className="text-[10px] text-zinc-600">
-                      {aiPrompt.length}/1000
-                    </span>
-                  </div>
-
-                  <textarea
-                    value={aiPrompt}
-                    maxLength={1000}
-                    rows={5}
-                    onChange={(event) =>
-                      setAiPrompt(event.target.value)
-                    }
-                    placeholder="Example: A dark anime swordsman standing beneath a red moon, dramatic cinematic lighting, deep shadows, premium notebook artwork..."
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm leading-6 text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400/50"
-                  />
-                </label>
-              </div>
-
-              <div className="mt-4">
-                <label className="block">
-                  <div className="mb-2">
-                    <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                      Avoid
-                    </span>
-                  </div>
-
-                  <input
-                    value={aiNegativePrompt}
-                    maxLength={1000}
-                    onChange={(event) =>
-                      setAiNegativePrompt(event.target.value)
-                    }
-                    placeholder="Optional: blurry, low quality, distorted..."
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-yellow-400/50"
-                  />
-                </label>
-              </div>
-
-              <div className="mt-4">
-                <div className="mb-2 text-xs font-black uppercase tracking-wider text-zinc-300">
-                  Generate for
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                  {(
-                    [
-                      ["front", "Front Cover"],
-                      ["insideFront", "Inside Front"],
-                      ["back", "Back Cover"],
-                      ["insideBack", "Inside Back"],
-                      ["all", "All 4"],
-                    ] as const
-                  ).map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() =>
-                        setAiTargetSides(value)
-                      }
-                      disabled={generatingAi}
-                      className={`rounded-xl border px-3 py-3 text-xs font-black transition ${
-                        aiTargetSides === value
-                          ? "border-yellow-400/60 bg-yellow-400/[0.10] text-yellow-300"
-                          : "border-white/10 bg-white/[0.025] text-zinc-500 hover:border-white/20 hover:text-white"
-                      } disabled:cursor-not-allowed disabled:opacity-50`}
+              return (
+                <div key={element.id} style={style}>
+                  {element.type === "text" && (
+                    <div
+                      className="flex h-full w-full items-center justify-center break-words"
+                      style={{
+                        fontSize: (element.fontSize ?? 42) * scale,
+                        fontWeight: element.fontWeight,
+                        color: element.color,
+                        textAlign: element.textAlign,
+                        lineHeight: element.lineHeight ?? 1.2,
+                        letterSpacing: `${element.letterSpacing ?? 0}px`,
+                      }}
                     >
-                      {label}
-                    </button>
-                  ))}
+                      {element.text}
+                    </div>
+                  )}
+
+                  {element.type === "image" && element.src && (
+                    <img
+                      src={element.src}
+                      alt=""
+                      className="h-full w-full"
+                      style={{
+                        objectFit: element.objectFit ?? "contain",
+                        borderRadius:
+                          (element.borderRadius ?? 0) * scale,
+                        transform: `translate(${
+                          (element.imageOffsetX ?? 0) * scale
+                        }px, ${
+                          (element.imageOffsetY ?? 0) * scale
+                        }px) scale(${element.imageScale ?? 1})`,
+                        transformOrigin: "center center",
+                      }}
+                    />
+                  )}
+
+                  {element.type === "shape" && (
+                    <div
+                      className="h-full w-full"
+                      style={{
+                        background: element.fill,
+                        borderRadius:
+                          element.shape === "circle"
+                            ? "50%"
+                            : (element.borderRadius ?? 0) * scale,
+                      }}
+                    />
+                  )}
                 </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={generateWithAi}
-                disabled={
-                  generatingAi ||
-                  !aiPrompt.trim()
-                }
-                className="mt-4 w-full rounded-2xl bg-yellow-400 px-5 py-4 text-sm font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {generatingAi
-                  ? "Creating your cover..."
-                  : generationNumber === 2
-                    ? "Generate Again ✨"
-                    : "Generate with AI ✨"}
-              </button>
-
-              {generationMessage ? (
-                <p
-                  className={`mt-3 text-center text-[10px] font-bold ${
-                    generationMessage.includes("✓")
-                      ? "text-emerald-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {generationMessage}
-                </p>
-              ) : null}
-
-              <div className="mt-3 flex items-center justify-between text-[9px] leading-4 text-zinc-700">
-                <span>
-                  {generationNumber
-                    ? `Generation ${generationNumber}/7 used`
-                    : "Up to 7 AI generations included"}
-                </span>
-
-                <span>
-                  AI artwork contains no system branding.
-                </span>
-              </div>
-            </div>
-            </div>
-          ) : null}
-
-          {/* UPLOAD ARTWORK */}
-          <div
-            className={`rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 ${
-              activeEditorTool === "image" ? "" : "hidden"
-            }`}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                  Your artwork
-                </div>
-
-                <p className="mt-1 text-xs leading-5 text-zinc-600">
-                  Upload your own artwork to any of the four cover surfaces.
-                </p>
-              </div>
-
-              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-zinc-500">
-                PNG · JPG · WEBP
-              </span>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={handleUpload}
-            />
-
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {(
-                [
-                  ["front", "Front Cover"],
-                  ["insideFront", "Inside Front"],
-                  ["back", "Back Cover"],
-                  ["insideBack", "Inside Back"],
-                ] as const
-              ).map(([surface, label]) => (
-                <button
-                  key={surface}
-                  type="button"
-                  onClick={() => openUpload(surface)}
-                  disabled={uploadingSide !== null}
-                  className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 text-xs font-black text-white transition hover:border-yellow-400/40 disabled:opacity-50"
-                >
-                  {uploadingSide === surface
-                    ? "Uploading..."
-                    : assets.some((asset) => asset.side === surface)
-                      ? `Replace ${label}`
-                      : `Upload ${label}`}
-                </button>
-              ))}
-            </div>
-
-            {uploadedAssetForSide ? (
-              <div className="mt-3 flex items-center justify-between rounded-xl border border-emerald-400/10 bg-emerald-400/[0.04] px-3 py-2.5">
-                <div className="text-[10px] font-bold text-emerald-400">
-                  {getCoverSideLabel(side)} artwork active ✓
-                </div>
-
-                <div className="text-[9px] text-zinc-600">
-                  {uploadedAssetForSide.width}×{uploadedAssetForSide.height}
-                </div>
-              </div>
-            ) : null}
-
-            {uploadMessage ? (
-              <p
-                className={`mt-3 text-center text-[10px] font-bold ${
-                  uploadMessage.includes("✓")
-                    ? "text-emerald-400"
-                    : "text-red-400"
-                }`}
-              >
-                {uploadMessage}
-              </p>
-            ) : null}
-
-            <p className="mt-3 text-[9px] leading-4 text-zinc-700">
-              15 MB max · 600×800 minimum · private
-            </p>
-          </div>
-
-          {/* TEMPLATE */}
-          <div
-            id="custom-cover-style-tools"
-            className={activeEditorTool === "style" ? "" : "hidden"}
-          >
-            <div className="mb-3">
-              <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                Choose template
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {(
-                Object.entries(templates) as [
-                  TemplateId,
-                  (typeof templates)[TemplateId]
-                ][]
-              ).map(([id, item]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => {
-                    setTemplateId(id);
-                    setDesignElements((current) => ({
-                      ...current,
-                      [side]: current[side] ?? [],
-                    }));
-                  }}
-                  className={`rounded-2xl border p-3 text-left transition ${
-                    templateId === id
-                      ? "border-yellow-400/60 bg-yellow-400/[0.08]"
-                      : "border-white/10 bg-white/[0.025] hover:border-white/20"
-                  }`}
-                >
-                  <div className="text-lg">{item.emoji}</div>
-
-                  <div className="mt-2 text-xs font-black text-white">
-                    {item.label}
-                  </div>
-
-                  <div className="mt-1 text-[10px] leading-4 text-zinc-600">
-                    Template style
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* BRANDING */}
-          <div className="hidden rounded-2xl border border-white/10 bg-white/[0.025] p-4">
-            <div className="text-xs font-black uppercase tracking-wider text-zinc-300">
-              System branding
-            </div>
-
-            <div className="mt-3 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-bold text-white">
-                  MineNote
-                </div>
-
-                <div className="mt-1 text-xs text-zinc-600">
-                  Applied automatically to your cover.
-                </div>
-              </div>
-
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
-                Locked ✓
-              </span>
-            </div>
-          </div>
-
-          {/* CREATION METHOD */}
-          <div className="hidden rounded-2xl border border-white/10 bg-white/[0.025] p-4">
-            <div className="text-[10px] font-black uppercase tracking-wider text-zinc-600">
-              Creation method
-            </div>
-
-            <div className="mt-2 text-sm font-bold capitalize text-white">
-              {customization.creationMethod}
-            </div>
-
-            <p className="mt-1 text-xs leading-5 text-zinc-600">
-              Template styling is active in this editor foundation.
-            </p>
-          </div>
-
-          <div className="text-center text-[9px] font-black uppercase tracking-[0.16em] text-zinc-700">
-            Status · {approving ? "Approving..." : customization.status}
+              );
+            })}
           </div>
         </div>
-      </section>
+      )}
     </div>
   );
 }

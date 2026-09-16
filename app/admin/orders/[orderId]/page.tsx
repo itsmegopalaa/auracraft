@@ -58,7 +58,7 @@ export default async function AdminOrderDetailPage({
                   hint: error.hint,
                 },
                 null,
-                2
+                2,
               )}
             </pre>
           </div>
@@ -74,10 +74,18 @@ export default async function AdminOrderDetailPage({
   const { data: shipment } = await supabase
     .from("shipments")
     .select(
-      "id, status, courier_name, awb, tracking_url, label_url, shipping_charge, product_printed, cover_verified, notebook_assembled, quality_checked, packed, handed_over, checklist_updated_at"
+      "id, status, courier_name, awb, tracking_url, label_url, shipping_charge",
     )
-    .eq("order_id", order.order_id)
+    .eq("order_id", order.id)
     .maybeSingle();
+
+  const productionChecklist = {
+    product_printed: Boolean(order.product_printed),
+    cover_verified: Boolean(order.cover_verified),
+    notebook_assembled: Boolean(order.notebook_assembled),
+    quality_checked: Boolean(order.quality_checked),
+    packed: Boolean(order.packed),
+  };
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 sm:py-8 md:px-8">
@@ -85,14 +93,14 @@ export default async function AdminOrderDetailPage({
         <div className="mb-6 sm:mb-8">
           <Link
             href="/admin/orders"
-            className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:text-zinc-100"
+            className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
           >
             ← Back to orders
           </Link>
 
           <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-xl font-bold sm:text-2xl text-zinc-900 dark:text-zinc-100 sm:text-3xl">
+              <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-3xl">
                 {order.order_id}
               </h1>
 
@@ -101,7 +109,7 @@ export default async function AdminOrderDetailPage({
               </p>
             </div>
 
-            <span className="w-fit rounded-full bg-zinc-100 dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <span className="w-fit rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium capitalize text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
               {order.order_status}
             </span>
           </div>
@@ -113,20 +121,17 @@ export default async function AdminOrderDetailPage({
               Customer
             </h2>
 
-            <div className="mt-5 space-y-3 text-sm">
+            <div className="mt-5 space-y-3 text-sm text-zinc-700 dark:text-zinc-300">
               <p>
-                <span className="font-medium">Name:</span>{" "}
-                {order.name}
+                <span className="font-medium">Name:</span> {order.name}
               </p>
 
               <p>
-                <span className="font-medium">Email:</span>{" "}
-                {order.email}
+                <span className="font-medium">Email:</span> {order.email}
               </p>
 
               <p>
-                <span className="font-medium">Phone:</span>{" "}
-                {order.phone}
+                <span className="font-medium">Phone:</span> {order.phone}
               </p>
             </div>
           </section>
@@ -144,7 +149,7 @@ export default async function AdminOrderDetailPage({
               <p>PIN: {order.pin}</p>
             </div>
 
-            <p className="mt-4 text-sm">
+            <p className="mt-4 text-sm text-zinc-700 dark:text-zinc-300">
               <span className="font-medium">Delivery:</span>{" "}
               {order.delivery}
             </p>
@@ -155,7 +160,7 @@ export default async function AdminOrderDetailPage({
               Payment
             </h2>
 
-            <div className="mt-5 space-y-3 text-sm">
+            <div className="mt-5 space-y-3 text-sm text-zinc-700 dark:text-zinc-300">
               <p>
                 <span className="font-medium">Method:</span>{" "}
                 {order.payment_method}
@@ -167,24 +172,19 @@ export default async function AdminOrderDetailPage({
               </p>
 
               <p>
-                <span className="font-medium">Total:</span>{" "}
-                ₹{order.total}
+                <span className="font-medium">Total:</span> ₹{order.total}
               </p>
 
               {order.razorpay_order_id && (
                 <p className="break-all">
-                  <span className="font-medium">
-                    Razorpay Order:
-                  </span>{" "}
+                  <span className="font-medium">Razorpay Order:</span>{" "}
                   {order.razorpay_order_id}
                 </p>
               )}
 
               {order.razorpay_payment_id && (
                 <p className="break-all">
-                  <span className="font-medium">
-                    Razorpay Payment:
-                  </span>{" "}
+                  <span className="font-medium">Razorpay Payment:</span>{" "}
                   {order.razorpay_payment_id}
                 </p>
               )}
@@ -209,7 +209,7 @@ export default async function AdminOrderDetailPage({
               {order.order_status}
             </p>
 
-            <div className="mt-5 border-t border-zinc-100 dark:border-zinc-800 pt-5">
+            <div className="mt-5 border-t border-zinc-100 pt-5 dark:border-zinc-800">
               <OrderStatusForm
                 orderId={order.order_id}
                 currentStatus={order.order_status}
@@ -221,11 +221,33 @@ export default async function AdminOrderDetailPage({
         <section className="mt-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mt-6 sm:p-6">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Fulfillment
+              Production
             </h2>
 
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Automated shipping and production workflow.
+              Complete the physical production steps. Shipping starts
+              automatically after production is complete.
+            </p>
+          </div>
+
+          <div className="mt-6">
+            <ProductionChecklist
+              orderId={order.order_id}
+              shipmentStatus={shipment?.status ?? null}
+              checklist={productionChecklist}
+            />
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mt-6 sm:p-6">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Shipping
+            </h2>
+
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              Courier shipment is created automatically after production is
+              complete.
             </p>
           </div>
 
@@ -296,30 +318,17 @@ export default async function AdminOrderDetailPage({
                   </a>
                 </div>
               )}
-
-              <div className="mt-6 border-t border-zinc-100 pt-6 dark:border-zinc-800">
-                <ProductionChecklist
-                  orderId={order.order_id}
-                  shipmentStatus={shipment.status}
-                  checklist={{
-                    product_printed: shipment.product_printed,
-                    cover_verified: shipment.cover_verified,
-                    notebook_assembled: shipment.notebook_assembled,
-                    quality_checked: shipment.quality_checked,
-                    packed: shipment.packed,
-                    handed_over: shipment.handed_over,
-                  }}
-                />
-              </div>
             </>
           ) : (
             <div className="mt-5 rounded-xl border border-dashed border-zinc-300 p-5 dark:border-zinc-700">
               <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Automated shipment not created yet.
+                Shipment not created yet.
               </p>
+
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                The system will create the shipment automatically after the
-                order passes payment and shipping validation.
+                This is expected while production is still in progress.
+                Once all five production steps are complete, shipping
+                automation will attempt to create the courier shipment.
               </p>
             </div>
           )}
@@ -350,55 +359,60 @@ export default async function AdminOrderDetailPage({
 
             <span className="text-sm text-zinc-500 dark:text-zinc-400">
               {Array.isArray(order.items) ? order.items.length : 0} item
-              {Array.isArray(order.items) && order.items.length === 1 ? "" : "s"}
+              {Array.isArray(order.items) && order.items.length === 1
+                ? ""
+                : "s"}
             </span>
           </div>
 
-          <div className="mt-5 divide-y divide-zinc-100">
+          <div className="mt-5 divide-y divide-zinc-100 dark:divide-zinc-800">
             {Array.isArray(order.items) && order.items.length > 0 ? (
-              order.items.map((item: {
-                id: number;
-                name: string;
-                price: number;
-                quantity: number;
-                image: string;
-              }) => {
-                const lineTotal = Number(item.price) * Number(item.quantity);
+              order.items.map(
+                (item: {
+                  id: number;
+                  name: string;
+                  price: number;
+                  quantity: number;
+                  image: string;
+                }) => {
+                  const lineTotal =
+                    Number(item.price) * Number(item.quantity);
 
-                return (
-                  <div
-                    key={item.id}
-                    className="flex gap-3 py-4 first:pt-0 last:pb-0 sm:gap-4 sm:py-5"
-                  >
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 sm:h-20 sm:w-20">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className="h-full w-full object-cover"
-                      />
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex gap-3 py-4 first:pt-0 last:pb-0 sm:gap-4 sm:py-5"
+                    >
+                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 sm:h-20 sm:w-20">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          {item.name}
+                        </h3>
+
+                        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                          ₹{Number(item.price).toLocaleString("en-IN")} ×{" "}
+                          {item.quantity}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0 text-right">
+                        <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          ₹{lineTotal.toLocaleString("en-IN")}
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                        {item.name}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                        ₹{Number(item.price).toLocaleString("en-IN")} ×{" "}
-                        {item.quantity}
-                      </p>
-                    </div>
-
-                    <div className="shrink-0 text-right">
-                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                        ₹{lineTotal.toLocaleString("en-IN")}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
+                  );
+                },
+              )
             ) : (
               <p className="py-5 text-sm text-zinc-500 dark:text-zinc-400">
                 No item details available.

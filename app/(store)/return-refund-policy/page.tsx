@@ -10,9 +10,9 @@ export default function ReturnRefundPolicyPage() {
   return (
     <>
 
-      <main className="min-h-screen bg-black px-6 py-20 text-white">
+      <main className="min-h-screen bg-[var(--mn-bg)] px-6 py-[clamp(5rem,8vw,7.5rem)] text-[var(--mn-text)]">
         <article className="mx-auto max-w-4xl">
-          <p className="text-sm font-semibold text-yellow-400">
+          <p className="text-sm font-semibold text-[var(--mn-accent)]">
             MineNote — a brand by AuraCraft
           </p>
 
@@ -20,13 +20,13 @@ export default function ReturnRefundPolicyPage() {
             Return & Refund Policy
           </h1>
 
-          <p className="mt-5 text-gray-400">
+          <p className="mt-5 text-[var(--mn-text-muted)]">
             We want every MineNote order to arrive as expected.
           </p>
 
-          <div className="mt-12 space-y-10 text-gray-300">
+          <div className="mt-12 space-y-10 text-[var(--mn-text-secondary)]">
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Order Cancellation
               </h2>
               <p className="mt-3 leading-8">
@@ -37,7 +37,7 @@ export default function ReturnRefundPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Damaged Products
               </h2>
               <p className="mt-3 leading-8">
@@ -50,7 +50,7 @@ export default function ReturnRefundPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Incorrect Product
               </h2>
               <p className="mt-3 leading-8">
@@ -63,7 +63,7 @@ export default function ReturnRefundPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Change of Mind
               </h2>
               <p className="mt-3 leading-8">
@@ -74,7 +74,7 @@ export default function ReturnRefundPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Refund Processing
               </h2>
               <p className="mt-3 leading-8">
@@ -87,7 +87,7 @@ export default function ReturnRefundPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Claim Verification
               </h2>
               <p className="mt-3 leading-8">
@@ -99,7 +99,7 @@ export default function ReturnRefundPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--mn-text)]">
                 Contact Us
               </h2>
               <p className="mt-3 leading-8">

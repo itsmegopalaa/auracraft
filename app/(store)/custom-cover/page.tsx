@@ -43,13 +43,13 @@ export default async function CustomCoverPage({
 
   if (productId && !isUuid(productId)) {
     return (
-      <main className="min-h-screen bg-black px-4 py-20 text-white">
+      <main className="min-h-screen bg-[var(--mn-bg)] px-4 py-[clamp(5rem,8vw,7.5rem)] text-[var(--mn-text)]">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-yellow-400">Custom Cover</p>
+          <p className="text-[var(--mn-accent)]">Custom Cover</p>
           <h1 className="mt-4 text-4xl font-black">
             Invalid notebook selection
           </h1>
-          <p className="mt-4 text-zinc-500">
+          <p className="mt-4 text-[var(--mn-text-muted)]">
             Please choose a valid MineNote notebook and try again.
           </p>
         </div>
@@ -67,13 +67,13 @@ export default async function CustomCoverPage({
     console.error("CUSTOM COVER PRODUCT LOOKUP ERROR:", error);
 
     return (
-      <main className="min-h-screen bg-black px-4 py-20 text-white">
+      <main className="min-h-screen bg-[var(--mn-bg)] px-4 py-[clamp(5rem,8vw,7.5rem)] text-[var(--mn-text)]">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-yellow-400">MineNote</p>
+          <p className="text-[var(--mn-accent)]">MineNote</p>
           <h1 className="mt-4 text-4xl font-black">
             Unable to load notebooks
           </h1>
-          <p className="mt-4 text-zinc-500">
+          <p className="mt-4 text-[var(--mn-text-muted)]">
             Please refresh the page and try again.
           </p>
         </div>
@@ -90,13 +90,13 @@ export default async function CustomCoverPage({
 
   if (productId && !selectedProduct) {
     return (
-      <main className="min-h-screen bg-black px-4 py-20 text-white">
+      <main className="min-h-screen bg-[var(--mn-bg)] px-4 py-[clamp(5rem,8vw,7.5rem)] text-[var(--mn-text)]">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-yellow-400">Custom Cover</p>
+          <p className="text-[var(--mn-accent)]">Custom Cover</p>
           <h1 className="mt-4 text-4xl font-black">
             Notebook unavailable
           </h1>
-          <p className="mt-4 text-zinc-500">
+          <p className="mt-4 text-[var(--mn-text-muted)]">
             This notebook is no longer available for customization.
           </p>
         </div>
@@ -116,8 +116,8 @@ export default async function CustomCoverPage({
     <main
       className={
         selectedProduct
-          ? "min-h-0 bg-black text-white"
-          : "min-h-screen bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24"
+          ? "min-h-0 bg-[var(--mn-bg)] text-[var(--mn-text)]"
+          : "min-h-screen bg-[var(--mn-bg)] px-4 py-16 text-[var(--mn-text)] sm:px-5 lg:px-6 sm:py-[clamp(5rem,8vw,7.5rem)] lg:py-[clamp(5rem,8vw,8rem)]"
       }
     >
       <section
@@ -130,12 +130,12 @@ export default async function CustomCoverPage({
         {!selectedProduct && (
           <div className="mb-10 max-w-4xl">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/[0.07] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-400">
+            <span className="inline-flex rounded-full border border-[var(--mn-accent)]/20 bg-[var(--mn-accent-soft)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)]">
               ✨ Custom Creation Studio
             </span>
 
             {!selectedProduct && (
-              <span className="inline-flex rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
+              <span className="inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-text-secondary)]">
                 Create Your Own
               </span>
             )}
@@ -145,17 +145,17 @@ export default async function CustomCoverPage({
             {selectedProduct ? (
               <>
                 Make it{" "}
-                <span className="text-yellow-400">yours.</span>
+                <span className="text-[var(--mn-accent)]">yours.</span>
               </>
             ) : (
               <>
                 Create something{" "}
-                <span className="text-yellow-400">original.</span>
+                <span className="text-[var(--mn-accent)]">original.</span>
               </>
             )}
           </h1>
 
-          <p className="mt-5 max-w-3xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
+          <p className="mt-5 max-w-3xl text-base leading-7 text-[var(--mn-text-secondary)] sm:text-lg sm:leading-8">
             {selectedProduct
               ? "Personalise this MineNote notebook with your own front and back cover."
               : "Start with a blank idea, choose your physical notebook, and create a cover that does not have to look like anything else in our catalogue."}
@@ -164,27 +164,27 @@ export default async function CustomCoverPage({
         )}
 
         {!selectedProduct && (
-          <div className="mb-8 rounded-[2rem] border border-yellow-400/20 bg-yellow-400/[0.045] p-5 sm:p-7">
+          <div className="mb-8 rounded-[2rem] border border-[var(--mn-accent)]/20 bg-[var(--mn-accent-soft)] p-5 sm:p-7">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-yellow-400">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)]">
                   🔥 Your design. Your rules.
                 </p>
 
-                <h2 className="mt-2 text-xl font-black text-white sm:text-2xl">
+                <h2 className="mt-2 text-xl font-black text-[var(--mn-text)] sm:text-2xl">
                   Nothing from the catalogue is required.
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--mn-text-secondary)]">
                   The catalogue only contains ready-made products.
                   Your custom creation remains private unless you
                   explicitly give MineNote permission to publish it.
                 </p>
               </div>
 
-              <div className="shrink-0 rounded-2xl border border-white/[0.08] bg-black/40 px-5 py-4 text-center">
+              <div className="shrink-0 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)]/40 px-5 py-4 text-center">
                 <p className="text-2xl">🔒</p>
-                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500">
+                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--mn-text-muted)]">
                   Private by default
                 </p>
               </div>

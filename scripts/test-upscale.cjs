@@ -1,5 +1,3 @@
-const sharp = require("sharp");
-
 const SOURCE_WIDTH = 1240;
 const SOURCE_HEIGHT = 1754;
 
@@ -7,6 +5,8 @@ const TARGET_WIDTH = 2480;
 const TARGET_HEIGHT = 3508;
 
 async function main() {
+  const { default: sharp } = await import("sharp");
+
   console.log("===== SOURCE =====");
 
   const source = await sharp({

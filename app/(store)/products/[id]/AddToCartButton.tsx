@@ -49,14 +49,14 @@ export default function AddToCartButton({ product }: Props) {
         className="
           flex-1
           rounded-full
-          bg-yellow-400
+          bg-[var(--mn-accent)]
           px-5
           py-4
           font-bold
-          text-black
+          text-[var(--mn-accent-contrast)]
           transition
           hover:scale-[1.02]
-          hover:bg-yellow-300
+          hover:bg-[var(--mn-accent-hover)]
         "
       >
         Add to Cart 🛒
@@ -68,14 +68,14 @@ export default function AddToCartButton({ product }: Props) {
           flex-1
           rounded-full
           border
-          border-yellow-400
+          border-[var(--mn-accent)]
           px-5
           py-4
           font-bold
-          text-yellow-400
+          text-[var(--mn-accent)]
           transition
-          hover:bg-yellow-400
-          hover:text-black
+          hover:bg-[var(--mn-accent)]
+          hover:text-[var(--mn-accent-contrast)]
         "
       >
         Buy Now ⚡

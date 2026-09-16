@@ -8,7 +8,8 @@ import type {
 } from "./provider";
 
 export type CreateShipmentInput = {
-  orderId: string;
+  orderUuid: string;
+  orderNumber: string;
   address: ShippingAddress;
   items: ShippingOrderItem[];
   package: ShippingPackage;
@@ -78,7 +79,7 @@ export async function createShipment(input: CreateShipmentInput) {
       .select(
         "id, status, shipment_id, awb, retry_count"
       )
-      .eq("order_id", input.orderId)
+      .eq("order_id", input.orderUuid)
       .maybeSingle();
 
   if (existingError) {
@@ -144,7 +145,7 @@ export async function createShipment(input: CreateShipmentInput) {
       await supabase
         .from("shipments")
         .insert({
-          order_id: input.orderId,
+          order_id: input.orderUuid,
           provider: provider.name,
           status: "creating",
           weight_grams: input.package.weight_grams,
@@ -176,7 +177,7 @@ export async function createShipment(input: CreateShipmentInput) {
   try {
     const pushed = await provider.createShipment(
       {
-        order_id: input.orderId,
+        order_id: input.orderNumber,
         origin_pin:
           process.env.SHIPMOZO_PICKUP_PIN || "",
         destination: input.address,
@@ -315,7 +316,7 @@ export async function createShipment(input: CreateShipmentInput) {
       console.error(
         "SHIPMENT LABEL GENERATION FAILED:",
         {
-          orderId: input.orderId,
+          orderId: input.orderNumber,
           awb: finalAwb,
           error:
             labelError instanceof Error
@@ -331,7 +332,7 @@ export async function createShipment(input: CreateShipmentInput) {
           console.error(
             "INITIAL TRACKING SYNC FAILED:",
             {
-              orderId: input.orderId,
+              orderId: input.orderNumber,
               awb: finalAwb,
               error:
                 trackingError instanceof Error
@@ -387,7 +388,7 @@ export async function createShipment(input: CreateShipmentInput) {
           tracking_url:
             finalShipment.tracking_url,
         })
-        .eq("order_id", input.orderId);
+        .eq("order_id", input.orderNumber);
 
     if (orderLinkError) {
       throw new Error(

@@ -134,15 +134,6 @@ function readUint32BE(bytes: Uint8Array, offset: number): number {
   );
 }
 
-function readUint32LE(bytes: Uint8Array, offset: number): number {
-  return (
-    bytes[offset] +
-    bytes[offset + 1] * 0x100 +
-    bytes[offset + 2] * 0x10000 +
-    bytes[offset + 3] * 0x1000000
-  );
-}
-
 function detectPng(bytes: Uint8Array): DetectedImage | null {
   if (
     bytes.length < 24 ||

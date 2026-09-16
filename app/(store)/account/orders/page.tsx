@@ -55,14 +55,14 @@ function statusClasses(status: string | null) {
       return "border-blue-400/20 bg-blue-400/10 text-blue-300";
 
     case "cancelled":
-      return "border-red-400/20 bg-red-400/10 text-red-300";
+      return "border-[color-mix(in_srgb,var(--mn-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_10%,var(--mn-surface))] text-[var(--mn-danger)]";
 
     case "confirmed":
     case "processing":
-      return "border-yellow-400/20 bg-yellow-400/10 text-yellow-300";
+      return "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]";
 
     default:
-      return "border-zinc-700 bg-zinc-800 text-zinc-300";
+      return "border-[var(--mn-border-strong)] bg-[var(--mn-surface-soft)] text-[var(--mn-text-secondary)]";
   }
 }
 
@@ -127,29 +127,29 @@ export default async function AccountOrdersPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-black px-4 py-10 text-white sm:px-6 sm:py-14 md:py-20">
+    <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-10 text-[var(--mn-text)] sm:px-6 sm:py-14 md:py-[clamp(5rem,8vw,7.5rem)]">
       <div className="mx-auto w-full max-w-5xl">
         {/* Header */}
-        <div className="flex flex-col gap-5 border-b border-white/[0.06] pb-7 sm:gap-6 sm:pb-8 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-5 border-b border-[var(--mn-border)] pb-7 sm:gap-[var(--mn-space-card)] sm:pb-8 md:flex-row md:items-end md:justify-between">
           <div>
             <Link
               href="/account"
-              className="text-sm font-semibold text-yellow-400 transition hover:text-yellow-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="text-sm font-semibold text-[var(--mn-accent)] transition hover:text-[var(--mn-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
             >
               ← Back to My Account
             </Link>
 
             <div className="mt-4 flex flex-wrap items-center gap-3 sm:mt-5">
-              <h1 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+              <h1 className="mn-h2 tracking-tight sm:text-4xl md:text-5xl">
                 My Orders
               </h1>
 
-              <span className="rounded-full border border-white/[0.07] bg-zinc-900 px-4 min-h-10 py-1 text-xs font-bold text-zinc-500">
+              <span className="rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 min-h-10 py-1 text-xs font-bold text-[var(--mn-text-muted)]">
                 {customerOrders.length}
               </span>
             </div>
 
-            <p className="mt-2.5 max-w-xl text-sm leading-6 text-zinc-500 sm:mt-3 sm:text-base">
+            <p className="mt-2.5 max-w-xl text-sm leading-6 text-[var(--mn-text-muted)] sm:mt-3 sm:text-base">
               View your MineNote order history, payment details, and
               shipment progress.
             </p>
@@ -158,14 +158,14 @@ export default async function AccountOrdersPage() {
           <div className="grid w-full gap-3 sm:flex sm:w-auto sm:flex-row">
             <Link
               href="/track-order"
-              className="rounded-2xl border border-white/[0.08] bg-zinc-950 px-5 py-3 text-center text-sm font-bold text-zinc-300 transition hover:-translate-y-0.5 hover:border-yellow-400/30 hover:text-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] px-5 py-3 text-center text-sm font-bold text-[var(--mn-text-secondary)] transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
             >
               🔎 Track as Guest
             </Link>
 
             <Link
               href="/products"
-              className="rounded-2xl bg-yellow-400 px-5 py-3 text-center text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="rounded-[1.5rem] bg-[var(--mn-accent)] px-5 py-3 text-center text-sm font-black text-[var(--mn-accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
             >
               Continue Shopping →
             </Link>
@@ -174,37 +174,37 @@ export default async function AccountOrdersPage() {
 
         {/* Error */}
         {error ? (
-          <div className="mt-6 rounded-3xl border border-red-500/20 bg-red-950/20 p-5 sm:mt-8 sm:p-7">
+          <div className="mt-6 rounded-3xl border border-[color-mix(in_srgb,var(--mn-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--mn-danger)_8%,var(--mn-surface))] p-5 sm:mt-8 sm:p-7">
             <div className="text-3xl">⚠️</div>
 
             <h2 className="mt-4 text-xl font-black">
               Unable to load your orders
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-red-200/60">
+            <p className="mt-2 text-sm leading-6 text-[var(--mn-danger)]">
               Something went wrong while loading your order history.
               Please try again later.
             </p>
           </div>
         ) : customerOrders.length === 0 ? (
           /* Empty State */
-          <div className="mt-6 rounded-3xl border border-white/[0.07] bg-zinc-900 p-6 text-center sm:mt-8 sm:p-10 md:p-12">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-black text-4xl">
+          <div className="mt-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-[var(--mn-space-card)] text-center sm:mt-8 sm:p-10 md:p-12">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--mn-bg)] text-4xl">
               📦
             </div>
 
-            <h2 className="mt-6 text-2xl font-black">
+            <h2 className="mt-6 mn-h3">
               No orders yet
             </h2>
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-zinc-500">
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--mn-text-muted)]">
               Your MineNote purchases will appear here after you
               place your first order.
             </p>
 
             <Link
               href="/products"
-              className="mt-7 inline-flex rounded-2xl bg-yellow-400 px-6 py-3.5 font-black text-black transition hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="mt-7 inline-flex rounded-[1.5rem] bg-[var(--mn-accent)] px-6 py-3.5 font-black text-[var(--mn-accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
             >
               Explore Notebooks →
             </Link>
@@ -242,26 +242,26 @@ export default async function AccountOrdersPage() {
               return (
                 <article
                   key={order.order_id}
-                  className="overflow-hidden rounded-3xl border border-white/[0.07] bg-zinc-900 transition duration-300 hover:border-yellow-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="overflow-hidden rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] transition duration-300 hover:border-[var(--mn-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                 >
                   {/* Order Header */}
-                  <div className="flex flex-col gap-3 border-b border-white/[0.06] p-4 sm:gap-4 sm:p-6 md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-col gap-3 border-b border-[var(--mn-border)] p-4 sm:gap-4 sm:p-[var(--mn-space-card)] md:flex-row md:items-center md:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-3">
-                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-600">
+                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--mn-text-muted)]">
                           Order
                         </p>
 
-                        <span className="text-xs text-zinc-700">
+                        <span className="text-xs text-[var(--mn-text-muted)]">
                           •
                         </span>
 
-                        <p className="text-[13px] text-zinc-400">
+                        <p className="text-[13px] text-[var(--mn-text-secondary)]">
                           {formatDate(order.created_at)}
                         </p>
                       </div>
 
-                      <h2 className="mt-1 break-all text-lg font-black text-yellow-400 sm:text-xl">
+                      <h2 className="mt-1 break-all text-lg font-black text-[var(--mn-accent)] sm:text-xl">
                         {order.order_id}
                       </h2>
                     </div>
@@ -280,9 +280,9 @@ export default async function AccountOrdersPage() {
                   </div>
 
                   {/* Product Preview */}
-                  <div className="p-4 sm:p-6">
+                  <div className="p-4 sm:p-[var(--mn-space-card)]">
                     <div className="flex gap-3 sm:gap-4">
-                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/[0.06] bg-black sm:h-24 sm:w-24">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)] sm:h-24 sm:w-24">
                         <Image
                           src={firstImage}
                           alt={firstName}
@@ -293,15 +293,15 @@ export default async function AccountOrdersPage() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-600">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--mn-text-muted)]">
                           Products
                         </p>
 
-                        <h3 className="mt-1 truncate font-bold text-white">
+                        <h3 className="mt-1 truncate font-bold text-[var(--mn-text)]">
                           {firstName}
                         </h3>
 
-                        <p className="mt-1 text-[15px] text-zinc-400">
+                        <p className="mt-1 text-[15px] text-[var(--mn-text-secondary)]">
                           {itemCount}{" "}
                           {itemCount === 1 ? "item" : "items"}
                           {items.length > 1
@@ -310,7 +310,7 @@ export default async function AccountOrdersPage() {
                         </p>
 
                         {items.length > 1 && (
-                          <p className="mt-2 text-xs text-zinc-600">
+                          <p className="mt-2 text-xs text-[var(--mn-text-muted)]">
                             + {items.length - 1} more{" "}
                             {items.length - 1 === 1
                               ? "design"
@@ -320,11 +320,11 @@ export default async function AccountOrdersPage() {
                       </div>
 
                       <div className="hidden text-right sm:block">
-                        <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                        <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
                           Total
                         </p>
 
-                        <p className="mt-1 text-xl font-black text-yellow-400">
+                        <p className="mt-1 text-xl font-black text-[var(--mn-accent)]">
                           ₹
                           {Number(order.total).toLocaleString(
                             "en-IN"
@@ -334,12 +334,12 @@ export default async function AccountOrdersPage() {
                     </div>
 
                     {/* Mobile Total */}
-                    <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/[0.05] bg-black px-4 py-3 sm:hidden">
-                      <span className="text-sm font-semibold text-zinc-500">
+                    <div className="mt-5 flex items-center justify-between rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)] px-4 py-3 sm:hidden">
+                      <span className="text-sm font-semibold text-[var(--mn-text-muted)]">
                         Order Total
                       </span>
 
-                      <span className="font-black text-yellow-400">
+                      <span className="font-black text-[var(--mn-accent)]">
                         ₹
                         {Number(order.total).toLocaleString(
                           "en-IN"
@@ -349,38 +349,38 @@ export default async function AccountOrdersPage() {
 
                     {/* Info */}
                     <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3">
-                      <div className="rounded-2xl border border-white/[0.04] bg-black p-4">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                      <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)] p-4">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)]">
                           Payment
                         </p>
 
-                        <p className="mt-1 text-sm font-bold text-zinc-200">
+                        <p className="mt-1 text-sm font-bold text-[var(--mn-text-secondary)]">
                           {order.payment_method === "COD"
                             ? "Cash on Delivery"
                             : "Online Payment"}
                         </p>
 
-                        <p className="mt-1 text-[12px] capitalize text-zinc-400">
+                        <p className="mt-1 text-[12px] capitalize text-[var(--mn-text-secondary)]">
                           {order.payment_status ?? "pending"}
                         </p>
                       </div>
 
-                      <div className="rounded-2xl border border-white/[0.04] bg-black p-4">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                      <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)] p-4">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)]">
                           Delivery
                         </p>
 
-                        <p className="mt-1 text-sm font-bold text-zinc-200">
+                        <p className="mt-1 text-sm font-bold text-[var(--mn-text-secondary)]">
                           {order.delivery ?? "—"}
                         </p>
                       </div>
 
-                      <div className="rounded-2xl border border-white/[0.04] bg-black p-4">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                      <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)] p-4">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)]">
                           Shipment
                         </p>
 
-                        <p className="mt-1 text-sm font-bold text-zinc-200">
+                        <p className="mt-1 text-sm font-bold text-[var(--mn-text-secondary)]">
                           {hasShipment
                             ? "Tracking available"
                             : "Not shipped yet"}
@@ -390,13 +390,13 @@ export default async function AccountOrdersPage() {
 
                     {/* Shipment */}
                     {hasShipment && (
-                      <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-blue-400/10 bg-blue-400/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                      <div className="mt-4 flex flex-col gap-3 rounded-[1.5rem] border border-blue-400/10 bg-blue-400/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                         <div className="min-w-0">
                           <p className="text-xs font-bold uppercase tracking-wider text-blue-300/70">
                             🚚 Shipment
                           </p>
 
-                          <p className="mt-1 truncate text-sm font-semibold text-zinc-300">
+                          <p className="mt-1 truncate text-sm font-semibold text-[var(--mn-text-secondary)]">
                             {order.shipping_partner ?? "Shipping Partner"}
                             {order.tracking_id
                               ? ` · ${order.tracking_id}`
@@ -409,7 +409,7 @@ export default async function AccountOrdersPage() {
                             href={order.tracking_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="shrink-0 text-sm font-bold text-yellow-400 transition hover:text-yellow-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            className="shrink-0 text-sm font-bold text-[var(--mn-accent)] transition hover:text-[var(--mn-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                           >
                             Track Shipment →
                           </a>
@@ -419,14 +419,14 @@ export default async function AccountOrdersPage() {
 
                     {/* Refund */}
                     {order.refund_status && (
-                      <div className="mt-4 rounded-2xl border border-emerald-400/10 bg-emerald-400/[0.04] p-4">
+                      <div className="mt-4 rounded-[1.5rem] border border-[color-mix(in_srgb,var(--mn-success)_10%,transparent)] bg-[color-mix(in_srgb,var(--mn-success)_4%,var(--mn-surface))] p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
-                            <p className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">
+                            <p className="text-xs font-bold uppercase tracking-wider text-[var(--mn-success)]">
                               ↩️ Refund
                             </p>
 
-                            <p className="mt-1 text-sm font-bold text-emerald-200">
+                            <p className="mt-1 text-sm font-bold text-[var(--mn-success)]">
                               {order.refund_status === "processed"
                                 ? "Refund Processed"
                                 : order.refund_status}
@@ -434,7 +434,7 @@ export default async function AccountOrdersPage() {
                           </div>
 
                           {order.refund_amount != null && (
-                            <p className="text-sm font-black text-emerald-300">
+                            <p className="text-sm font-black text-[var(--mn-success)]">
                               ₹
                               {Number(
                                 order.refund_amount
@@ -445,7 +445,7 @@ export default async function AccountOrdersPage() {
                         </div>
 
                         {order.refund_processed_at && (
-                          <p className="mt-2 text-xs text-emerald-200/50">
+                          <p className="mt-2 text-xs text-[var(--mn-success)]/50">
                             Processed on{" "}
                             {formatDate(order.refund_processed_at)}
                           </p>
@@ -459,7 +459,7 @@ export default async function AccountOrdersPage() {
                         href={`/track-order?orderId=${encodeURIComponent(
                           order.order_id
                         )}`}
-                        className="rounded-2xl border border-white/[0.08] bg-black px-5 py-3 text-center text-sm font-bold text-zinc-300 transition hover:-translate-y-0.5 hover:border-yellow-400/30 hover:text-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)] px-5 py-3 text-center text-sm font-bold text-[var(--mn-text-secondary)] transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                       >
                         View Tracking
                       </Link>
@@ -468,7 +468,7 @@ export default async function AccountOrdersPage() {
                         href={`/account/orders/${encodeURIComponent(
                           order.order_id
                         )}`}
-                        className="rounded-2xl bg-yellow-400 px-5 py-3 text-center text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        className="rounded-[1.5rem] bg-[var(--mn-accent)] px-5 py-3 text-center text-sm font-black text-[var(--mn-accent-contrast)] transition hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                       >
                         View Order →
                       </Link>
@@ -480,7 +480,7 @@ export default async function AccountOrdersPage() {
           </div>
         )}
 
-        <p className="mt-6 px-4 text-center text-xs leading-5 text-zinc-700 sm:mt-8">
+        <p className="mt-6 px-4 text-center text-xs leading-5 text-[var(--mn-text-muted)] sm:mt-8">
           Need help with an order? Keep your Order ID ready when
           contacting MineNote support.
         </p>

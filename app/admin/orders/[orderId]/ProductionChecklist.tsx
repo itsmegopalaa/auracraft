@@ -9,7 +9,6 @@ type Checklist = {
   notebook_assembled: boolean;
   quality_checked: boolean;
   packed: boolean;
-  handed_over: boolean;
 };
 
 type Props = {
@@ -27,7 +26,6 @@ const ITEMS: {
   { field: "notebook_assembled", label: "Notebook assembled" },
   { field: "quality_checked", label: "Quality checked" },
   { field: "packed", label: "Packed" },
-  { field: "handed_over", label: "Parcel handed over" },
 ];
 
 export default function ProductionChecklist({
@@ -59,14 +57,14 @@ export default function ProductionChecklist({
             field,
             value: nextValue,
           }),
-        }
+        },
       );
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
         throw new Error(
-          result.error || "Unable to update production checklist."
+          result.error || "Unable to update production checklist.",
         );
       }
 
@@ -80,25 +78,18 @@ export default function ProductionChecklist({
       setMessage(
         error instanceof Error
           ? error.message
-          : "Unable to update production checklist."
+          : "Unable to update production checklist.",
       );
     } finally {
       setLoadingField(null);
     }
   }
 
-  const completed = ITEMS.filter(({ field }) => checklist[field]).length;
-  const productionFields: (keyof Checklist)[] = [
-    "product_printed",
-    "cover_verified",
-    "notebook_assembled",
-    "quality_checked",
-    "packed",
-  ];
-  const productionCompleted = productionFields.filter(
-    (field) => checklist[field]
+  const productionCompleted = ITEMS.filter(
+    ({ field }) => checklist[field],
   ).length;
-  const allComplete = productionCompleted === productionFields.length;
+
+  const allComplete = productionCompleted === ITEMS.length;
 
   return (
     <div>
@@ -109,12 +100,18 @@ export default function ProductionChecklist({
           </h3>
 
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {productionCompleted} of {productionFields.length} production steps completed
+            {productionCompleted} of {ITEMS.length} production steps completed
           </p>
         </div>
 
-        <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          Shipment: {shipmentStatus ?? "Not created"}
+        <span
+          className={`text-sm font-medium ${
+            allComplete
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-zinc-500 dark:text-zinc-400"
+          }`}
+        >
+          {allComplete ? "Production complete" : "Production in progress"}
         </span>
       </div>
 
@@ -160,10 +157,15 @@ export default function ProductionChecklist({
           <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Production complete ✓
           </p>
+
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            All production steps are complete. The parcel can now be handed
-            over to the courier.
+            All five production steps are complete. Shipping automation can
+            now create the courier shipment.
           </p>
+
+          <div className="mt-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Shipping: {shipmentStatus ?? "Preparing automatically"}
+          </div>
         </div>
       )}
 

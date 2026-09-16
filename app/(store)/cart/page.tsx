@@ -28,34 +28,34 @@ item.quantity
   return (
   <>
 
-    <main className="min-h-screen overflow-x-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24">
+    <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-16 text-[var(--mn-text)] sm:px-6 sm:py-20 lg:py-[clamp(4rem,8vw,7rem)]">
       <div className="mx-auto max-w-5xl">
 
 
         <h1 className="mb-8 text-4xl font-black tracking-tight sm:mb-12 sm:text-5xl">
-          Your <span className="text-yellow-400">Cart</span>
+          Your <span className="text-[var(--mn-accent)]">Cart</span>
         </h1>
 
 
         {cart.length === 0 ? (
 
-  <div className="rounded-[2rem] border border-white/[0.08] bg-zinc-950 p-8 text-center shadow-2xl shadow-black/20 sm:p-12">
+  <div className="rounded-[2rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-8 text-center shadow-[var(--mn-shadow-lg)] sm:p-10 lg:p-12">
 
     <div className="mb-5 text-5xl sm:mb-6 sm:text-6xl">
       🛒
     </div>
 
-    <h2 className="text-2xl font-black sm:text-3xl">
+    <h2 className="mn-h3">
       Your cart is empty
     </h2>
 
-    <p className="mt-4 text-gray-400">
+    <p className="mt-4 text-[var(--mn-text-secondary)]">
       Looks like you haven&apos;t added anything yet.
     </p>
 
     <Link
       href="/products"
-      className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-yellow-400 px-8 py-4 font-black text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--mn-accent)] px-8 py-4 font-black text-[var(--mn-accent-contrast)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
     >
       Explore Products →
     </Link>
@@ -76,23 +76,23 @@ flex-col
 gap-5
 rounded-[2rem]
 border
-border-white/[0.08]
-bg-zinc-950
+border-[var(--mn-border)]
+bg-[var(--mn-surface)]
 p-4
-shadow-xl
-shadow-black/10
+shadow-[var(--mn-shadow-sm)]
+shadow-[var(--mn-shadow-sm)]
 transition-all
 duration-300
-hover:border-yellow-400/25
+hover:border-[var(--mn-border-strong)]
 sm:p-6
 md:flex-row
 md:items-center
 md:justify-between
- focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+ focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
               >
 
 
-                <div className="flex min-w-0 items-center gap-4 sm:gap-6">
+                <div className="flex min-w-0 items-center gap-4 sm:gap-5 md:gap-6">
 
                  <Link href={`/products/${item.id}`}>
   <Image
@@ -100,7 +100,7 @@ md:justify-between
     alt={item.name}
     width={120}
     height={160}
-    className="h-28 w-20 shrink-0 rounded-2xl object-cover transition duration-300 hover:scale-[1.03] sm:h-32 sm:w-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+    className="h-28 w-20 shrink-0 rounded-2xl object-cover transition duration-300 hover:scale-[1.03] sm:h-32 sm:w-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
   />
 </Link>
 
@@ -108,18 +108,18 @@ md:justify-between
                   <div>
 
                    <Link href={`/products/${item.id}`}>
-  <h2 className="text-lg font-black leading-tight transition hover:text-yellow-400 sm:text-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+  <h2 className="text-lg font-black leading-tight transition hover:text-[var(--mn-accent)] sm:text-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]">
     {item.name}
   </h2>
 </Link>
 
 
-                    <p className="mt-2 text-lg font-bold text-yellow-400 sm:text-xl">
+                    <p className="mt-2 text-lg font-bold text-[var(--mn-accent)] sm:text-xl">
                      ₹{item.price}
                     </p>
 
 
-                    <div className="mt-4 flex items-center gap-3 sm:gap-4">
+                    <div className="mt-4 flex items-center gap-3 sm:gap-4 md:gap-5">
 
                      <button
   onClick={() =>
@@ -127,12 +127,12 @@ md:justify-between
   }
   className="
     flex h-10 w-10 items-center justify-center rounded-full
-    bg-zinc-800
+    bg-[var(--mn-control-bg)]
     text-xl font-bold
     transition-all duration-200
-    hover:bg-zinc-700
+    hover:bg-[var(--mn-control-hover)]
     active:scale-95
-   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
 >
   -
 </button>
@@ -148,12 +148,12 @@ md:justify-between
   }
   className="
     flex h-10 w-10 items-center justify-center rounded-full
-    bg-yellow-400
-    text-xl font-black text-black
+    bg-[var(--mn-accent)]
+    text-xl font-black text-[var(--mn-accent-contrast)]
     transition-all duration-200
-    hover:bg-yellow-300
+    hover:bg-[var(--mn-accent-hover)]
     active:scale-95
-   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
 >
   +
 </button>
@@ -173,17 +173,17 @@ md:justify-between
                   }
                  className="
   w-full rounded-2xl
-  border border-red-500/30
+  border border-[color-mix(in_srgb,var(--mn-danger)_30%,transparent)]
   px-5 py-3
   text-sm font-bold
-  text-red-400
+  text-[var(--mn-danger)]
   transition-all duration-200
-  hover:border-red-500
-  hover:bg-red-500
-  hover:text-white
+  hover:border-[var(--mn-danger)]
+  hover:bg-[var(--mn-danger)]
+  hover:text-[var(--mn-text)]
   active:scale-[0.98]
   md:w-auto
- focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+ focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
                 >
                   Remove
                 </button>
@@ -195,49 +195,49 @@ md:justify-between
 
 
 
-           <div className="mt-8 rounded-[2rem] border border-yellow-400/15 bg-zinc-950 p-6 shadow-2xl shadow-black/20 sm:mt-10 sm:p-8">
+           <div className="mt-8 rounded-[1.5rem] border border-[var(--mn-accent)] bg-[var(--mn-surface)] p-6 shadow-[var(--mn-shadow-lg)] sm:mt-10 sm:p-8">
 
-  <h2 className="text-2xl font-black sm:text-3xl">
+  <h2 className="mn-h3">
     Order Summary
   </h2>
 
-  <div className="mt-6 flex justify-between text-gray-400">
+  <div className="mt-6 flex justify-between text-[var(--mn-text-secondary)]">
     <span>Subtotal</span>
     <span>₹{total}</span>
   </div>
-<div className="mt-4 flex justify-between text-gray-400">
+<div className="mt-4 flex justify-between text-[var(--mn-text-secondary)]">
   <span>Delivery</span>
   <span className="text-green-400">
     FREE
   </span>
 </div>
 
-<div className="mt-4 flex justify-between text-gray-400">
-  <span>Premium Packaging</span>
+<div className="mt-4 flex justify-between text-[var(--mn-text-secondary)]">
+  <span>Premium packaging</span>
   <span className="text-green-400">
     FREE
   </span>
 </div>
-  <div className="my-6 border-t border-zinc-700"></div>
+  <div className="my-6 border-t border-[var(--mn-border-strong)]"></div>
 
   <div className="flex items-end justify-between gap-4 text-2xl font-black">
     <span>Total</span>
-    <span className="text-yellow-400">
+    <span className="text-[var(--mn-accent)]">
       ₹{total}
     </span>
   </div>
 
  <Link href="/checkout">
-  <button className="mt-8 flex w-full items-center justify-center rounded-2xl bg-yellow-400 py-4 font-black text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+  <button className="mt-8 flex w-full items-center justify-center rounded-2xl bg-[var(--mn-accent)] py-4 font-black text-[var(--mn-accent-contrast)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]">
     Proceed to Checkout →
   </button>
 </Link>
 
 <Link
   href="/products"
-  className="mt-3 block w-full rounded-2xl border border-yellow-400/50 py-4 text-center font-bold text-yellow-400 transition-all duration-300 hover:border-yellow-400 hover:bg-yellow-400 hover:text-black sm:mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+  className="mt-3 block w-full rounded-2xl border border-[var(--mn-accent)] py-4 text-center font-bold text-[var(--mn-accent)] transition-all duration-300 hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent)] hover:text-[var(--mn-accent-contrast)] sm:mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
 >
-  ← Continue Shopping
+  ← Continue Exploring
 </Link>
 
 </div>

@@ -206,12 +206,12 @@ export default async function ProductPage({
         }}
       />
 
-      <main className="min-h-screen overflow-x-hidden bg-black px-4 py-16 text-white sm:px-6 sm:py-20 lg:py-24">
+      <main className="min-h-screen overflow-x-hidden bg-[var(--mn-bg)] px-4 py-16 text-[var(--mn-text)] sm:px-6 sm:py-20 lg:py-24">
         <section className="mx-auto grid max-w-7xl items-start gap-10 md:grid-cols-2 lg:gap-16">
           {/* Gallery */}
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-zinc-950 p-4 shadow-2xl shadow-black/20 sm:p-6 lg:p-8">
+          <div className="relative overflow-hidden rounded-[2rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-[var(--mn-shadow-lg)] sm:p-6 lg:p-8">
             {typedProduct.bestseller && (
-              <span className="pointer-events-none absolute left-4 top-4 z-30 inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-yellow-200/70 bg-yellow-400 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-xl shadow-yellow-400/20 sm:left-6 sm:top-6 sm:px-5 sm:py-2.5 sm:text-sm">
+              <span className="pointer-events-none absolute left-4 top-4 z-30 inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-[var(--mn-accent)] bg-[var(--mn-accent)] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] sm:left-6 sm:top-6 sm:px-5 sm:py-2.5 sm:text-sm">
                 🔥 BEST SELLER
               </span>
             )}
@@ -226,31 +226,31 @@ export default async function ProductPage({
           <div className="flex flex-col">
             {/* Category */}
             <div>
-              <span className="inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/[0.07] px-4 min-h-10 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-yellow-400 sm:px-4 sm:py-2 sm:text-[10px]">
+              <span className="inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent)]/[0.07] px-4 min-h-10 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)] sm:px-4 sm:py-2 sm:text-[10px]">
                 {typedProduct.category}
               </span>
             </div>
 
             {/* Title */}
-            <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.045em] text-white sm:mt-6 sm:text-5xl lg:text-6xl">
+            <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[var(--mn-text)] sm:mt-6 sm:text-5xl lg:text-6xl">
               {typedProduct.name}
             </h1>
 
             {/* Rating + availability */}
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-4">
               <div className="flex items-center gap-2">
-                <span className="text-lg text-yellow-400">
+                <span className="text-lg text-[var(--mn-accent)]">
                   ★
                 </span>
 
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-[var(--mn-text)]">
                   {productRating?.effective_rating?.toFixed(1) ??
                     typedProduct.rating ??
                     "—"}
                 </span>
 
                 {productRating && productRating.review_count > 0 && (
-                  <span className="text-sm text-zinc-500">
+                  <span className="text-sm text-[var(--mn-text-muted)]">
                     ({productRating.review_count}{" "}
                     {productRating.review_count === 1
                       ? "review"
@@ -260,15 +260,15 @@ export default async function ProductPage({
               </div>
 
               <span
-                className="hidden h-1 w-1 rounded-full bg-zinc-700 sm:block"
+                className="hidden h-1 w-1 rounded-full bg-[var(--mn-border-strong)] sm:block"
                 aria-hidden="true"
               />
 
               <span
                 className={
                   typedProduct.stock > 0
-                    ? "text-sm font-medium text-emerald-400"
-                    : "text-sm font-medium text-red-400"
+                    ? "text-sm font-semibold text-[var(--mn-success)]"
+                    : "text-sm font-semibold text-[var(--mn-danger)]"
                 }
               >
                 {typedProduct.stock > 0
@@ -278,60 +278,60 @@ export default async function ProductPage({
             </div>
 
             {/* Price */}
-            <div className="mt-6 border-y border-white/[0.07] py-5 sm:mt-7 sm:py-6">
-              <p className="text-3xl font-black tracking-tight text-yellow-400 sm:text-4xl">
+            <div className="mt-6 border-y border-[var(--mn-border)] py-5 sm:mt-7 sm:py-6">
+              <p className="text-3xl font-black tracking-tight text-[var(--mn-accent)] sm:text-4xl">
                 ₹{typedProduct.price}
               </p>
 
-              <p className="mt-2 text-[12px] uppercase tracking-[0.13em] text-zinc-400">
+              <p className="mt-2 text-[12px] uppercase tracking-[0.13em] text-[var(--mn-text-secondary)]">
                 Premium MineNote notebook
               </p>
             </div>
 
             {/* Description */}
-            <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400 sm:mt-7 sm:text-lg sm:leading-8">
+            <p className="mt-6 max-w-xl text-base leading-7 text-[var(--mn-text-secondary)] sm:mt-7 sm:text-lg sm:leading-8">
               {typedProduct.description}
             </p>
 
             {/* Product Specs */}
             <div className="mt-7 sm:mt-8">
-              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--mn-text-secondary)]">
                 Product details
               </p>
 
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-yellow-400/25 hover:bg-yellow-400/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+                <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent)]/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]">
                   <div className="text-lg" aria-hidden="true">
                     📄
                   </div>
-                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)]">
                     Pages
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-white">
+                  <p className="mt-1 text-sm font-semibold text-[var(--mn-text)]">
                     {typedProduct.pages}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-yellow-400/25 hover:bg-yellow-400/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+                <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent)]/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]">
                   <div className="text-lg" aria-hidden="true">
                     📃
                   </div>
-                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)]">
                     Paper
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-white">
+                  <p className="mt-1 text-sm font-semibold text-[var(--mn-text)]">
                     {typedProduct.paper}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-yellow-400/25 hover:bg-yellow-400/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+                <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-3 text-center transition duration-300 hover:-translate-y-0.5 hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent)]/[0.03] sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]">
                   <div className="text-lg" aria-hidden="true">
                     📐
                   </div>
-                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-secondary)]">
                     Size
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-white">
+                  <p className="mt-1 text-sm font-semibold text-[var(--mn-text)]">
                     {typedProduct.size}
                   </p>
                 </div>
@@ -339,13 +339,13 @@ export default async function ProductPage({
             </div>
 
             {/* Custom Cover */}
-            <div className="mt-7 rounded-[1.5rem] border border-yellow-400/20 bg-yellow-400/[0.045] p-4 sm:mt-8 sm:p-5">
+            <div className="mt-7 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-accent)]/[0.045] p-4 sm:mt-8 sm:p-5">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-yellow-400">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--mn-accent)]">
                   ✨ Make it yours
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                <p className="mt-2 text-sm leading-6 text-[var(--mn-text-secondary)]">
                   Create a personalised front + back cover with AI,
                   your own design, or a MineNote template.
                 </p>
@@ -353,7 +353,7 @@ export default async function ProductPage({
 
               <a
                 href={`/custom-cover?productId=${typedProduct.id}`}
-                className="mt-4 flex w-full items-center justify-center rounded-full bg-yellow-400 px-5 py-4 text-sm font-black text-black transition hover:scale-[1.01] hover:bg-yellow-300"
+                className="mt-4 flex w-full items-center justify-center rounded-full bg-[var(--mn-accent)] px-5 py-4 text-sm font-black text-[var(--mn-accent-contrast)] transition hover:scale-[1.01] hover:bg-[var(--mn-accent-hover)]"
               >
                 Customise This Cover ✨
               </a>
@@ -391,12 +391,12 @@ export default async function ProductPage({
             </div>
 
             {/* Small reassurance */}
-            <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-[9px] font-bold uppercase tracking-[0.13em] text-zinc-600 sm:mt-6 sm:text-[10px]">
+            <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-[9px] font-bold uppercase tracking-[0.13em] text-[var(--mn-text-muted)] sm:mt-6 sm:text-[10px]">
               <span>Secure checkout</span>
               <span>•</span>
-              <span>Carefully packed</span>
+              <span>Carefully packed with care</span>
               <span>•</span>
-              <span>Made for Ideas</span>
+              <span>Designed for Ideas</span>
             </div>
           </div>
 
@@ -419,7 +419,7 @@ export default async function ProductPage({
         <section className="mx-auto mt-16 max-w-7xl sm:mt-20 lg:mt-24">
           <h2 className="mb-7 text-3xl font-black tracking-tight sm:mb-8 sm:text-4xl">
             You may also{" "}
-            <span className="text-yellow-400">
+            <span className="text-[var(--mn-accent)]">
               like
             </span>
           </h2>

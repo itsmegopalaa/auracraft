@@ -146,7 +146,7 @@ export type CustomCoverAiBudget = {
 export type CustomCoverCustomization = {
   id?: string;
   customerId?: string;
-  productId: string;
+  productId?: string | null;
   templateId?: string;
   creationMethod: CustomCoverCreationMethod;
   status: CustomCoverStatus;

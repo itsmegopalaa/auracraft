@@ -1,91 +1,127 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Footer from "@/app/components/Footer";
+
+type StartOption = "blank" | "existing";
+type Size = "A4" | "A5";
+type Paper = "plain" | "ruled" | "dotGrid";
 
 type Product = {
   id: string;
-  name: string;
-  price: number;
-  image?: string | null;
+  name?: string;
+  title?: string;
+  price?: number;
+  image?: string;
+  image_url?: string;
 };
 
 type Props = {
-  product: Product | null;
-  products: Product[];
+  product?: Product | null;
+  products?: Product[];
   createYourOwn?: boolean;
 };
 
-type StartOption = "blank" | "page-no" | "existing";
+const START_OPTIONS = [
+  {
+    id: "blank" as const,
+    title: "Blank Sheet",
+    description: "Start completely from scratch.",
+  },
+  {
+    id: "existing" as const,
+    title: "Existing Product",
+    description: "Customize a notebook from our catalogue.",
+  },
+];
+
+const SIZES = [
+  {
+    id: "A4" as const,
+    title: "A4",
+    meta: "210 × 297 mm",
+    badge: "Recommended",
+  },
+  {
+    id: "A5" as const,
+    title: "A5",
+    meta: "148 × 210 mm",
+  },
+];
+
+const PAGES = [100, 150, 200];
+
+const PAPERS = [
+  {
+    id: "plain" as const,
+    title: "Plain",
+    description: "Clean blank pages",
+  },
+  {
+    id: "ruled" as const,
+    title: "Ruled",
+    description: "Classic writing lines",
+  },
+  {
+    id: "dotGrid" as const,
+    title: "Dot Grid",
+    description: "Flexible creative layout",
+  },
+];
 
 export default function CustomCoverBuilder({
   product,
-  products,
-  createYourOwn = false,
+  products = [],
 }: Props) {
   const router = useRouter();
+  const productScrollRef = useRef<HTMLDivElement | null>(null);
 
-  const [selectedOption, setSelectedOption] = useState<StartOption | null>(
-    product ? "existing" : null
+  const [selectedOption, setSelectedOption] = useState<StartOption>(
+    product ? "existing" : "blank"
   );
+
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     product?.id ?? null
   );
-  const [pageCount, setPageCount] = useState("100");
-  const [customPageCount, setCustomPageCount] = useState("");
-  const [showAllProducts, setShowAllProducts] = useState(false);
+
+  const [size, setSize] = useState<Size>("A4");
+  const [pageCount, setPageCount] = useState(100);
+  const [paper, setPaper] = useState<Paper>("plain");
+  const [quantity, setQuantity] = useState(1);
+  const [bulkOrder, setBulkOrder] = useState(false);
+  const [bulkQuantity, setBulkQuantity] = useState("10");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  if (!createYourOwn && product) {
-    return (
-      <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center px-6 py-12">
-        <div className="w-full rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-control-bg)] p-8 text-[var(--mn-text)] shadow-[var(--mn-shadow-lg)]">
-          <p className="text-sm font-semibold text-[var(--mn-text)]/50">Customize</p>
-          <h1 className="mt-2 text-3xl font-bold">{product.name}</h1>
-          <p className="mt-2 text-[var(--mn-text)]/60">
-            Create a custom cover for this product.
-          </p>
+  const selectedProduct = useMemo(
+    () =>
+      products.find((item) => item.id === selectedProductId) ??
+      product ??
+      null,
+    [products, selectedProductId, product]
+  );
 
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                `/custom-cover?productId=${encodeURIComponent(product.id)}`
-              )
-            }
-            className="mt-8 rounded-[1.25rem] bg-[var(--mn-accent)] px-5 py-3 font-semibold text-[var(--mn-accent-contrast)] transition hover:opacity-90"
-          >
-            Continue to Cover Editor →
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const productName =
+    selectedProduct?.name ?? selectedProduct?.title ?? "Blank notebook";
 
-  const previewProducts = products.slice(0, 4);
+  const scrollProducts = (direction: "left" | "right") => {
+    const container = productScrollRef.current;
 
-  const selectedProduct =
-    products.find((item) => item.id === selectedProductId) ?? null;
+    if (!container) return;
 
-  const chooseOption = (option: StartOption) => {
-    setSelectedOption(option);
-    setError("");
-
-    if (option === "existing") {
-      setShowAllProducts(false);
-    }
+    container.scrollBy({
+      left: direction === "left" ? -320 : 320,
+      behavior: "smooth",
+    });
   };
 
-  const chooseProduct = (productId: string) => {
-    setSelectedProductId(productId);
-    setError("");
+  const handleProductSelect = (item: Product) => {
+    setSelectedProductId(item.id);
+    setSelectedOption("existing");
   };
 
-  const createCustomization = async () => {
-    if (!selectedOption || creating) return;
-
+  const handleContinue = async () => {
     setCreating(true);
     setError("");
 
@@ -97,14 +133,15 @@ export default function CustomCoverBuilder({
         },
         body: JSON.stringify({
           productId: selectedProductId,
-          ...(selectedOption === "page-no"
-            ? {
-                pageCount:
-                  pageCount === "custom"
-                    ? Number(customPageCount) || 100
-                    : Number(pageCount),
-              }
-            : {}),
+          creationMethod: "upload",
+          size,
+          pages: pageCount,
+          paper,
+          orientation: "portrait",
+          quantity: bulkOrder
+            ? Math.max(2, Number(bulkQuantity) || 2)
+            : quantity,
+          bulkOrder,
         }),
       });
 
@@ -112,7 +149,7 @@ export default function CustomCoverBuilder({
 
       if (!response.ok || !data?.customization?.id) {
         throw new Error(
-          data?.error || "Unable to start your custom cover."
+          data?.error || "Unable to create your customization."
         );
       }
 
@@ -121,289 +158,317 @@ export default function CustomCoverBuilder({
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to start your custom cover."
+          : "Something went wrong. Please try again."
       );
       setCreating(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100dvh-4rem)] bg-[var(--mn-bg)] px-5 py-10 text-[var(--mn-text)]">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-10 text-center">
-          <p className="text-sm font-semibold tracking-wide text-[var(--mn-text)]/45">
-            ✨ Create Your Own
+    <main className="min-h-screen bg-[var(--mn-bg)] text-[var(--mn-text)]">
+      {/* HERO */}
+      <section className="border-b border-[var(--mn-border)]">
+        <div className="mn-container-wide mx-auto px-5 pb-11 pt-14 sm:px-6 lg:pb-13 lg:pt-18">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--mn-accent)]">
+            MineNote · Custom Creation Studio
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            Where do you want to start?
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--mn-text)]/55 sm:text-base">
-            Choose one starting point. Nothing else is required here.
-          </p>
-        </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Blank Sheet */}
-          <button
-            type="button"
-            onClick={() => chooseOption("blank")}
-            className={`rounded-3xl border p-[var(--mn-space-card)] text-left transition ${
-              selectedOption === "blank"
-                ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
-                : "border-[var(--mn-border)] bg-[var(--mn-control-bg)] hover:border-[var(--mn-border-strong)] hover:bg-[var(--mn-control-hover)]"
-            }`}
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-[1.5rem] bg-[var(--mn-control-hover)] text-2xl">
-              📄
-            </div>
-            <h2 className="mt-5 text-xl font-semibold">Blank Sheet</h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--mn-text)]/50">
-              Start completely from scratch.
+          <div className="max-w-3xl">
+            <h1 className="font-[var(--mn-font-display)] text-[clamp(2.35rem,5vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.045em]">
+              Create something that’s yours.
+            </h1>
+
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--mn-text-secondary)] sm:text-lg">
+              Build a notebook around your ideas, identity and imagination.
             </p>
-          </button>
-
-          {/* Page No. */}
-          <button
-            type="button"
-            onClick={() => chooseOption("page-no")}
-            className={`rounded-3xl border p-[var(--mn-space-card)] text-left transition ${
-              selectedOption === "page-no"
-                ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
-                : "border-[var(--mn-border)] bg-[var(--mn-control-bg)] hover:border-[var(--mn-border-strong)] hover:bg-[var(--mn-control-hover)]"
-            }`}
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-[1.5rem] bg-[var(--mn-control-hover)] text-2xl">
-              🔢
-            </div>
-            <h2 className="mt-5 text-xl font-semibold">Page No.</h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--mn-text)]/50">
-              Start with a page-number setup.
-            </p>
-          </button>
-
-          {/* Existing Product */}
-          <div
-            className={`rounded-3xl border p-[var(--mn-space-card)] transition ${
-              selectedOption === "existing"
-                ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
-                : "border-[var(--mn-border)] bg-[var(--mn-control-bg)]"
-            }`}
-          >
-            <button
-              type="button"
-              onClick={() => chooseOption("existing")}
-              className="w-full text-left"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-[1.5rem] bg-[var(--mn-control-hover)] text-2xl">
-                🎨
-              </div>
-              <h2 className="mt-5 text-xl font-semibold">
-                Existing Product
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--mn-text)]/50">
-                Customize one of our existing notebooks.
-              </p>
-            </button>
-
-            <div className="mt-5 flex items-center gap-2">
-              {previewProducts.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedOption("existing");
-                    chooseProduct(item.id);
-                  }}
-                  className={`h-12 w-10 overflow-hidden rounded-lg border transition ${
-                    selectedProductId === item.id
-                      ? "border-[var(--mn-accent)]"
-                      : "border-[var(--mn-border)] hover:border-[var(--mn-border-strong)]"
-                  }`}
-                  title={item.name}
-                >
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-full items-center justify-center text-lg">
-                      📓
-                    </span>
-                  )}
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedOption("existing");
-                  setShowAllProducts((value) => !value);
-                }}
-                className="ml-auto text-xs font-semibold text-[var(--mn-text)]/60 transition hover:text-[var(--mn-text)]"
-              >
-                {showAllProducts ? "Hide" : "View All"} →
-              </button>
-            </div>
-
-            {showAllProducts && (
-              <div className="mt-4 max-h-64 space-y-2 overflow-y-auto pr-1">
-                {products.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => chooseProduct(item.id)}
-                    className={`flex w-full items-center gap-3 rounded-[1.25rem] border p-2 text-left transition ${
-                      selectedProductId === item.id
-                        ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
-                        : "border-[var(--mn-border)] hover:bg-[var(--mn-control-hover)]"
-                    }`}
-                  >
-                    <div className="h-12 w-10 shrink-0 overflow-hidden rounded-lg bg-[var(--mn-control-hover)]">
-                      {item.image ? (
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="flex h-full items-center justify-center">
-                          📓
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">
-                        {item.name}
-                      </p>
-                      <p className="text-xs text-[var(--mn-text)]/40">
-                        ₹{item.price}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
+      </section>
 
-        {selectedOption && (
-          <section className="mt-8 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-control-bg)] p-[var(--mn-space-card)] sm:p-7 lg:p-8">
-            {selectedOption === "page-no" && (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--mn-text)]/35">
-                  Page No.
-                </p>
-                <h2 className="mt-2 text-xl font-semibold">
-                  Number of Pages
-                </h2>
-                <p className="mt-1 text-sm text-[var(--mn-text)]/50">
-                  Choose how many numbered pages you want.
-                </p>
+      <div className="mn-container-wide mx-auto px-5 py-10 sm:px-6 lg:py-13">
+        {/* 01 */}
+        <section>
+          <SectionHeading number="01" title="Start with" />
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-4">
-                  {["100", "150", "200", "custom"].map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setPageCount(option)}
-                      className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
-                        pageCount === option
-                          ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
-                          : "border-[var(--mn-border)] bg-[var(--mn-control-bg)] hover:border-[var(--mn-border-strong)]"
-                      }`}
-                    >
-                      <p className="font-semibold">
-                        {option === "custom" ? "Custom" : `${option} Pages`}
-                      </p>
-                      {option === "custom" && (
-                        <p className="mt-1 text-xs text-[var(--mn-text)]/40">
-                          Enter your own count
-                        </p>
-                      )}
-                    </button>
-                  ))}
-                </div>
+          <p className="mb-5 text-sm text-[var(--mn-text-secondary)]">
+            Start fresh or personalize an existing notebook.
+          </p>
 
-                {pageCount === "custom" && (
-                  <div className="mt-5 max-w-xs">
-                    <label
-                      htmlFor="custom-page-count"
-                      className="mb-2 block text-sm font-semibold text-[var(--mn-text)]/70"
-                    >
-                      Custom page count
-                    </label>
-                    <input
-                      id="custom-page-count"
-                      type="number"
-                      min="1"
-                      value={customPageCount}
-                      placeholder="Enter page count"
-                      onChange={(event) =>
-                        setCustomPageCount(event.target.value)
-                      }
-                      className="w-full rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-control-hover)] px-4 py-3 text-[var(--mn-text)] outline-none transition placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-border-strong)]"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {START_OPTIONS.map((option) => {
+              const active = selectedOption === option.id;
 
-            {selectedOption === "page-no" && (
-              <div className="my-6 border-t border-[var(--mn-border)]" />
-            )}
-
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--mn-text)]/35">
-                Optional
-              </p>
-              <h2 className="mt-2 text-xl font-semibold">
-                Choose a product
-              </h2>
-              <p className="mt-1 text-sm text-[var(--mn-text)]/50">
-                You can select one now or skip it and continue to the editor.
-              </p>
-
-              {selectedProduct && (
-                <p className="mt-3 text-sm text-[var(--mn-text)]/80">
-                  Selected:{" "}
-                  <span className="font-semibold">
-                    {selectedProduct.name}
-                  </span>
-                </p>
-              )}
-            </div>
-
-            {selectedProductId && (
-              <div className="mt-5">
+              return (
                 <button
+                  key={option.id}
                   type="button"
-                  onClick={() => setSelectedProductId(null)}
-                  className="rounded-[1.25rem] border border-[var(--mn-border)] px-4 py-2 text-sm font-semibold text-[var(--mn-text)]/65 transition hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
+                  onClick={() => {
+                    setSelectedOption(option.id);
+
+                    if (option.id === "blank") {
+                      setSelectedProductId(null);
+                    }
+                  }}
+                  className={[
+                    "mn-transition rounded-2xl border p-5 text-left",
+                    active
+                      ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] shadow-[var(--mn-shadow-sm)]"
+                      : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
+                  ].join(" ")}
                 >
-                  Skip Product
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-base font-semibold">
+                        {option.title}
+                      </h3>
+
+                      <p className="mt-1 text-sm leading-6 text-[var(--mn-text-secondary)]">
+                        {option.description}
+                      </p>
+                    </div>
+
+                    {active && (
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--mn-accent)] text-xs text-white">
+                        ✓
+                      </span>
+                    )}
+                  </div>
                 </button>
-              </div>
-            )}
+              );
+            })}
+          </div>
+        </section>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-              {error && (
-                <p className="mr-auto text-sm text-[var(--mn-danger)]">{error}</p>
+        {/* 02 */}
+        <section className="mt-12 border-t border-[var(--mn-border)] pt-12">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--mn-text-muted)]">
+            03
+          </p>
+
+          <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+            Quantity
+          </h2>
+
+          <p className="mt-2 text-sm text-[var(--mn-text-secondary)]">
+            How many copies do you need?
+          </p>
+
+          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              {!bulkOrder ? (
+                <div className="inline-flex items-center overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)]">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setQuantity((value) => Math.max(1, value - 1))
+                    }
+                    className="h-11 w-11 text-lg hover:bg-[var(--mn-surface-soft)]"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+
+                  <span className="flex h-11 min-w-12 items-center justify-center border-x border-[var(--mn-border)] text-sm font-semibold">
+                    {quantity}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((value) => value + 1)}
+                    className="h-11 w-11 text-lg hover:bg-[var(--mn-surface-soft)]"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <input
+                  id="bulk-quantity"
+                  type="number"
+                  min={2}
+                  step={1}
+                  inputMode="numeric"
+                  value={bulkQuantity}
+                  onChange={(event) =>
+                    setBulkQuantity(
+                      event.target.value.replace(/[^0-9]/g, "")
+                    )
+                  }
+                  onBlur={() => {
+                    const value = Number(bulkQuantity);
+
+                    if (!Number.isFinite(value) || value < 2) {
+                      setBulkQuantity("2");
+                    }
+                  }}
+                  className="h-11 w-32 rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-4 text-sm font-semibold outline-none focus:border-[var(--mn-accent)]"
+                  aria-label="Bulk order quantity"
+                />
               )}
-
-              <button
-                type="button"
-                onClick={createCustomization}
-                disabled={creating}
-                className="rounded-[1.25rem] bg-[var(--mn-accent)] px-6 py-3 font-semibold text-[var(--mn-accent-contrast)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {creating ? "Starting..." : "Next →"}
-              </button>
             </div>
-          </section>
-        )}
+
+            <label className="flex h-11 w-fit cursor-pointer items-center gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4">
+              <input
+                type="checkbox"
+                checked={bulkOrder}
+                onChange={(event) => {
+                  const checked = event.target.checked;
+
+                  setBulkOrder(checked);
+
+                  if (checked) {
+                    setBulkQuantity(String(Math.max(2, quantity)));
+                  } else {
+                    setQuantity(1);
+                  }
+                }}
+                className="h-4 w-4"
+              />
+
+              <span className="text-sm font-semibold">
+                📦 Bulk Order
+              </span>
+
+              <span className="text-xs text-[var(--mn-text-muted)]">
+                For multiple copies
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section className="mt-12 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 shadow-[var(--mn-shadow-sm)] sm:p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--mn-text-muted)]">
+            Your notebook
+          </p>
+
+          <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold">{productName}</p>
+
+              <p className="mt-1 text-sm text-[var(--mn-text-secondary)]">
+                {size} · {pageCount} pages ·{" "}
+                {PAPERS.find((item) => item.id === paper)?.title} ·{" "}
+                {bulkOrder ? Math.max(2, Number(bulkQuantity) || 2) : quantity}{" "}
+                {bulkOrder
+                  ? Math.max(2, Number(bulkQuantity) || 2) === 1
+                    ? "copy"
+                    : "copies"
+                  : quantity === 1
+                    ? "copy"
+                    : "copies"}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={creating}
+              className="mn-transition rounded-xl bg-[var(--mn-text)] px-6 py-3 text-sm font-semibold text-[var(--mn-text-inverse)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {creating ? "Preparing…" : "Continue to Editor →"}
+            </button>
+          </div>
+
+          {error && (
+            <p className="mt-4 rounded-lg bg-[var(--mn-danger)]/10 px-3 py-2 text-sm text-[var(--mn-danger)]">
+              {error}
+            </p>
+          )}
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className="mt-12 border-t border-[var(--mn-border)] pt-10">
+          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--mn-text-muted)]">
+            How it works
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-4">
+            {[
+              ["01", "Choose"],
+              ["02", "Create"],
+              ["03", "Preview"],
+              ["04", "We make it"],
+            ].map(([number, title]) => (
+              <div key={number} className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-[var(--mn-accent)]">
+                  {number}
+                </span>
+
+                <span className="text-sm font-medium">{title}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* PRIVACY */}
+        <section className="mt-10 flex items-center gap-3 border-t border-[var(--mn-border)] pt-7 text-sm text-[var(--mn-text-secondary)]">
+          <span>🔒</span>
+          <span>
+            <strong className="font-medium text-[var(--mn-text)]">
+              Private by default
+            </strong>{" "}
+            · Your creation stays private unless you choose to share it.
+          </span>
+        </section>
       </div>
+
+      <Footer />
+    </main>
+  );
+}
+
+function SectionHeading({
+  number,
+  title,
+}: {
+  number: string;
+  title: string;
+}) {
+  return (
+    <div className="mb-2 flex items-baseline gap-3">
+      <span className="text-[11px] font-semibold tracking-[0.12em] text-[var(--mn-accent)]">
+        {number}
+      </span>
+
+      <h2 className="font-[var(--mn-font-display)] text-[clamp(1.45rem,2.2vw,2rem)] font-semibold leading-tight tracking-[-0.025em]">
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-sm font-semibold tracking-[-0.01em]">
+      {children}
+    </h3>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: [string, string][];
+}) {
+  return (
+    <div>
+      <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+        {title}
+      </h3>
+
+      <nav className="mt-3 flex flex-col gap-2.5">
+        {links.map(([label, href]) => (
+          <a
+            key={href}
+            href={href}
+            className="text-sm text-[var(--mn-text-secondary)] transition hover:text-[var(--mn-text)]"
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
     </div>
   );
 }

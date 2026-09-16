@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!["COD", "Razorpay"].includes(paymentMethod)) {
+    if (paymentMethod !== "Razorpay") {
       return NextResponse.json(
         {
           error: "Invalid payment method.",

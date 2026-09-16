@@ -14,7 +14,7 @@ export type CreateShipmentInput = {
   items: ShippingOrderItem[];
   package: ShippingPackage;
   orderValue: number;
-  paymentMethod: "COD" | "PREPAID";
+  paymentMethod: "PREPAID";
   rate: ShippingRate;
 };
 

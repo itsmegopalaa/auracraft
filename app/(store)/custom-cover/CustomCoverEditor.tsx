@@ -107,6 +107,7 @@ export default function CustomCoverEditor({
     "select" | "text" | "image" | "shape" | "ai"
   >("select");
   const [zoom, setZoom] = useState(0.72);
+  const [fitZoom, setFitZoom] = useState(0.72);
   const [preview, setPreview] = useState(false);
   const [saved, setSaved] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -136,6 +137,7 @@ export default function CustomCoverEditor({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const canvasViewportRef = useRef<HTMLDivElement | null>(null);
   const interactionRef = useRef<Interaction | null>(null);
 
   const selectedElement = useMemo(
@@ -398,6 +400,42 @@ export default function CustomCoverEditor({
     });
   }
 
+  useEffect(() => {
+    const viewport = canvasViewportRef.current;
+    if (!viewport) return;
+
+    const updateFitZoom = () => {
+      const rect = viewport.getBoundingClientRect();
+
+      const availableWidth = Math.max(220, rect.width - 32);
+      const availableHeight = Math.max(300, rect.height - 32);
+
+      const widthFit = availableWidth / CANVAS_WIDTH;
+      const heightFit = availableHeight / CANVAS_HEIGHT;
+
+      const nextFit = Math.max(
+        0.4,
+        Math.min(1.2, widthFit, heightFit),
+      );
+
+      setFitZoom(Number(nextFit.toFixed(3)));
+    };
+
+    updateFitZoom();
+
+    const observer = new ResizeObserver(updateFitZoom);
+    observer.observe(viewport);
+
+    window.addEventListener("resize", updateFitZoom);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateFitZoom);
+    };
+  }, []);
+
+  const displayZoom = Math.min(zoom, fitZoom);
+
   function getCanvasPoint(event: ReactPointerEvent) {
     const rect = canvasRef.current?.getBoundingClientRect();
 
@@ -406,8 +444,8 @@ export default function CustomCoverEditor({
     }
 
     return {
-      x: (event.clientX - rect.left) / zoom,
-      y: (event.clientY - rect.top) / zoom,
+      x: (event.clientX - rect.left) / displayZoom,
+      y: (event.clientY - rect.top) / displayZoom,
     };
   }
 
@@ -478,25 +516,6 @@ export default function CustomCoverEditor({
       startRotation: element.rotation,
     };
 
-    interactionRef.current.centerX = point.x + (
-      element.x + element.width / 2 - point.x
-    );
-    interactionRef.current.centerY = point.y + (
-      element.y + element.height / 2 - point.y
-    );
-
-    const rect = canvasRef.current?.getBoundingClientRect();
-
-    if (rect) {
-      interactionRef.current.centerX =
-        (rect.left + (element.x + element.width / 2) * zoom - rect.left) /
-        zoom;
-
-      interactionRef.current.centerY =
-        (rect.top + (element.y + element.height / 2) * zoom - rect.top) /
-        zoom;
-    }
-
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
@@ -564,12 +583,12 @@ export default function CustomCoverEditor({
           }
 
           if (interaction.handle.includes("w")) {
+            const maxX =
+              interaction.originX + interaction.originWidth - minWidth;
+
             const nextX = Math.max(
               0,
-              Math.min(
-                interaction.originX + interaction.originWidth - minWidth,
-                interaction.originX + dx,
-              ),
+              Math.min(maxX, interaction.originX + dx),
             );
 
             x = nextX;
@@ -577,12 +596,12 @@ export default function CustomCoverEditor({
           }
 
           if (interaction.handle.includes("n")) {
+            const maxY =
+              interaction.originY + interaction.originHeight - minHeight;
+
             const nextY = Math.max(
               0,
-              Math.min(
-                interaction.originY + interaction.originHeight - minHeight,
-                interaction.originY + dy,
-              ),
+              Math.min(maxY, interaction.originY + dy),
             );
 
             y = nextY;
@@ -833,8 +852,10 @@ export default function CustomCoverEditor({
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     background: design.background || "#ffffff",
-    transform: `scale(${zoom})`,
+    transform: `scale(${displayZoom})`,
     transformOrigin: "center center",
+    touchAction: "none",
+    userSelect: "none",
   };
 
   const toolbarButton =
@@ -963,7 +984,7 @@ export default function CustomCoverEditor({
         </div>
       </div>
 
-      <main className="flex min-h-[calc(100dvh-4rem)] flex-col lg:flex-row">
+      <main className="flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col overflow-hidden lg:flex-row">
         {/* TOOLBAR */}
         <aside className="order-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:order-1 lg:w-[92px] lg:border-r lg:border-t-0">
           <div className="flex items-center justify-center gap-2 overflow-x-auto p-2 lg:h-full lg:flex-col lg:justify-start lg:gap-3 lg:py-5">
@@ -1056,7 +1077,10 @@ export default function CustomCoverEditor({
           background:
             "radial-gradient(circle at 50% 12%, #3d4046 0%, #292b30 48%, #18191c 100%)",
         }}>
-          <div className="flex flex-1 items-center justify-center overflow-hidden p-5 sm:p-10">
+          <div
+    ref={canvasViewportRef}
+    className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-6 lg:p-10"
+  >
             <div
               ref={canvasRef}
               className="relative shrink-0 shadow-[var(--mn-shadow-lg)]"
@@ -1255,7 +1279,7 @@ export default function CustomCoverEditor({
 
             <button
               type="button"
-              onClick={() => setZoom(0.72)}
+              onClick={() => setZoom(fitZoom)}
               className="min-w-[60px] rounded-lg px-2 py-2 text-xs text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
             >
               {Math.round(zoom * 100)}%
@@ -1273,8 +1297,7 @@ export default function CustomCoverEditor({
 
             <button
               type="button"
-              onClick={() => setZoom(0.72)}
-              className="rounded-lg px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+              onClick={() => setZoom(fitZoom)}              className="rounded-lg px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
             >
               Fit
             </button>

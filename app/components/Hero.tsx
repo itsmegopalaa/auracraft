@@ -41,15 +41,19 @@ export default function Hero() {
             everything you want to make your own.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center md:justify-start">
             <Link
               href="/products"
-              className="group inline-flex min-h-13 items-center justify-center gap-3 rounded-xl bg-[var(--mn-accent)] px-7 text-sm font-semibold text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)]"
+              className="group relative inline-flex min-h-13 items-center justify-center gap-3 overflow-hidden rounded-xl bg-[var(--mn-accent)] px-7 text-sm font-semibold text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--mn-shadow-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] active:translate-y-0"
             >
-              Shop Collection
               <span
                 aria-hidden="true"
-                className="transition-transform duration-200 group-hover:translate-x-1"
+                className="absolute inset-0 -translate-x-full bg-white/10 transition-transform duration-500 group-hover:translate-x-0"
+              />
+              <span className="relative">Shop Collection</span>
+              <span
+                aria-hidden="true"
+                className="relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-[currentColor]/25 text-base transition-transform duration-300 group-hover:translate-x-1"
               >
                 →
               </span>
@@ -57,46 +61,80 @@ export default function Hero() {
 
             <Link
               href="/custom-cover"
-              className="inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-7 text-sm font-semibold text-[var(--mn-text)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[var(--mn-surface-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)]"
+              className="group inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-7 text-sm font-semibold text-[var(--mn-text)] shadow-[var(--mn-shadow-sm)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)] hover:shadow-[var(--mn-shadow-sm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] active:translate-y-0"
             >
-              Create Your Own
-              <span aria-hidden="true">✦</span>
+              <span>Create Your Own</span>
+              <span
+                aria-hidden="true"
+                className="text-[var(--mn-accent)] transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110"
+              >
+                ✦
+              </span>
             </Link>
 
             <Link
               href="/about"
-              className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl px-5 text-sm font-medium text-[var(--mn-text-secondary)] transition-colors hover:text-[var(--mn-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)]"
+              className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-[var(--mn-text-secondary)] transition-all duration-300 hover:-translate-y-0.5 hover:text-[var(--mn-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)]"
             >
-              Our Story
-              <span aria-hidden="true">→</span>
+              <span className="relative">
+                Our Story
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-40 bg-[var(--mn-accent)] transition-transform duration-300 group-hover:scale-x-100"
+                />
+              </span>
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              >
+                →
+              </span>
             </Link>
           </div>
 
-          <div className="mt-9 grid max-w-xl grid-cols-3 border-y border-[var(--mn-border)] py-4">
-            <div className="px-3 text-center md:text-left">
-              <p className="text-sm font-semibold text-[var(--mn-text)]">
-                Premium
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-[var(--mn-text-muted)]">
-                Quality
-              </p>
-            </div>
-
-            <div className="border-x border-[var(--mn-border)] px-3 text-center md:text-left">
-              <p className="text-sm font-semibold text-[var(--mn-text)]">
-                Personal
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-[var(--mn-text-muted)]">
-                By design
+          <div className="mt-9 grid max-w-xl grid-cols-3 border-y border-[var(--mn-border)] py-5">
+            <div className="group px-3 text-center md:text-left">
+              <div className="mb-2 flex items-center justify-center gap-2 md:justify-start">
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 rounded-full bg-[var(--mn-accent)] transition-transform duration-300 group-hover:scale-125"
+                />
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--mn-text)]">
+                  Premium
+                </p>
+              </div>
+              <p className="text-[10px] tracking-[0.08em] text-[var(--mn-text-muted)]">
+                Quality, thoughtfully made
               </p>
             </div>
 
-            <div className="px-3 text-center md:text-left">
-              <p className="text-sm font-semibold text-[var(--mn-text)]">
-                Made in India
+            <div className="group border-x border-[var(--mn-border)] px-3 text-center md:text-left">
+              <div className="mb-2 flex items-center justify-center gap-2 md:justify-start">
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 rounded-full bg-[var(--mn-accent)] transition-transform duration-300 group-hover:scale-125"
+                />
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--mn-text)]">
+                  Personal
+                </p>
+              </div>
+              <p className="text-[10px] tracking-[0.08em] text-[var(--mn-text-muted)]">
+                Designed around you
               </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-[var(--mn-text-muted)]">
-                With care
+            </div>
+
+            <div className="group px-3 text-center md:text-left">
+              <div className="mb-2 flex items-center justify-center gap-2 md:justify-start">
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 rounded-full bg-[var(--mn-accent)] transition-transform duration-300 group-hover:scale-125"
+                />
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--mn-text)]">
+                  Made in India
+                </p>
+              </div>
+              <p className="text-[10px] tracking-[0.08em] text-[var(--mn-text-muted)]">
+                Crafted with care
               </p>
             </div>
           </div>

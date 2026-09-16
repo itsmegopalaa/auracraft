@@ -211,10 +211,40 @@ export async function orchestrateAiGeneration(
         getErrorMessage(error);
 
       /*
-       * Assets were already inserted successfully, but the
-       * generation record could not be completed. Remove the
-       * inserted assets so a failed generation does not leave
-       * orphaned customization assets behind.
+       * The finalize RPC may have committed successfully even if
+       * the client did not receive its response (for example,
+       * a transient network failure after the database commit).
+       *
+       * Re-check the database before treating finalization as
+       * failed. This prevents deleting valid assets or consuming
+       * a successful generation as failed.
+       */
+      try {
+        const { data: currentGeneration, error: statusError } =
+          await supabase
+            .from("custom_cover_generations")
+            .select("id, status")
+            .eq("id", generationId)
+            .maybeSingle();
+
+        if (!statusError && currentGeneration?.status === "completed") {
+          return {
+            generationId,
+            status: "completed" as const,
+            result,
+          };
+        }
+      } catch (statusCheckError) {
+        console.error(
+          "CUSTOM COVER AI GENERATION FINALIZATION STATUS CHECK ERROR:",
+          statusCheckError
+        );
+      }
+
+      /*
+       * Finalization was not committed. The assets were already
+       * inserted successfully, so remove them before marking the
+       * pending generation as failed.
        */
       await cleanupIngestedAssets(
         supabase,

@@ -8,7 +8,6 @@ export const DELIVERY_ESTIMATE = "3-5 Working Days";
 
 export const PAYMENT_METHODS = {
   RAZORPAY: "Razorpay",
-  COD: "COD",
 } as const;
 
 export type PaymentMethod =

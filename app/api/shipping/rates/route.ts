@@ -145,9 +145,7 @@ export async function POST(request: Request) {
       },
       order_value: Number(order.total),
       payment_method:
-        String(order.payment_method).toUpperCase() === "COD"
-          ? "COD"
-          : "PREPAID",
+        "PREPAID",
     });
 
     return successResponse({

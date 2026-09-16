@@ -19,7 +19,7 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [pin, setPin] = useState("");
-  const [payment, setPayment] = useState("COD");
+  const [payment] = useState("ONLINE");
   const [loading, setLoading] = useState(false);
 
   const total = cart.reduce(
@@ -119,60 +119,6 @@ export default function CheckoutPage() {
     return result.order;
   };
 
-  const handlePlaceOrder = async () => {
-    if (!validateDetails()) return;
-
-    setLoading(true);
-
-    try {
-      const orderId = `MN${Date.now().toString().slice(-8)}`;
-
-      const savedOrder = await saveOrderToDatabase({
-        orderId,
-        paymentMethod: "COD",
-        paymentStatus: "pending",
-        orderStatus: "placed",
-      });
-
-      const order = {
-        orderId,
-        name,
-        phone,
-        email,
-        address,
-        city,
-        state,
-        pin,
-        payment: "COD",
-        items: cart,
-        total,
-        delivery: "3-5 Working Days",
-        databaseOrderId: savedOrder.id,
-      };
-
-      localStorage.setItem(
-        "auracraft_last_order",
-        JSON.stringify(order)
-      );
-
-      toast.success("Order placed successfully!");
-
-      setTimeout(() => {
-        router.push("/success");
-      }, 700);
-    } catch (error) {
-      console.error("COD ORDER ERROR:", error);
-
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Unable to place order."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (cart.length === 0) {
     return (
       <>
@@ -223,8 +169,8 @@ export default function CheckoutPage() {
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--mn-text-secondary)] sm:mt-4 sm:text-lg sm:leading-7">
-              Enter your delivery details and choose how you&apos;d like to
-              pay. Your MineNote order is just a few steps away. ✨
+              Enter your delivery details and complete your secure online
+              payment. Your MineNote order is just a few steps away. ✨
             </p>
 
             {/* Checkout progress */}
@@ -447,57 +393,24 @@ export default function CheckoutPage() {
                     </h3>
                   </div>
 
-                  <div className="space-y-2.5 sm:space-y-3">
-                    {[
-                      {
-                        id: "COD",
-                        icon: "💵",
-                        label: "Cash on Delivery",
-                        description: "Pay when your order arrives",
-                      },
-                      {
-                        id: "ONLINE",
-                        icon: "💳",
-                        label: "UPI / Card",
-                        description: "Secure payment via Razorpay",
-                      },
-                    ].map((method) => {
-                      const selected = payment === method.id;
+                  <div className="rounded-2xl border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] p-4 shadow-[var(--mn-shadow-sm)] sm:p-5">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">💳</span>
 
-                      return (
-                        <label
-                          key={method.id}
-                          className={`flex min-h-[72px] cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-all ${
-                            selected
-                              ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] shadow-[var(--mn-shadow-sm)]"
-                              : "border-[var(--mn-border-strong)] bg-[var(--mn-surface)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-control-hover)]"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="payment"
-                            value={method.id}
-                            checked={selected}
-                            onChange={() => setPayment(method.id)}
-                            className="h-4 w-4 accent-[var(--mn-accent)]"
-                          />
+                      <div className="min-w-0">
+                        <p className="font-bold text-[var(--mn-text)]">
+                          UPI / Card
+                        </p>
 
-                          <span className="text-xl">
-                            {method.icon}
-                          </span>
+                        <p className="mt-1 text-xs text-[var(--mn-text-secondary)]">
+                          Secure online payment via Razorpay
+                        </p>
+                      </div>
 
-                          <span className="min-w-0">
-                            <span className="block font-bold text-[var(--mn-text-secondary)]">
-                              {method.label}
-                            </span>
-
-                            <span className="mt-1 block text-xs text-[var(--mn-text-secondary)]">
-                              {method.description}
-                            </span>
-                          </span>
-                        </label>
-                      );
-                    })}
+                      <span className="ml-auto rounded-full bg-[var(--mn-surface)] px-3 py-1 text-[11px] font-bold text-[var(--mn-accent)]">
+                        Secure
+                      </span>
+                    </div>
                   </div>
 
                   {/* Trust */}
@@ -516,26 +429,14 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Checkout action */}
-                  {payment === "COD" ? (
-                    <button
-                      type="button"
-                      onClick={handlePlaceOrder}
-                      disabled={loading}
-                      className="mt-5 min-h-12 w-full rounded-2xl bg-[var(--mn-accent)] py-3.5 font-black text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] transition-all hover:-translate-y-0.5 hover:bg-[var(--mn-accent-hover)] hover:shadow-[var(--mn-shadow-sm)] disabled:cursor-not-allowed disabled:opacity-50 sm:mt-6 sm:py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
-                    >
-                      {loading
-                        ? "Saving Order..."
-                        : "Place Order →"}
-                    </button>
-                  ) : (
-                    <div
-                      onClickCapture={(event) => {
-                        if (!validateDetails()) {
-                          event.preventDefault();
-                          event.stopPropagation();
-                        }
-                      }}
-                    >
+                  <div
+                    onClickCapture={(event) => {
+                      if (!validateDetails()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }
+                    }}
+                  >
                       <RazorpayCheckout
                         amount={total}
                         name={name}
@@ -611,8 +512,7 @@ export default function CheckoutPage() {
                           }
                         }}
                       />
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </aside>

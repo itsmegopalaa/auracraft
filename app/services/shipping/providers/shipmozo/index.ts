@@ -140,10 +140,7 @@ export class ShipmozoProvider implements ShippingProvider {
       order_amount: String(request.order_value),
       type_of_package: "SPS",
       rov_type: "ROV_OWNER",
-      cod_amount:
-        request.payment_method === "COD"
-          ? String(request.order_value)
-          : "",
+      cod_amount: 0,
       weight: String(request.package.weight_grams),
       dimensions: [
         {
@@ -271,10 +268,7 @@ export class ShipmozoProvider implements ShippingProvider {
       consignee_state: request.destination.state,
       product_detail: productDetail,
       payment_type: request.payment_method,
-      cod_amount:
-        request.payment_method === "COD"
-          ? String(request.order_value)
-          : "0",
+      cod_amount: 0,
       shipping_charges: String(Math.round(rate.shipping_charge)),
       weight: request.package.weight_grams,
       length: request.package.length_cm,

@@ -46,15 +46,21 @@ export default function Home() {
           aria-hidden="true"
         />
 
-        <div className="mn-container-wide relative grid items-center gap-12 py-[clamp(4rem,7vw,6rem)] sm:py-[clamp(5rem,8vw,7.5rem)] md:grid-cols-[1fr_0.9fr] md:gap-12 lg:gap-20 lg:py-28 xl:py-32">
+        <div className="mn-container-wide relative grid items-center gap-12 py-[clamp(5rem,8vw,7.5rem)] sm:py-[clamp(6rem,9vw,9rem)] md:grid-cols-[1fr_0.9fr] md:gap-12 lg:gap-20 lg:py-28 xl:py-32">
 
           {/* Copy */}
           <div className="mn-reading max-w-2xl">
-            <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--mn-accent)]">
-              More than a notebook
-            </p>
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="h-px w-8 bg-[var(--mn-accent)]"
+              />
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--mn-accent)]">
+                More than a notebook
+              </p>
+            </div>
 
-            <h2 className="text-4xl font-semibold leading-[0.98] tracking-[-0.045em] text-[var(--mn-text)] sm:mn-display">
+            <h2 className="mt-5 text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-[var(--mn-text)] sm:text-6xl lg:text-[clamp(3.5rem,5.5vw,5.5rem)]">
               Your notebook.
               <br />
               <span className="text-[var(--mn-text-secondary)]">
@@ -68,7 +74,7 @@ export default function Home() {
               creativity, and the ideas you want to bring to life.
             </p>
 
-            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--mn-text-muted)] sm:mt-8">
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--mn-text-muted)] sm:mt-8 sm:text-[11px]">
               <span>Personal</span>
               <span aria-hidden="true">•</span>
               <span>Premium</span>
@@ -79,33 +85,45 @@ export default function Home() {
             <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap">
               <Link
                 href="/products"
-                className="mn-transition inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--mn-accent)] px-7 py-3.5 text-sm font-semibold text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] active:translate-y-0"
+                className="group relative inline-flex min-h-13 items-center justify-center gap-3 overflow-hidden rounded-xl bg-[var(--mn-accent)] px-7 text-sm font-semibold text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--mn-shadow-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] active:translate-y-0"
               >
-                Explore Collection
-                <span className="ml-2" aria-hidden="true">
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 -translate-x-full bg-white/10 transition-transform duration-500 group-hover:translate-x-0"
+                />
+                <span className="relative">Explore Collection</span>
+                <span
+                  aria-hidden="true"
+                  className="relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-[currentColor]/25 transition-transform duration-300 group-hover:translate-x-1"
+                >
                   →
                 </span>
               </Link>
 
               <Link
                 href="/custom-cover"
-                className="mn-transition inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-[var(--mn-border-strong)] bg-transparent px-6 py-3.5 text-sm font-semibold text-[var(--mn-text)] hover:-translate-y-0.5 hover:border-[var(--mn-text)] hover:bg-[var(--mn-bg)] active:translate-y-0"
+                className="group inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-7 text-sm font-semibold text-[var(--mn-text)] shadow-[var(--mn-shadow-sm)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)] hover:shadow-[var(--mn-shadow-sm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] active:translate-y-0"
               >
-                Create Your Own
-                <span aria-hidden="true">✨</span>
+                <span>Create Your Own</span>
+                <span
+                  aria-hidden="true"
+                  className="text-[var(--mn-accent)] transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110"
+                >
+                  ✦
+                </span>
               </Link>
             </div>
           </div>
 
           {/* Product showcase */}
-          <div className="relative flex min-h-[360px] items-center justify-center sm:min-h-[440px] md:min-h-[500px] lg:min-h-[560px]">
+          <div className="relative flex min-h-[380px] items-center justify-center sm:min-h-[460px] md:min-h-[500px] lg:min-h-[560px]">
 
             <div
-              className="absolute h-64 w-64 rounded-full bg-[var(--mn-accent)]/[0.055] blur-3xl sm:h-80 sm:w-80 lg:h-96 lg:w-96"
+              className="absolute h-64 w-64 rounded-full bg-[var(--mn-accent)]/[0.055] blur-3xl transition-transform duration-700 group-hover:scale-110 sm:h-80 sm:w-80 lg:h-96 lg:w-96"
               aria-hidden="true"
             />
 
-            <div className="relative max-w-[88%] border border-[var(--mn-border)] bg-[var(--mn-bg)] p-[var(--mn-space-card)] shadow-[var(--mn-shadow-lg)] sm:max-w-none sm:p-7">
+            <div className="group relative max-w-[88%] border border-[var(--mn-border-strong)] bg-[var(--mn-bg)] p-4 shadow-[var(--mn-shadow-lg)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[var(--mn-shadow-image)] sm:max-w-none sm:p-7">
               <div
                 className="absolute inset-3 border border-[var(--mn-border)]"
                 aria-hidden="true"
@@ -116,11 +134,16 @@ export default function Home() {
                 alt="AuraNotes Premium Notebook"
                 width={450}
                 height={600}
-                className="relative z-10 h-auto max-h-[360px] w-auto max-w-full object-contain drop-shadow-[var(--mn-shadow-hero)] transition-transform duration-500 hover:scale-[1.02] sm:max-h-[470px] lg:max-h-[520px]"
+                className="relative z-10 h-auto max-h-[370px] w-auto max-w-full object-contain drop-shadow-[var(--mn-shadow-hero)] transition-transform duration-700 group-hover:scale-[1.025] sm:max-h-[480px] lg:max-h-[530px]"
+              />
+
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-tr from-transparent via-white/[0.025] to-white/[0.06] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
               />
             </div>
 
-            <div className="absolute bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-secondary)] shadow-[var(--mn-shadow-sm)] sm:bottom-5 sm:px-4 sm:tracking-[0.22em]">
+            <div className="absolute bottom-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full border border-[var(--mn-border-strong)] bg-[var(--mn-surface)] px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--mn-text-secondary)] shadow-[var(--mn-shadow-sm)] transition-transform duration-300 hover:-translate-y-0.5 sm:bottom-5 sm:px-5 sm:tracking-[0.22em]">
               Crafted for your journey
             </div>
           </div>

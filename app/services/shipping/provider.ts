@@ -30,7 +30,7 @@ export type ShippingRateRequest = {
   destination: ShippingAddress;
   package: ShippingPackage;
   order_value: number;
-  payment_method: "COD" | "PREPAID";
+  payment_method: "PREPAID";
   items?: ShippingOrderItem[];
 };
 

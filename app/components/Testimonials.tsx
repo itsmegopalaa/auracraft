@@ -18,11 +18,17 @@ export default function Testimonials() {
     <section className="border-b border-[var(--mn-border)] bg-[var(--mn-surface-soft)]">
       <div className="mn-container-wide py-[clamp(5rem,8vw,7.5rem)] sm:py-[clamp(6rem,9vw,9rem)] lg:py-28">
         <div className="max-w-2xl">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--mn-accent)]">
-            Real words
-          </p>
+          <div className="flex items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="h-px w-8 bg-[var(--mn-accent)]"
+            />
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--mn-accent)]">
+              Real words
+            </p>
+          </div>
 
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-[var(--mn-text)] sm:text-5xl">
+          <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-[var(--mn-text)] sm:text-5xl lg:text-6xl">
             What people say
           </h2>
 
@@ -31,14 +37,14 @@ export default function Testimonials() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-[var(--mn-space-card)] md:grid-cols-2">
+        <div className="mt-10 grid gap-[var(--mn-space-card)] md:mt-12 md:grid-cols-2">
           {testimonials.map((testimonial) => (
             <article
               key={testimonial.name}
-              className="border border-[var(--mn-border)] bg-[var(--mn-surface)] p-7 shadow-[var(--mn-shadow-sm)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--mn-shadow-md)] sm:p-9"
+              className="group relative overflow-hidden rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-7 shadow-[var(--mn-shadow-sm)] transition-all duration-500 hover:-translate-y-1 hover:border-[var(--mn-border-strong)] hover:shadow-[var(--mn-shadow-lg)] sm:p-9"
             >
               <span
-                className="font-serif text-5xl leading-none text-[var(--mn-accent)]"
+                className="font-serif text-6xl leading-none text-[var(--mn-accent)] transition-transform duration-500 group-hover:-translate-y-1"
                 aria-hidden="true"
               >
                 “
@@ -49,9 +55,15 @@ export default function Testimonials() {
               </p>
 
               <div className="mt-8 border-t border-[var(--mn-border)] pt-5">
-                <p className="text-sm font-semibold text-[var(--mn-text)]">
+                <div className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="h-1.5 w-1.5 rounded-full bg-[var(--mn-accent)]"
+                  />
+                  <p className="text-sm font-semibold text-[var(--mn-text)]">
                   {testimonial.name}
-                </p>
+                  </p>
+                </div>
 
                 <p className="mt-1 text-xs text-[var(--mn-text-muted)]">
                   {testimonial.label}

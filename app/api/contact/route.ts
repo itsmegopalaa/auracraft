@@ -19,6 +19,40 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return firstIp;
+  }
+
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  return realIp || "unknown";
+}
+
+function createRateLimitKey(type: "ip" | "email", value: string) {
+  return `contact:${type}:${value.toLowerCase().trim()}`;
+}
+
+async function consumeRateLimit(key: string) {
+  const { data, error } = await supabaseAdmin.rpc(
+    "consume_contact_rate_limit",
+    {
+      p_key: key,
+      p_window_seconds: 3600,
+      p_max_requests: 5,
+    }
+  );
+
+  if (error) {
+    console.error("CONTACT RATE LIMIT ERROR:", error);
+    return null;
+  }
+
+  return data?.[0] ?? null;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -64,6 +98,44 @@ export async function POST(request: Request) {
           error: "Message is too long.",
         },
         { status: 400 }
+      );
+    }
+
+    const clientIp = getClientIp(request);
+
+    const [ipLimit, emailLimit] = await Promise.all([
+      consumeRateLimit(createRateLimitKey("ip", clientIp)),
+      consumeRateLimit(createRateLimitKey("email", email)),
+    ]);
+
+    if (!ipLimit || !emailLimit) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unable to process your message right now. Please try again later.",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (!ipLimit.allowed || !emailLimit.allowed) {
+      const retryAfter = Math.max(
+        ipLimit.retry_after_seconds ?? 0,
+        emailLimit.retry_after_seconds ?? 0,
+        1
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too many messages. Please try again later.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+          },
+        }
       );
     }
 

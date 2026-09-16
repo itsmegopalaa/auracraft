@@ -104,7 +104,6 @@ export async function POST(request: Request) {
 
     return successResponse({
       orderId: order.id,
-      originPin,
       destinationPin: order.pin,
       serviceable,
       provider: provider.name,

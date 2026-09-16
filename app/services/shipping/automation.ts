@@ -126,7 +126,7 @@ export async function automateOrderShipping(orderId: string) {
     package: packageData,
     order_value: Number(order.total),
     payment_method:
-      order.payment_method === "COD" ? "COD" : "PREPAID",
+      "PREPAID",
     items,
   });
 
@@ -150,7 +150,7 @@ export async function automateOrderShipping(orderId: string) {
     package: packageData,
     orderValue: Number(order.total),
     paymentMethod:
-      order.payment_method === "COD" ? "COD" : "PREPAID",
+      "PREPAID",
     rate: selectedRate,
     items,
   });

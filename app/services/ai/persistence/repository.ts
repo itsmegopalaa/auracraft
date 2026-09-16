@@ -159,13 +159,37 @@ export async function failAiGenerationRecord(
       completed_at: new Date().toISOString(),
     })
     .eq("id", generationId)
+    .eq("status", "pending")
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(
       `Failed to mark AI generation as failed: ${error.message}`
     );
+  }
+
+  if (!data) {
+    const { data: currentGeneration, error: lookupError } =
+      await supabase
+        .from("custom_cover_generations")
+        .select("*")
+        .eq("id", generationId)
+        .maybeSingle();
+
+    if (lookupError) {
+      throw new Error(
+        `Failed to verify AI generation status: ${lookupError.message}`
+      );
+    }
+
+    if (!currentGeneration) {
+      throw new Error(
+        "Failed to mark AI generation as failed: generation not found."
+      );
+    }
+
+    return currentGeneration as AiGenerationRow;
   }
 
   return data as AiGenerationRow;

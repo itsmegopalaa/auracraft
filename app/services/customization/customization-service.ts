@@ -23,6 +23,13 @@ export type CreateCustomizationInput = {
     category: string;
     theme: string;
   };
+  physicalConfig?: {
+    size: "A4" | "A5";
+    pages: 100 | 150 | 200;
+    paper: "plain" | "ruled" | "dotGrid";
+    orientation: "portrait" | "landscape";
+    quantity: number;
+  };
 };
 
 export function createDraftCustomization(
@@ -37,7 +44,8 @@ export function createDraftCustomization(
     version: CUSTOM_COVER_VERSION,
     customerName: validateCustomerText(input.customerName) ?? undefined,
     customerText: validateCustomerText(input.customerText) ?? undefined,
-    physicalConfig: DEFAULT_CUSTOM_COVER_PHYSICAL_CONFIG,
+    physicalConfig:
+      input.physicalConfig ?? DEFAULT_CUSTOM_COVER_PHYSICAL_CONFIG,
     aiBudget: DEFAULT_CUSTOM_COVER_AI_BUDGET,
     design: {
       front: {

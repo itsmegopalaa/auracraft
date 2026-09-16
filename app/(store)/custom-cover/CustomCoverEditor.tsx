@@ -11,6 +11,9 @@ import {
   useState,
 } from "react";
 
+import { useRouter } from "next/navigation";
+import { useCart } from "@/app/context/CartContext";
+
 type EditorElementType = "text" | "image" | "shape";
 
 type EditorElement = {
@@ -49,6 +52,13 @@ type Props = {
   productId?: string;
   productName?: string;
   productImage?: string;
+  physicalConfig?: {
+    size: "A4" | "A5";
+    pages: 100 | 150 | 200;
+    paper: "plain" | "ruled" | "dotGrid";
+    orientation: "portrait" | "landscape";
+    quantity: number;
+  };
 };
 
 type Interaction =
@@ -98,7 +108,11 @@ export default function CustomCoverEditor({
   productId,
   productName,
   productImage,
+  physicalConfig,
 }: Props) {
+  const router = useRouter();
+  const { addCustomCoverToCart } = useCart();
+
   const [design, setDesign] = useState<DesignState>(initialDesign);
   const [history, setHistory] = useState<DesignState[]>([]);
   const [future, setFuture] = useState<DesignState[]>([]);
@@ -116,6 +130,7 @@ export default function CustomCoverEditor({
   );
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
+  const [approving, setApproving] = useState(false);
 
   const [selectedProductId, setSelectedProductId] = useState(
     productId ?? "",
@@ -691,8 +706,8 @@ export default function CustomCoverEditor({
     setSaved(false);
   }
 
-  async function saveCustomization() {
-    if (saving) return;
+  async function saveCustomization(): Promise<boolean> {
+    if (saving) return false;
 
     setSaving(true);
     setSaved(false);
@@ -730,11 +745,101 @@ export default function CustomCoverEditor({
       }
 
       setSaved(true);
+      return true;
     } catch (error) {
       console.error("CUSTOM COVER SAVE FAILED:", error);
       setSaved(false);
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to save customization.",
+      );
+
+      return false;
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function approveAndAddToCart() {
+    if (approving || saving) return;
+
+    if (!selectedProductId) {
+      window.alert("Please select a notebook before approval.");
+      return;
+    }
+
+    const quantity = Math.max(
+      1,
+      Math.floor(
+        Number.isFinite(Number(physicalConfig?.quantity))
+          ? Number(physicalConfig?.quantity)
+          : 1,
+      ),
+    );
+
+    setApproving(true);
+
+    try {
+      const didSave = await saveCustomization();
+
+      if (!didSave) {
+        return;
+      }
+
+      const response = await fetch(
+        `/api/custom-cover/${customizationId}/approve`,
+        {
+          method: "POST",
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Unable to approve custom cover.",
+        );
+      }
+
+      const approvedProduct = data?.product;
+
+      if (
+        !approvedProduct?.id ||
+        typeof approvedProduct.name !== "string" ||
+        !Number.isFinite(Number(approvedProduct.price))
+      ) {
+        throw new Error(
+          "Custom cover was approved, but product details were unavailable.",
+        );
+      }
+
+      addCustomCoverToCart(
+        {
+          id: String(approvedProduct.id),
+          name: approvedProduct.name,
+          price: Number(approvedProduct.price),
+          image: productImage || null,
+        },
+        customizationId,
+        quantity,
+      );
+
+      router.push("/cart");
+    } catch (error) {
+      console.error(
+        "CUSTOM COVER APPROVAL FAILED:",
+        error,
+      );
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to approve custom cover.",
+      );
+    } finally {
+      setApproving(false);
     }
   }
 
@@ -1307,9 +1412,32 @@ export default function CustomCoverEditor({
             <button
               type="button"
               onClick={resetDesign}
-              className="rounded-lg px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]"
+              disabled={saving || approving}
+              className="rounded-lg px-3 py-2 text-xs text-[var(--mn-text-muted)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Reset
+            </button>
+
+            <div className="mx-2 h-5 w-px bg-[var(--mn-control-hover)]" />
+
+            <button
+              type="button"
+              onClick={saveCustomization}
+              disabled={saving || approving}
+              className="rounded-lg border border-[var(--mn-border-strong)] px-3 py-2 text-xs font-medium text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+
+            <button
+              type="button"
+              onClick={approveAndAddToCart}
+              disabled={saving || approving}
+              className="rounded-lg bg-[var(--mn-accent)] px-4 py-2 text-xs font-semibold text-[var(--mn-accent-contrast)] shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {approving
+                ? "Adding..."
+                : `Approve & Add to Cart · ${physicalConfig?.quantity ?? 1}`}
             </button>
           </div>
         </section>

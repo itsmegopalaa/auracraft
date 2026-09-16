@@ -46,7 +46,8 @@ type CartContextType = {
 
   addCustomCoverToCart: (
     product: CustomCoverCartProduct,
-    customCoverId: string
+    customCoverId: string,
+    quantity: number
   ) => void;
 
   removeFromCart: (idOrCartKey: string) => void;
@@ -209,14 +210,22 @@ export function CartProvider({
 
   function addCustomCoverToCart(
     product: CustomCoverCartProduct,
-    customCoverId: string
+    customCoverId: string,
+    quantity: number
   ) {
     const productId = String(product.id);
-    const customizationId = String(
-      customCoverId
-    );
+    const customizationId = String(customCoverId);
     const cartKey =
       `${productId}::custom::${customizationId}`;
+
+    const normalizedQuantity = Math.max(
+      1,
+      Math.floor(
+        Number.isFinite(Number(quantity))
+          ? Number(quantity)
+          : 1
+      )
+    );
 
     setCart((prev) => {
       const existing = prev.find(
@@ -236,7 +245,7 @@ export function CartProvider({
                 category: product.category,
                 customCoverId: customizationId,
                 cartKey,
-                quantity: item.quantity + 1,
+                quantity: normalizedQuantity,
               }
             : item
         );
@@ -251,7 +260,7 @@ export function CartProvider({
           image: product.image ?? null,
           description: product.description ?? null,
           category: product.category ?? null,
-          quantity: 1,
+          quantity: normalizedQuantity,
           cartKey,
           customCoverId: customizationId,
         },

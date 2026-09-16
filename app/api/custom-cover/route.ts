@@ -65,6 +65,12 @@ export async function POST(request: Request) {
       templateId,
       category,
       theme,
+      size,
+      pages,
+      paper,
+      orientation,
+      quantity,
+      bulkOrder,
     } = body;
 
     const normalizedCreationMethod =
@@ -137,6 +143,30 @@ export async function POST(request: Request) {
     const normalizedTheme =
       typeof theme === "string" ? theme.trim() : "";
 
+    const normalizedSize = size === "A5" ? "A5" : "A4";
+
+    const normalizedPages =
+      pages === 150 ? 150 : pages === 200 ? 200 : 100;
+
+    const normalizedPaper =
+      paper === "ruled"
+        ? "ruled"
+        : paper === "dotGrid"
+          ? "dotGrid"
+          : "plain";
+
+    const normalizedOrientation =
+      orientation === "landscape" ? "landscape" : "portrait";
+
+    const normalizedQuantity = Math.max(
+      bulkOrder === true ? 2 : 1,
+      Math.floor(
+        typeof quantity === "number" && Number.isFinite(quantity)
+          ? quantity
+          : 1
+      )
+    );
+
     if (normalizedCreationMethod === "template" && !templateId) {
       return NextResponse.json(
         { error: "templateId is required for template customization." },
@@ -204,6 +234,13 @@ export async function POST(request: Request) {
             },
           }
         : {}),
+      physicalConfig: {
+        size: normalizedSize,
+        pages: normalizedPages,
+        paper: normalizedPaper,
+        orientation: normalizedOrientation,
+        quantity: normalizedQuantity,
+      },
     };
 
     const customization = createDraftCustomization(input);
@@ -220,6 +257,7 @@ export async function POST(request: Request) {
         status: customization.status,
         design: customization.design,
         print_spec: customization.printSpec,
+        physical_config: customization.physicalConfig,
         version: customization.version,
       })
       .select("id, product_id, creation_method, status, template_id, created_at")

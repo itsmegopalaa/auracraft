@@ -123,7 +123,7 @@ export async function POST(request: Request) {
         await supabaseAdmin
           .from("custom_cover_customizations")
           .select(
-            "id, customer_id, product_id, template_id, creation_method, status, version, customer_name, customer_text, design, print_spec"
+            "id, customer_id, product_id, template_id, creation_method, status, version, customer_name, customer_text, design, print_spec, physical_config"
           )
           .eq("id", customCoverId)
           .eq("customer_id", user.id)

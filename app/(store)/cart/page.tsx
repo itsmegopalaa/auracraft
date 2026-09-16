@@ -120,43 +120,53 @@ md:justify-between
 
 
                     <div className="mt-4 flex items-center gap-3 sm:gap-4 md:gap-5">
+                      {item.customCoverId ? (
+                        <>
+                          <span className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+                            Quantity
+                          </span>
+                          <span className="min-w-10 rounded-full border border-[var(--mn-border)] px-3 py-1.5 text-center text-lg font-bold">
+                            {item.quantity}
+                          </span>
+                          <span className="text-xs text-[var(--mn-text-muted)]">
+                            Fixed for this custom cover
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => decreaseQuantity(item.id)}
+                            className="
+                              flex h-10 w-10 items-center justify-center rounded-full
+                              bg-[var(--mn-control-bg)]
+                              text-xl font-bold
+                              transition-all duration-200
+                              hover:bg-[var(--mn-control-hover)]
+                              active:scale-95
+                              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
+                          >
+                            -
+                          </button>
 
-                     <button
-  onClick={() =>
-    decreaseQuantity(item.id)
-  }
-  className="
-    flex h-10 w-10 items-center justify-center rounded-full
-    bg-[var(--mn-control-bg)]
-    text-xl font-bold
-    transition-all duration-200
-    hover:bg-[var(--mn-control-hover)]
-    active:scale-95
-   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
->
-  -
-</button>
+                          <span className="text-xl font-bold">
+                            {item.quantity}
+                          </span>
 
-                      <span className="text-xl font-bold">
-                        {item.quantity}
-                      </span>
-
-
-                     <button
-  onClick={() =>
-    increaseQuantity(item.id)
-  }
-  className="
-    flex h-10 w-10 items-center justify-center rounded-full
-    bg-[var(--mn-accent)]
-    text-xl font-black text-[var(--mn-accent-contrast)]
-    transition-all duration-200
-    hover:bg-[var(--mn-accent-hover)]
-    active:scale-95
-   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
->
-  +
-</button>
+                          <button
+                            onClick={() => increaseQuantity(item.id)}
+                            className="
+                              flex h-10 w-10 items-center justify-center rounded-full
+                              bg-[var(--mn-accent)]
+                              text-xl font-black text-[var(--mn-accent-contrast)]
+                              transition-all duration-200
+                              hover:bg-[var(--mn-accent-hover)]
+                              active:scale-95
+                              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
+                          >
+                            +
+                          </button>
+                        </>
+                      )}
 
 
                     </div>

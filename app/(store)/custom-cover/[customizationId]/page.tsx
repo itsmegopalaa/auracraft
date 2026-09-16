@@ -40,7 +40,7 @@ export default async function CustomCoverEditorPage({
     await supabase
       .from("custom_cover_customizations")
       .select(
-        "id, customer_id, product_id, creation_method, status, template_id, customer_name, customer_text, design, print_spec, ai_budget"
+        "id, customer_id, product_id, creation_method, status, template_id, customer_name, customer_text, design, print_spec, physical_config, ai_budget"
       )
       .eq("id", customizationId)
       .eq("customer_id", user.id)
@@ -80,6 +80,15 @@ export default async function CustomCoverEditorPage({
           productId={customization.product_id ?? undefined}
           productName={product?.name ?? "Custom Cover"}
           productImage={product?.image ?? ""}
+          physicalConfig={
+            customization.physical_config as {
+              size: "A4" | "A5";
+              pages: 100 | 150 | 200;
+              paper: "plain" | "ruled" | "dotGrid";
+              orientation: "portrait" | "landscape";
+              quantity: number;
+            }
+          }
         />
       </section>
     </main>

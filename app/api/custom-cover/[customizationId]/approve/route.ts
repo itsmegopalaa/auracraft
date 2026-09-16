@@ -152,7 +152,7 @@ export async function POST(
         .eq("customer_id", user.id)
         .eq("status", "draft")
         .select(
-          "id, product_id, creation_method, status, template_id, customer_name, customer_text, design, print_spec, customer_approved_at"
+          "id, product_id, creation_method, status, template_id, customer_name, customer_text, design, print_spec, physical_config, customer_approved_at"
         )
         .single();
 

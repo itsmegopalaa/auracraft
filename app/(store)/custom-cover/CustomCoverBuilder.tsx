@@ -241,15 +241,210 @@ export default function CustomCoverBuilder({
 
         {/* 02 */}
         <section className="mt-12 border-t border-[var(--mn-border)] pt-12">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--mn-text-muted)]">
-            03
+          <SectionHeading number="02" title="Notebook Format" />
+
+          <p className="mb-6 text-sm text-[var(--mn-text-secondary)]">
+            Choose the notebook you want to create and its physical format.
           </p>
 
-          <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-            Quantity
-          </h2>
+          {/* Existing product catalogue */}
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <Label>Product</Label>
 
-          <p className="mt-2 text-sm text-[var(--mn-text-secondary)]">
+              {products.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scrollProducts("left")}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] text-sm transition hover:border-[var(--mn-border-strong)] hover:bg-[var(--mn-surface-soft)]"
+                    aria-label="Scroll products left"
+                  >
+                    ←
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => scrollProducts("right")}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] text-sm transition hover:border-[var(--mn-border-strong)] hover:bg-[var(--mn-surface-soft)]"
+                    aria-label="Scroll products right"
+                  >
+                    →
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {products.length > 0 ? (
+              <div
+                ref={productScrollRef}
+                className="flex gap-3 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {products.map((item) => {
+                  const active = selectedProductId === item.id;
+                  const itemName = item.name ?? item.title ?? "Notebook";
+                  const image = item.image_url ?? item.image;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleProductSelect(item)}
+                      className={[
+                        "mn-transition min-w-[180px] shrink-0 rounded-2xl border p-3 text-left",
+                        active
+                          ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] shadow-[var(--mn-shadow-sm)]"
+                          : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
+                      ].join(" ")}
+                    >
+                      <div className="h-[105px] overflow-hidden rounded-lg bg-[var(--mn-surface-soft)] sm:h-[110px]">
+                        {image ? (
+                          <img
+                            src={image}
+                            alt={itemName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-xs text-[var(--mn-text-muted)]">
+                            MineNote
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-2 flex items-start justify-between gap-1.5">
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-semibold sm:text-sm">
+                            {itemName}
+                          </p>
+
+                          {typeof item.price === "number" && (
+                            <p className="mt-0.5 text-[11px] text-[var(--mn-text-secondary)]">
+                              ₹{item.price}
+                            </p>
+                          )}
+                        </div>
+
+                        {active && (
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--mn-accent)] text-[10px] text-white">
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-sm text-[var(--mn-text-secondary)]">
+                Blank notebook
+              </div>
+            )}
+          </div>
+
+          {/* Size */}
+          <div className="mt-8">
+            <Label>Size</Label>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {SIZES.map((item) => {
+                const active = size === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSize(item.id)}
+                    className={[
+                      "mn-transition rounded-2xl border p-4 text-left",
+                      active
+                        ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] shadow-[var(--mn-shadow-sm)]"
+                        : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold">{item.title}</p>
+                        <p className="mt-0.5 text-[11px] text-[var(--mn-text-secondary)]">
+                          {item.meta}
+                        </p>
+                      </div>
+
+                      {item.badge && (
+                        <span className="rounded-full bg-[var(--mn-accent-soft)] px-2.5 py-1 text-[10px] font-semibold text-[var(--mn-accent)]">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Pages */}
+          <div className="mt-8">
+            <Label>Pages</Label>
+
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {PAGES.map((pages) => {
+                const active = pageCount === pages;
+
+                return (
+                  <button
+                    key={pages}
+                    type="button"
+                    onClick={() => setPageCount(pages)}
+                    className={[
+                      "mn-transition rounded-xl border px-4 py-3 text-sm font-semibold",
+                      active
+                        ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
+                        : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
+                    ].join(" ")}
+                  >
+                    {pages}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Paper */}
+          <div className="mt-8">
+            <Label>Paper</Label>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {PAPERS.map((item) => {
+                const active = paper === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setPaper(item.id)}
+                    className={[
+                      "mn-transition rounded-2xl border p-4 text-left",
+                      active
+                        ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] shadow-[var(--mn-shadow-sm)]"
+                        : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
+                    ].join(" ")}
+                  >
+                    <p className="text-sm font-semibold">{item.title}</p>
+
+                    <p className="mt-1 text-xs leading-5 text-[var(--mn-text-secondary)]">
+                      {item.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* 03 */}
+        <section className="mt-12 border-t border-[var(--mn-border)] pt-12">
+          <SectionHeading number="03" title="Quantity" />
+
+          <p className="mb-5 text-sm text-[var(--mn-text-secondary)]">
             How many copies do you need?
           </p>
 

@@ -73,7 +73,7 @@ export default async function CustomCoverEditorPage({
   }
 
   return (
-    <main className="flex h-[calc(100dvh-4rem)] min-h-0 w-full overflow-hidden bg-[var(--mn-bg)] text-[var(--mn-text)]">
+    <main className="flex h-dvh min-h-0 w-full overflow-hidden bg-[var(--mn-bg)] text-[var(--mn-text)]">
       <section className="flex h-full min-h-0 w-full min-w-0 overflow-hidden">
         <CustomCoverEditor
           customizationId={customization.id}

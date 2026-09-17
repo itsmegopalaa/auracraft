@@ -91,4 +91,15 @@ export function validateCustomization(
 
   validateCustomerText(customization.customerName);
   validateCustomerText(customization.customerText);
+
+  const quantity = customization.physicalConfig?.quantity;
+
+  if (
+    typeof quantity !== "number" ||
+    !Number.isFinite(quantity) ||
+    !Number.isInteger(quantity) ||
+    quantity < 1
+  ) {
+    throw new Error("Custom cover quantity must be a positive integer.");
+  }
 }

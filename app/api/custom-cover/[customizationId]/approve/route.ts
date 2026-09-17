@@ -46,7 +46,7 @@ export async function POST(
     const { data: customization, error } = await supabase
       .from("custom_cover_customizations")
       .select(
-        "id, customer_id, product_id, creation_method, status, template_id, design"
+        "id, customer_id, product_id, creation_method, status, template_id, customer_name, customer_text, design, physical_config"
       )
       .eq("id", customizationId)
       .eq("customer_id", user.id)
@@ -66,6 +66,33 @@ export async function POST(
             "This customization can no longer be approved.",
         },
         { status: 409 }
+      );
+    }
+
+    const physicalConfig = customization.physical_config;
+
+    if (
+      !physicalConfig ||
+      typeof physicalConfig !== "object" ||
+      Array.isArray(physicalConfig)
+    ) {
+      return NextResponse.json(
+        { error: "Custom cover physical configuration is invalid." },
+        { status: 400 }
+      );
+    }
+
+    const quantity = (physicalConfig as Record<string, unknown>).quantity;
+
+    if (
+      typeof quantity !== "number" ||
+      !Number.isFinite(quantity) ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return NextResponse.json(
+        { error: "Custom cover quantity must be a positive integer." },
+        { status: 400 }
       );
     }
 

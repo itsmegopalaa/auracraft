@@ -1,15 +1,19 @@
 import type {
   A4ProductionResult,
   ProductionCoverSide,
+  ProductionOrientation,
+  ProductionSize,
   ProductionText,
+  ProductionDesignState,
 } from "./types";
 
-import type {
-  UpscaleProviderId,
-} from "../upscale";
+import type { UpscaleProviderId } from "../upscale";
 
 export type ProductionPipelineInput = {
   artwork: Buffer;
+
+  size?: ProductionSize;
+  orientation?: ProductionOrientation;
 
   sourceWidth: number;
   sourceHeight: number;
@@ -28,6 +32,12 @@ export type ProductionPipelineInput = {
   };
 
   texts?: ProductionText[];
+
+  canvasWidth?: number;
+  canvasHeight?: number;
+
+  design?: ProductionDesignState;
+  assetBuffers?: Record<string, Buffer>;
 
   upscaleProvider?: UpscaleProviderId;
 };
@@ -50,6 +60,8 @@ export type ProductionPipelineResult = {
   };
 
   final: {
+    size: ProductionSize;
+    orientation: ProductionOrientation;
     width: number;
     height: number;
     dpi: number;

@@ -3,6 +3,7 @@ import {
 } from "../upscale";
 
 import {
+  getProductionSpec,
   renderA4ProductionCover,
 } from "./renderer";
 
@@ -11,15 +12,21 @@ import type {
   ProductionPipelineResult,
 } from "./pipeline-types";
 
-const A4_WIDTH = 2480;
-const A4_HEIGHT = 3508;
-
 export async function createProductionCover(
-  input: ProductionPipelineInput
+  input: ProductionPipelineInput,
 ): Promise<ProductionPipelineResult> {
+  const selectedSize = input.size ?? "A4";
+  const selectedOrientation =
+    input.orientation ?? "portrait";
+
+  const productionSpec = getProductionSpec(
+    selectedSize,
+    selectedOrientation,
+  );
+
   if (!Buffer.isBuffer(input.artwork)) {
     throw new Error(
-      "Production artwork must be a Buffer."
+      "Production artwork must be a Buffer.",
     );
   }
 
@@ -28,7 +35,7 @@ export async function createProductionCover(
     input.sourceWidth <= 0
   ) {
     throw new Error(
-      "Invalid source artwork width."
+      "Invalid source artwork width.",
     );
   }
 
@@ -37,77 +44,95 @@ export async function createProductionCover(
     input.sourceHeight <= 0
   ) {
     throw new Error(
-      "Invalid source artwork height."
+      "Invalid source artwork height.",
     );
   }
 
   if (!input.sourceMimeType) {
     throw new Error(
-      "Source artwork MIME type is required."
+      "Source artwork MIME type is required.",
     );
   }
 
-  /*
-   * Stage 1
-   *
-   * Normalize/enhance source artwork to the exact
-   * A4 production dimensions.
-   *
-   * Current provider is high-quality Sharp/Lanczos
-   * resampling. A real AI super-resolution provider
-   * can replace it later.
-   */
+  const sourceAspect =
+    input.sourceWidth /
+    input.sourceHeight;
+
+  const productionAspect =
+    productionSpec.widthPx /
+    productionSpec.heightPx;
+
+  const targetWidth =
+    sourceAspect >= productionAspect
+      ? productionSpec.widthPx
+      : Math.max(
+          1,
+          Math.round(
+            productionSpec.heightPx *
+              sourceAspect,
+          ),
+        );
+
+  const targetHeight =
+    sourceAspect >= productionAspect
+      ? Math.max(
+          1,
+          Math.round(
+            productionSpec.widthPx /
+              sourceAspect,
+          ),
+        )
+      : productionSpec.heightPx;
+
   const upscale = await upscaleArtwork({
     artwork: input.artwork,
     width: input.sourceWidth,
     height: input.sourceHeight,
     mimeType: input.sourceMimeType,
-    targetWidth: A4_WIDTH,
-    targetHeight: A4_HEIGHT,
-    provider: input.upscaleProvider ?? "sharp",
+    targetWidth,
+    targetHeight,
+    provider:
+      input.upscaleProvider ?? "sharp",
   });
 
-  /*
-   * Stage 2
-   *
-   * Apply customer text, branding and final
-   * print metadata on top of the normalized A4 art.
-   */
   const production =
     await renderA4ProductionCover({
       artwork: upscale.buffer,
+      size: selectedSize,
+      orientation: selectedOrientation,
       customerName: input.customerName,
       customerText: input.customerText,
       side: input.side,
       background: input.background,
       branding: input.branding,
       texts: input.texts,
+      design: input.design,
+      assetBuffers: input.assetBuffers,
     });
 
-  /*
-   * Hard production invariant.
-   *
-   * Nothing leaves this pipeline unless it is
-   * exactly A4 at 300 DPI.
-   */
   if (
-    production.widthPx !== A4_WIDTH ||
-    production.heightPx !== A4_HEIGHT
+    production.size !== selectedSize ||
+    production.orientation !==
+      selectedOrientation ||
+    production.widthPx !==
+      productionSpec.widthPx ||
+    production.heightPx !==
+      productionSpec.heightPx
   ) {
     throw new Error(
-      `Production output must be ${A4_WIDTH}×${A4_HEIGHT}px.`
+      `Production output must be ${selectedSize} ${selectedOrientation} ${productionSpec.widthPx}×${productionSpec.heightPx}px.`,
     );
   }
 
   if (production.dpi !== 300) {
     throw new Error(
-      "Production output must use 300 DPI metadata."
+      "Production output must use 300 DPI metadata.",
     );
   }
 
   if (production.mimeType !== "image/png") {
     throw new Error(
-      "Production output must be PNG."
+      "Production output must be PNG.",
     );
   }
 
@@ -129,6 +154,8 @@ export async function createProductionCover(
     },
 
     final: {
+      size: selectedSize,
+      orientation: selectedOrientation,
       width: production.widthPx,
       height: production.heightPx,
       dpi: production.dpi,

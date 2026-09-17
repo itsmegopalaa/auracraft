@@ -40,11 +40,27 @@ type EditorElement = {
   shape?: "rectangle" | "circle";
   fill?: string;
   borderRadius?: number;
+  assetId?: string;
+  zIndex?: number;
 };
+
+type CoverSide = "front" | "insideFront" | "insideBack" | "back";
 
 type DesignState = {
   background: string;
   elements: EditorElement[];
+  canvasWidth?: number;
+  canvasHeight?: number;
+  canvasSize?: "A4" | "A5";
+  canvasOrientation?: "portrait" | "landscape";
+};
+
+type SurfaceMap = Record<CoverSide, DesignState>;
+
+type SavedEditorState = {
+  activeSide?: CoverSide;
+  surfaces?: Partial<SurfaceMap>;
+  design?: DesignState;
 };
 
 type Props = {
@@ -92,15 +108,108 @@ type Interaction =
     };
 
 const CANVAS_WIDTH = 600;
-const CANVAS_HEIGHT = 760;
+
+function getCanvasSize(
+  size: "A4" | "A5" = "A4",
+  orientation: "portrait" | "landscape" = "portrait",
+) {
+  const ratio =
+    size === "A5"
+      ? 148 / 210
+      : 210 / 297;
+
+  const portraitWidth = CANVAS_WIDTH;
+  const portraitHeight = CANVAS_WIDTH / ratio;
+
+  if (orientation === "landscape") {
+    return {
+      width: portraitHeight,
+      height: portraitWidth,
+    };
+  }
+
+  return {
+    width: portraitWidth,
+    height: portraitHeight,
+  };
+}
+
+function scaleLegacyDesign(
+  value: DesignState,
+  canvasWidth: number,
+  canvasHeight: number,
+): DesignState {
+  const legacyWidth = 600;
+  const legacyHeight = 760;
+
+  const widthScale = canvasWidth / legacyWidth;
+  const heightScale = canvasHeight / legacyHeight;
+
+  if (
+    Math.abs(widthScale - 1) < 0.001 &&
+    Math.abs(heightScale - 1) < 0.001
+  ) {
+    return value;
+  }
+
+  return {
+    ...value,
+    elements: value.elements.map((element) => ({
+      ...element,
+      x: element.x * widthScale,
+      y: element.y * heightScale,
+      width: element.width * widthScale,
+      height: element.height * heightScale,
+      fontSize:
+        typeof element.fontSize === "number"
+          ? element.fontSize * Math.min(widthScale, heightScale)
+          : element.fontSize,
+      imageOffsetX:
+        typeof element.imageOffsetX === "number"
+          ? element.imageOffsetX * widthScale
+          : element.imageOffsetX,
+      imageOffsetY:
+        typeof element.imageOffsetY === "number"
+          ? element.imageOffsetY * heightScale
+          : element.imageOffsetY,
+    })),
+  };
+}
 
 const initialDesign: DesignState = {
   background: "#ffffff",
   elements: [],
+  canvasWidth: CANVAS_WIDTH,
+  canvasHeight: 600 / (210 / 297),
+  canvasSize: "A4",
+  canvasOrientation: "portrait",
 };
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+const COVER_SIDES: CoverSide[] = [
+  "front",
+  "insideFront",
+  "insideBack",
+  "back",
+];
+
+function createSurface(
+  size: "A4" | "A5",
+  orientation: "portrait" | "landscape",
+): DesignState {
+  const canvas = getCanvasSize(size, orientation);
+
+  return {
+    background: "#ffffff",
+    elements: [],
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+    canvasSize: size,
+    canvasOrientation: orientation,
+  };
 }
 
 export default function CustomCoverEditor({
@@ -113,7 +222,37 @@ export default function CustomCoverEditor({
   const router = useRouter();
   const { addCustomCoverToCart } = useCart();
 
-  const [design, setDesign] = useState<DesignState>(initialDesign);
+  const canvasSize = useMemo(
+    () =>
+      getCanvasSize(
+        physicalConfig?.size ?? "A4",
+        physicalConfig?.orientation ?? "portrait",
+      ),
+    [physicalConfig?.size, physicalConfig?.orientation],
+  );
+
+  const CANVAS_HEIGHT = canvasSize.height;
+
+  const defaultSurface = useMemo(
+    () =>
+      createSurface(
+        physicalConfig?.size ?? "A4",
+        physicalConfig?.orientation ?? "portrait",
+      ),
+    [physicalConfig?.size, physicalConfig?.orientation],
+  );
+
+  const [activeSide, setActiveSide] = useState<CoverSide>("front");
+
+  const [surfaces, setSurfaces] = useState<SurfaceMap>(() => ({
+    front: defaultSurface,
+    insideFront: defaultSurface,
+    insideBack: defaultSurface,
+    back: defaultSurface,
+  }));
+
+  const [design, setDesign] = useState<DesignState>(() => defaultSurface);
+
   const [history, setHistory] = useState<DesignState[]>([]);
   const [future, setFuture] = useState<DesignState[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -123,7 +262,41 @@ export default function CustomCoverEditor({
   const [zoom, setZoom] = useState(0.72);
   const [fitZoom, setFitZoom] = useState(0.72);
   const [preview, setPreview] = useState(false);
+  const [previewFrame, setPreviewFrame] = useState({
+    width: 360,
+    height: 456,
+  });
   const [saved, setSaved] = useState(true);
+
+  useEffect(() => {
+    if (!preview) return;
+
+    const updatePreviewFrame = () => {
+      const maxWidth = Math.max(280, window.innerWidth - 48);
+      const maxHeight = Math.max(280, window.innerHeight - 96);
+      const ratio = canvasSize.width / canvasSize.height;
+
+      let width = maxWidth;
+      let height = width / ratio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * ratio;
+      }
+
+      setPreviewFrame({
+        width: Math.floor(width),
+        height: Math.floor(height),
+      });
+    };
+
+    updatePreviewFrame();
+    window.addEventListener("resize", updatePreviewFrame);
+
+    return () => {
+      window.removeEventListener("resize", updatePreviewFrame);
+    };
+  }, [preview, canvasSize.width, canvasSize.height]);
   const [saving, setSaving] = useState(false);
   const [panel, setPanel] = useState<"properties" | "background" | "ai">(
     "properties",
@@ -161,6 +334,36 @@ export default function CustomCoverEditor({
     [design.elements, selectedId],
   );
 
+  function allSurfaces(): SurfaceMap {
+    return {
+      ...surfaces,
+      [activeSide]: design,
+    };
+  }
+
+  function switchSide(nextSide: CoverSide) {
+    if (nextSide === activeSide) return;
+
+    setSurfaces((current) => ({
+      ...current,
+      [activeSide]: design,
+    }));
+
+    setDesign(
+      surfaces[nextSide] ??
+        createSurface(
+          physicalConfig?.size ?? "A4",
+          physicalConfig?.orientation ?? "portrait",
+        ),
+    );
+
+    setActiveSide(nextSide);
+    setHistory([]);
+    setFuture([]);
+    setSelectedId(null);
+    setSaved(false);
+  }
+
   useEffect(() => {
     const raw = localStorage.getItem(
       `minenote-custom-cover-${customizationId}`,
@@ -169,29 +372,157 @@ export default function CustomCoverEditor({
     if (!raw) return;
 
     try {
-      const parsed = JSON.parse(raw) as DesignState;
+      const parsed = JSON.parse(raw) as SavedEditorState;
 
-      if (
+      const normalizeSurface = (
+        value: DesignState | undefined,
+      ): DesignState => {
+        const source =
+          value &&
+          typeof value.background === "string" &&
+          Array.isArray(value.elements)
+            ? value
+            : createSurface(
+                physicalConfig?.size ?? "A4",
+                physicalConfig?.orientation ?? "portrait",
+              );
+
+        const hydrated = scaleLegacyDesign(
+          source,
+          canvasSize.width,
+          canvasSize.height,
+        );
+
+        return {
+          ...hydrated,
+          canvasWidth: canvasSize.width,
+          canvasHeight: canvasSize.height,
+          canvasSize: physicalConfig?.size ?? "A4",
+          canvasOrientation:
+            physicalConfig?.orientation ?? "portrait",
+        };
+      };
+
+      const hasSurfaces =
         parsed &&
-        typeof parsed.background === "string" &&
-        Array.isArray(parsed.elements)
-      ) {
+        parsed.surfaces &&
+        typeof parsed.surfaces === "object";
+
+      if (hasSurfaces) {
+        const restoredSurfaces: SurfaceMap = {
+          front: normalizeSurface(parsed.surfaces?.front),
+          insideFront: normalizeSurface(parsed.surfaces?.insideFront),
+          insideBack: normalizeSurface(parsed.surfaces?.insideBack),
+          back: normalizeSurface(parsed.surfaces?.back),
+        };
+
+        const restoredActiveSide: CoverSide =
+          parsed.activeSide &&
+          COVER_SIDES.includes(parsed.activeSide)
+            ? parsed.activeSide
+            : "front";
+
         // Local draft hydration from browser storage.
         // This intentional state update is needed to restore the saved editor draft.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setDesign(parsed);
+        setSurfaces(restoredSurfaces);
+        setActiveSide(restoredActiveSide);
+        setDesign(restoredSurfaces[restoredActiveSide]);
+        setSelectedId(null);
+        setSaved(true);
+        return;
+      }
+
+      // Backward compatibility for the previous single-surface cache format.
+      if (
+        parsed &&
+        parsed.design &&
+        typeof parsed.design.background === "string" &&
+        Array.isArray(parsed.design.elements)
+      ) {
+        const restoredFront = normalizeSurface(parsed.design);
+
+        const restoredSurfaces: SurfaceMap = {
+          front: restoredFront,
+          insideFront: createSurface(
+            physicalConfig?.size ?? "A4",
+            physicalConfig?.orientation ?? "portrait",
+          ),
+          insideBack: createSurface(
+            physicalConfig?.size ?? "A4",
+            physicalConfig?.orientation ?? "portrait",
+          ),
+          back: createSurface(
+            physicalConfig?.size ?? "A4",
+            physicalConfig?.orientation ?? "portrait",
+          ),
+        };
+
+        // Local draft hydration from browser storage.
+        // This intentional state update is needed to restore the saved editor draft.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSurfaces(restoredSurfaces);
+        setActiveSide("front");
+        setDesign(restoredFront);
+        setSelectedId(null);
+        setSaved(true);
+        return;
+      }
+
+      // Legacy cache before multi-side support.
+      if (
+        parsed &&
+        typeof (parsed as unknown as DesignState).background === "string" &&
+        Array.isArray((parsed as unknown as DesignState).elements)
+      ) {
+        const legacyDesign = parsed as unknown as DesignState;
+        const restoredFront = normalizeSurface(legacyDesign);
+
+        const restoredSurfaces: SurfaceMap = {
+          front: restoredFront,
+          insideFront: createSurface(
+            physicalConfig?.size ?? "A4",
+            physicalConfig?.orientation ?? "portrait",
+          ),
+          insideBack: createSurface(
+            physicalConfig?.size ?? "A4",
+            physicalConfig?.orientation ?? "portrait",
+          ),
+          back: createSurface(
+            physicalConfig?.size ?? "A4",
+            physicalConfig?.orientation ?? "portrait",
+          ),
+        };
+
+        // Local draft hydration from browser storage.
+        // This intentional state update is needed to restore the saved editor draft.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSurfaces(restoredSurfaces);
+        setActiveSide("front");
+        setDesign(restoredFront);
+        setSelectedId(null);
+        setSaved(true);
       }
     } catch {
       // Ignore malformed local data.
     }
-  }, [customizationId]);
+  }, [
+    customizationId,
+    canvasSize.width,
+    canvasSize.height,
+    physicalConfig?.size,
+    physicalConfig?.orientation,
+  ]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
         localStorage.setItem(
           `minenote-custom-cover-${customizationId}`,
-          JSON.stringify(design),
+          JSON.stringify({
+            activeSide,
+            surfaces: allSurfaces(),
+          }),
         );
         setSaved(true);
       } catch {
@@ -200,7 +531,105 @@ export default function CustomCoverEditor({
     }, 700);
 
     return () => window.clearTimeout(timer);
-  }, [design, customizationId]);
+  }, [design, surfaces, activeSide, customizationId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateAssetUrls() {
+      try {
+        const response = await fetch(
+          `/api/custom-cover/${customizationId}/assets`,
+          {
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          assets?: Array<{
+            id?: string;
+            previewUrl?: string | null;
+          }>;
+        };
+
+        if (cancelled || !Array.isArray(payload.assets)) {
+          return;
+        }
+
+        const urlByAssetId = new Map<string, string>();
+
+        for (const asset of payload.assets) {
+          if (
+            typeof asset.id === "string" &&
+            typeof asset.previewUrl === "string" &&
+            asset.previewUrl.length > 0
+          ) {
+            urlByAssetId.set(asset.id, asset.previewUrl);
+          }
+        }
+
+        if (!urlByAssetId.size) return;
+
+        setSurfaces((current) => {
+          let changed = false;
+
+          const hydrated = Object.fromEntries(
+            COVER_SIDES.map((side) => {
+              const surface = current[side];
+
+              const elements = surface.elements.map((element) => {
+                if (
+                  element.type !== "image" ||
+                  !element.assetId
+                ) {
+                  return element;
+                }
+
+                const freshUrl =
+                  urlByAssetId.get(element.assetId);
+
+                if (
+                  !freshUrl ||
+                  freshUrl === element.src
+                ) {
+                  return element;
+                }
+
+                changed = true;
+
+                return {
+                  ...element,
+                  src: freshUrl,
+                };
+              });
+
+              return [
+                side,
+                elements === surface.elements
+                  ? surface
+                  : {
+                      ...surface,
+                      elements,
+                    },
+              ];
+            }),
+          ) as SurfaceMap;
+
+          return changed ? hydrated : current;
+        });
+      } catch {
+        // Asset hydration is best-effort; local draft remains usable.
+      }
+    }
+
+    void hydrateAssetUrls();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [customizationId]);
 
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
@@ -290,25 +719,63 @@ export default function CustomCoverEditor({
     setPanel("properties");
   }
 
-  function handleImage(file: File) {
-    if (!file.type.startsWith("image/")) return;
+  async function handleImage(file: File) {
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
 
-    const reader = new FileReader();
+    if (file.size > 15 * 1024 * 1024) {
+      window.alert("Image must be 15 MB or smaller.");
+      return;
+    }
 
-    reader.onload = () => {
-      const src = typeof reader.result === "string" ? reader.result : null;
-      if (!src) return;
+    const formData = new FormData();
+    formData.append("side", activeSide);
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(
+        `/api/custom-cover/${customizationId}/assets`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const payload = (await response.json()) as {
+        asset?: {
+          id: string;
+          side: CoverSide;
+          previewUrl?: string | null;
+          width?: number;
+          height?: number;
+        };
+        error?: string;
+      };
+
+      if (!response.ok || !payload.asset) {
+        throw new Error(
+          payload.error || "Unable to upload your artwork.",
+        );
+      }
+
+      const previewUrl = payload.asset.previewUrl;
+
+      if (!previewUrl) {
+        throw new Error("Artwork uploaded, but preview could not be created.");
+      }
 
       const element: EditorElement = {
         id: makeId("image"),
         type: "image",
-        x: 100,
-        y: 230,
-        width: 400,
-        height: 300,
+        x: canvasSize.width * 0.1,
+        y: canvasSize.height * 0.3,
+        width: canvasSize.width * 0.8,
+        height: canvasSize.height * 0.4,
         rotation: 0,
         opacity: 1,
-        src,
+        src: previewUrl,
+        assetId: payload.asset.id,
         objectFit: "contain",
         imageScale: 1,
         imageOffsetX: 0,
@@ -323,47 +790,81 @@ export default function CustomCoverEditor({
       setSelectedId(element.id);
       setTool("select");
       setPanel("properties");
-    };
-
-    reader.readAsDataURL(file);
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to upload your artwork.",
+      );
+    }
   }
 
-  function onImageChange(event: ChangeEvent<HTMLInputElement>) {
+  async function onImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
 
-    if (!file) {
-      event.target.value = "";
+    if (!file || !selectedElement || selectedElement.type !== "image") {
       return;
     }
 
-    if (selectedElement?.type === "image") {
-      if (!file.type.startsWith("image/")) {
-        event.target.value = "";
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const src =
-          typeof reader.result === "string" ? reader.result : null;
-
-        if (!src || !selectedElement) return;
-
-        updateElement(selectedElement.id, {
-          src,
-        });
-
-        setTool("select");
-        setPanel("properties");
-      };
-
-      reader.readAsDataURL(file);
-    } else {
-      handleImage(file);
+    if (!file.type.startsWith("image/")) {
+      window.alert("Please select a PNG, JPEG, or WebP image.");
+      return;
     }
 
-    event.target.value = "";
+    if (file.size > 15 * 1024 * 1024) {
+      window.alert("Image must be 15 MB or smaller.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("side", activeSide);
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(
+        `/api/custom-cover/${customizationId}/assets`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const payload = (await response.json()) as {
+        asset?: {
+          id: string;
+          side: CoverSide;
+          previewUrl?: string | null;
+        };
+        error?: string;
+      };
+
+      if (!response.ok || !payload.asset) {
+        throw new Error(
+          payload.error || "Unable to replace your artwork.",
+        );
+      }
+
+      if (!payload.asset.previewUrl) {
+        throw new Error(
+          "Artwork uploaded, but preview could not be created.",
+        );
+      }
+
+      updateElement(selectedElement.id, {
+        src: payload.asset.previewUrl,
+        assetId: payload.asset.id,
+      });
+
+      setTool("select");
+      setPanel("properties");
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to replace your artwork.",
+      );
+    }
   }
 
   function deleteSelected() {
@@ -425,8 +926,8 @@ export default function CustomCoverEditor({
       const availableWidth = Math.max(220, rect.width - 32);
       const availableHeight = Math.max(300, rect.height - 32);
 
-      const widthFit = availableWidth / CANVAS_WIDTH;
-      const heightFit = availableHeight / CANVAS_HEIGHT;
+      const widthFit = availableWidth / canvasSize.width;
+      const heightFit = availableHeight / canvasSize.height;
 
       const nextFit = Math.max(
         0.4,
@@ -551,14 +1052,14 @@ export default function CustomCoverEditor({
             x: Math.max(
               -element.width + 20,
               Math.min(
-                CANVAS_WIDTH - 20,
+                canvasSize.width - 20,
                 interaction.originX + point.x - interaction.startX,
               ),
             ),
             y: Math.max(
               -element.height + 20,
               Math.min(
-                CANVAS_HEIGHT - 20,
+                canvasSize.height - 20,
                 interaction.originY + point.y - interaction.startY,
               ),
             ),
@@ -581,7 +1082,7 @@ export default function CustomCoverEditor({
             width = Math.max(
               minWidth,
               Math.min(
-                CANVAS_WIDTH - x,
+                canvasSize.width - x,
                 interaction.originWidth + dx,
               ),
             );
@@ -591,7 +1092,7 @@ export default function CustomCoverEditor({
             height = Math.max(
               minHeight,
               Math.min(
-                CANVAS_HEIGHT - y,
+                canvasSize.height - y,
                 interaction.originHeight + dy,
               ),
             );
@@ -706,8 +1207,19 @@ export default function CustomCoverEditor({
     setSaved(false);
   }
 
-  async function saveCustomization(): Promise<boolean> {
+  async function saveCustomization(
+    designOverride?: DesignState,
+  ): Promise<boolean> {
     if (saving) return false;
+
+    const surfacesToSave = {
+      ...allSurfaces(),
+      ...(designOverride
+        ? {
+            [activeSide]: designOverride,
+          }
+        : {}),
+    };
 
     setSaving(true);
     setSaved(false);
@@ -721,7 +1233,13 @@ export default function CustomCoverEditor({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            design,
+            design: {
+              ...surfacesToSave,
+              branding: {
+                mineNote: true,
+                auraCraft: false,
+              },
+            },
             productId: selectedProductId || null,
           }),
         },
@@ -738,7 +1256,10 @@ export default function CustomCoverEditor({
       try {
         localStorage.setItem(
           `minenote-custom-cover-${customizationId}`,
-          JSON.stringify(design),
+          JSON.stringify({
+            activeSide,
+            surfaces: surfacesToSave,
+          }),
         );
       } catch {
         // Local cache is optional.
@@ -770,15 +1291,6 @@ export default function CustomCoverEditor({
       return;
     }
 
-    const quantity = Math.max(
-      1,
-      Math.floor(
-        Number.isFinite(Number(physicalConfig?.quantity))
-          ? Number(physicalConfig?.quantity)
-          : 1,
-      ),
-    );
-
     setApproving(true);
 
     try {
@@ -804,6 +1316,18 @@ export default function CustomCoverEditor({
       }
 
       const approvedProduct = data?.product;
+      const approvedQuantity = Number(
+        data?.customization?.physical_config?.quantity,
+      );
+
+      if (
+        !Number.isInteger(approvedQuantity) ||
+        approvedQuantity < 1
+      ) {
+        throw new Error(
+          "Custom cover was approved, but its quantity was unavailable.",
+        );
+      }
 
       if (
         !approvedProduct?.id ||
@@ -823,7 +1347,7 @@ export default function CustomCoverEditor({
           image: productImage || null,
         },
         customizationId,
-        quantity,
+        approvedQuantity,
       );
 
       router.push("/cart");
@@ -859,7 +1383,7 @@ export default function CustomCoverEditor({
         body: JSON.stringify({
           customizationId,
           prompt,
-          sides: ["front"],
+          sides: [activeSide],
         }),
       });
 
@@ -890,7 +1414,7 @@ export default function CustomCoverEditor({
               kind?: string;
               previewUrl?: string;
             }) =>
-              asset.side === "front" &&
+              asset.side === activeSide &&
               asset.kind === "preview" &&
               typeof asset.previewUrl === "string" &&
               asset.previewUrl.length > 0,
@@ -908,18 +1432,19 @@ export default function CustomCoverEditor({
         type: "image",
         x: 0,
         y: 0,
-        width: CANVAS_WIDTH,
-        height: CANVAS_HEIGHT,
+        width: canvasSize.width,
+        height: canvasSize.height,
         rotation: 0,
         opacity: 1,
         src: generatedAsset.previewUrl,
-        objectFit: "cover",
+        objectFit: "contain",
         imageScale: 1,
         imageOffsetX: 0,
         imageOffsetY: 0,
+        assetId: generatedAsset.id,
       };
 
-      commit({
+      const nextDesign: DesignState = {
         ...design,
         elements: [
           ...design.elements.filter(
@@ -931,7 +1456,9 @@ export default function CustomCoverEditor({
           ),
           element,
         ],
-      });
+      };
+
+      commit(nextDesign);
 
       setSelectedId(element.id);
       setTool("select");
@@ -939,7 +1466,7 @@ export default function CustomCoverEditor({
       setAiPrompt("");
       setSaved(false);
 
-      await saveCustomization();
+      await saveCustomization(nextDesign);
     } catch (error) {
       console.error("CUSTOM COVER AI GENERATION FAILED:", error);
 
@@ -954,8 +1481,8 @@ export default function CustomCoverEditor({
   }
 
   const canvasStyle: CSSProperties = {
-    width: CANVAS_WIDTH,
-    height: CANVAS_HEIGHT,
+    width: canvasSize.width,
+    height: canvasSize.height,
     background: design.background || "#ffffff",
     transform: `scale(${displayZoom})`,
     transformOrigin: "center center",
@@ -964,7 +1491,7 @@ export default function CustomCoverEditor({
   };
 
   const toolbarButton =
-    "flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-[1.5rem] text-[10px] transition";
+    "flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl text-[10px] transition-all duration-200";
 
   return (
     <div className="min-h-[100dvh] bg-[var(--mn-bg)] text-[var(--mn-text)]">
@@ -1007,7 +1534,7 @@ export default function CustomCoverEditor({
 
           <button
             type="button"
-            onClick={saveCustomization}
+            onClick={() => void saveCustomization()}
             disabled={saving}
             className="rounded-[1.25rem] bg-[var(--mn-accent)] px-4 py-2 text-sm font-semibold text-[var(--mn-accent-contrast)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1016,7 +1543,34 @@ export default function CustomCoverEditor({
         </div>
       </header>
 
-      <div className="absolute left-4 top-[4.5rem] z-40 w-[min(360px,calc(100vw-2rem))]">
+      {/* COVER SIDE SWITCHER */}
+      <div className="sticky top-16 z-40 border-b border-[var(--mn-border)] bg-[var(--mn-bg)]/95 px-3 py-2 backdrop-blur-xl sm:px-5">
+        <div className="mx-auto flex max-w-5xl items-center gap-1 overflow-x-auto rounded-[1.25rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-1">
+          {COVER_SIDES.map((side) => (
+            <button
+              key={side}
+              type="button"
+              onClick={() => switchSide(side)}
+              className={[
+                "shrink-0 rounded-[1rem] px-4 py-2 text-xs font-semibold transition",
+                activeSide === side
+                  ? "bg-[var(--mn-accent)] text-[var(--mn-accent-contrast)] shadow-sm"
+                  : "text-[var(--mn-text-secondary)] hover:bg-[var(--mn-surface-soft)] hover:text-[var(--mn-text)]",
+              ].join(" ")}
+            >
+              {side === "front"
+                ? "Front"
+                : side === "insideFront"
+                  ? "Inside Front"
+                  : side === "insideBack"
+                    ? "Inside Back"
+                    : "Back"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute left-4 top-[8.75rem] z-40 w-[min(360px,calc(100vw-2rem))]">
         <div className="rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-[var(--mn-shadow-lg)] backdrop-blur-xl">
           <div className="mb-2 flex items-center justify-between">
             <div>
@@ -1089,10 +1643,10 @@ export default function CustomCoverEditor({
         </div>
       </div>
 
-      <main className="flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col overflow-hidden lg:flex-row">
+      <main className="flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col overflow-hidden bg-white lg:h-[calc(100dvh-4rem)] lg:flex-row">
         {/* TOOLBAR */}
-        <aside className="order-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:order-1 lg:w-[92px] lg:border-r lg:border-t-0">
-          <div className="flex items-center justify-center gap-2 overflow-x-auto p-2 lg:h-full lg:flex-col lg:justify-start lg:gap-3 lg:py-5">
+        <aside className="order-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:order-1 lg:w-[88px] lg:border-r lg:border-t-0">
+          <div className="flex items-center justify-center gap-2 overflow-x-auto p-2 lg:h-full lg:flex-col lg:justify-start lg:gap-2.5 lg:py-4">
             <button
               type="button"
               onClick={() => setTool("select")}
@@ -1184,7 +1738,7 @@ export default function CustomCoverEditor({
         }}>
           <div
     ref={canvasViewportRef}
-    className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-6 lg:p-10"
+    className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-6 lg:p-8 xl:p-10"
   >
             <div
               ref={canvasRef}
@@ -1422,7 +1976,7 @@ export default function CustomCoverEditor({
 
             <button
               type="button"
-              onClick={saveCustomization}
+              onClick={() => void saveCustomization()}
               disabled={saving || approving}
               className="rounded-lg border border-[var(--mn-border-strong)] px-3 py-2 text-xs font-medium text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -1443,7 +1997,7 @@ export default function CustomCoverEditor({
         </section>
 
         {/* RIGHT PANEL */}
-        <aside className="order-3 w-full border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:w-[330px] lg:border-l lg:border-t-0">
+        <aside className="order-3 w-full border-t border-[var(--mn-border)] bg-[var(--mn-surface-soft)] lg:w-[320px] lg:border-l lg:border-t-0">
           <div className="h-full overflow-y-auto p-5">
             {panel === "ai" ? (
               <div>
@@ -2062,7 +2616,7 @@ export default function CustomCoverEditor({
                 </div>
 
                 <h2 className="text-lg font-semibold">
-                  Build your cover
+                  Create your cover
                 </h2>
 
                 <p className="mt-2 max-w-[230px] text-sm leading-6 text-[var(--mn-text-muted)]">
@@ -2078,7 +2632,7 @@ export default function CustomCoverEditor({
                   }}
                   className="mt-6 rounded-[1.25rem] border border-[var(--mn-border)] px-4 py-3 text-sm text-[var(--mn-text-secondary)] hover:border-[var(--mn-border-strong)] hover:text-[var(--mn-text)]"
                 >
-                  ✦ Open AI Assistant
+                  ✦ Create with AI
                 </button>
               </div>
             )}
@@ -2088,11 +2642,11 @@ export default function CustomCoverEditor({
 
       {/* PREVIEW */}
       {preview && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-transparent/90 p-6 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
           <button
             type="button"
             onClick={() => setPreview(false)}
-            className="absolute right-5 top-5 rounded-full border border-[var(--mn-border-strong)] px-4 py-2 text-sm text-[var(--mn-text-secondary)] hover:text-[var(--mn-text)]"
+            className="absolute right-5 top-5 z-10 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-md transition hover:bg-black/50"
           >
             Close
           </button>
@@ -2100,76 +2654,86 @@ export default function CustomCoverEditor({
           <div
             className="relative overflow-hidden shadow-[var(--mn-shadow-lg)]"
             style={{
-              width: 360,
-              height: 456,
+              width: previewFrame.width,
+              height: previewFrame.height,
               background: design.background || "#ffffff",
             }}
           >
-            {design.elements.map((element) => {
-              const scale = 360 / CANVAS_WIDTH;
+            <div
+              className="absolute left-0 top-0"
+              style={{
+                width: canvasSize.width,
+                height: canvasSize.height,
+                transform: `scale(${
+                  previewFrame.width / canvasSize.width
+                })`,
+                transformOrigin: "top left",
+                background: design.background || "#ffffff",
+              }}
+            >
+              {design.elements.map((element) => {
+                const style: CSSProperties = {
+                  position: "absolute",
+                  left: element.x,
+                  top: element.y,
+                  width: element.width,
+                  height: element.height,
+                  transform: `rotate(${element.rotation}deg)`,
+                  opacity: element.opacity,
+                };
 
-              const style: CSSProperties = {
-                position: "absolute",
-                left: element.x * scale,
-                top: element.y * scale,
-                width: element.width * scale,
-                height: element.height * scale,
-                transform: `rotate(${element.rotation}deg)`,
-                opacity: element.opacity,
-              };
+                return (
+                  <div key={element.id} style={style}>
+                    {element.type === "text" && (
+                      <div
+                        className="flex h-full w-full items-center justify-center break-words"
+                        style={{
+                          fontSize: element.fontSize ?? 42,
+                          fontWeight: element.fontWeight,
+                          color: element.color,
+                          textAlign: element.textAlign,
+                          lineHeight: element.lineHeight ?? 1.2,
+                          letterSpacing: `${element.letterSpacing ?? 0}px`,
+                        }}
+                      >
+                        {element.text}
+                      </div>
+                    )}
 
-              return (
-                <div key={element.id} style={style}>
-                  {element.type === "text" && (
-                    <div
-                      className="flex h-full w-full items-center justify-center break-words"
-                      style={{
-                        fontSize: (element.fontSize ?? 42) * scale,
-                        fontWeight: element.fontWeight,
-                        color: element.color,
-                        textAlign: element.textAlign,
-                        lineHeight: element.lineHeight ?? 1.2,
-                        letterSpacing: `${element.letterSpacing ?? 0}px`,
-                      }}
-                    >
-                      {element.text}
-                    </div>
-                  )}
+                    {element.type === "image" && element.src && (
+                      <img
+                        src={element.src}
+                        alt=""
+                        className="h-full w-full"
+                        style={{
+                          objectFit: element.objectFit ?? "contain",
+                          borderRadius: element.borderRadius ?? 0,
+                          transform: `translate(${
+                            element.imageOffsetX ?? 0
+                          }px, ${
+                            element.imageOffsetY ?? 0
+                          }px) scale(${element.imageScale ?? 1})`,
+                          transformOrigin: "center center",
+                        }}
+                      />
+                    )}
 
-                  {element.type === "image" && element.src && (
-                    <img
-                      src={element.src}
-                      alt=""
-                      className="h-full w-full"
-                      style={{
-                        objectFit: element.objectFit ?? "contain",
-                        borderRadius:
-                          (element.borderRadius ?? 0) * scale,
-                        transform: `translate(${
-                          (element.imageOffsetX ?? 0) * scale
-                        }px, ${
-                          (element.imageOffsetY ?? 0) * scale
-                        }px) scale(${element.imageScale ?? 1})`,
-                        transformOrigin: "center center",
-                      }}
-                    />
-                  )}
-
-                  {element.type === "shape" && (
-                    <div
-                      className="h-full w-full"
-                      style={{
-                        background: element.fill,
-                        borderRadius:
-                          element.shape === "circle"
-                            ? "50%"
-                            : (element.borderRadius ?? 0) * scale,
-                      }}
-                    />
-                  )}
-                </div>
-              );
-            })}
+                    {element.type === "shape" && (
+                      <div
+                        className="h-full w-full"
+                        style={{
+                          background: element.fill,
+                          borderRadius:
+                            element.shape === "circle"
+                              ? "50%"
+                              : element.borderRadius ?? 0,
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

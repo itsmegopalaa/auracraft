@@ -158,14 +158,27 @@ export async function POST(request: Request) {
     const normalizedOrientation =
       orientation === "landscape" ? "landscape" : "portrait";
 
-    const normalizedQuantity = Math.max(
-      bulkOrder === true ? 2 : 1,
-      Math.floor(
-        typeof quantity === "number" && Number.isFinite(quantity)
-          ? quantity
-          : 1
-      )
-    );
+    if (
+      typeof quantity !== "number" ||
+      !Number.isFinite(quantity) ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return NextResponse.json(
+        { error: "quantity must be a positive integer." },
+        { status: 400 }
+      );
+    }
+
+    if (bulkOrder !== undefined && typeof bulkOrder !== "boolean") {
+      return NextResponse.json(
+        { error: "bulkOrder must be a boolean." },
+        { status: 400 }
+      );
+    }
+
+    const normalizedQuantity =
+      bulkOrder === true ? Math.max(2, quantity) : quantity;
 
     if (normalizedCreationMethod === "template" && !templateId) {
       return NextResponse.json(

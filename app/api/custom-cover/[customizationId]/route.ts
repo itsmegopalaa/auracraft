@@ -77,9 +77,11 @@ function sanitizeDesign(value: unknown) {
         typeof surface.artworkUrl === "string"
           ? surface.artworkUrl.slice(0, 2000)
           : undefined,
+
       assets: Array.isArray(surface.assets)
         ? surface.assets.slice(0, 50)
         : [],
+
       elements: Array.isArray(surface.elements)
         ? surface.elements
             .filter((element) => isPlainObject(element))
@@ -89,80 +91,155 @@ function sanitizeDesign(value: unknown) {
                 typeof element.id === "string"
                   ? element.id.slice(0, 80)
                   : crypto.randomUUID(),
+
               type:
                 element.type === "image" ||
-                element.type === "text"
+                element.type === "text" ||
+                element.type === "shape"
                   ? element.type
                   : "text",
+
               x:
                 typeof element.x === "number" &&
                 Number.isFinite(element.x)
-                  ? Math.max(0, Math.min(100, element.x))
-                  : 50,
+                  ? Math.max(-10000, Math.min(10000, element.x))
+                  : 0,
+
               y:
                 typeof element.y === "number" &&
                 Number.isFinite(element.y)
-                  ? Math.max(0, Math.min(100, element.y))
-                  : 50,
+                  ? Math.max(-10000, Math.min(10000, element.y))
+                  : 0,
+
               width:
                 typeof element.width === "number" &&
                 Number.isFinite(element.width)
-                  ? Math.max(1, Math.min(100, element.width))
-                  : 30,
+                  ? Math.max(1, Math.min(10000, element.width))
+                  : 100,
+
               height:
                 typeof element.height === "number" &&
                 Number.isFinite(element.height)
-                  ? Math.max(1, Math.min(100, element.height))
-                  : 10,
+                  ? Math.max(1, Math.min(10000, element.height))
+                  : 100,
+
               rotation:
                 typeof element.rotation === "number" &&
                 Number.isFinite(element.rotation)
                   ? Math.max(-180, Math.min(180, element.rotation))
                   : 0,
-              zIndex:
-                typeof element.zIndex === "number" &&
-                Number.isFinite(element.zIndex)
-                  ? Math.max(
-                      0,
-                      Math.min(1000, Math.round(element.zIndex))
-                    )
+
+              opacity:
+                typeof element.opacity === "number" &&
+                Number.isFinite(element.opacity)
+                  ? Math.max(0, Math.min(1, element.opacity))
                   : 1,
+
               text:
                 typeof element.text === "string"
-                  ? element.text.slice(0, 120)
+                  ? element.text.slice(0, 500)
                   : undefined,
+
+              fontSize:
+                typeof element.fontSize === "number" &&
+                Number.isFinite(element.fontSize)
+                  ? Math.max(8, Math.min(1000, element.fontSize))
+                  : undefined,
+
+              fontWeight:
+                typeof element.fontWeight === "string" ||
+                typeof element.fontWeight === "number"
+                  ? String(element.fontWeight).slice(0, 20)
+                  : undefined,
+
+              textAlign:
+                element.textAlign === "left" ||
+                element.textAlign === "center" ||
+                element.textAlign === "right"
+                  ? element.textAlign
+                  : undefined,
+
+              color:
+                typeof element.color === "string"
+                  ? element.color.slice(0, 100)
+                  : undefined,
+
+              letterSpacing:
+                typeof element.letterSpacing === "number" &&
+                Number.isFinite(element.letterSpacing)
+                  ? Math.max(-100, Math.min(100, element.letterSpacing))
+                  : undefined,
+
+              lineHeight:
+                typeof element.lineHeight === "number" &&
+                Number.isFinite(element.lineHeight)
+                  ? Math.max(0.5, Math.min(5, element.lineHeight))
+                  : undefined,
+
+              src:
+                typeof element.src === "string"
+                  ? element.src.slice(0, 2_000_000)
+                  : undefined,
+
+              objectFit:
+                element.objectFit === "cover" ||
+                element.objectFit === "contain" ||
+                element.objectFit === "fill"
+                  ? element.objectFit
+                  : "contain",
+
+              imageScale:
+                typeof element.imageScale === "number" &&
+                Number.isFinite(element.imageScale)
+                  ? Math.max(0.01, Math.min(20, element.imageScale))
+                  : 1,
+
+              imageOffsetX:
+                typeof element.imageOffsetX === "number" &&
+                Number.isFinite(element.imageOffsetX)
+                  ? Math.max(-10000, Math.min(10000, element.imageOffsetX))
+                  : 0,
+
+              imageOffsetY:
+                typeof element.imageOffsetY === "number" &&
+                Number.isFinite(element.imageOffsetY)
+                  ? Math.max(-10000, Math.min(10000, element.imageOffsetY))
+                  : 0,
+
+              shape:
+                element.shape === "rectangle" ||
+                element.shape === "circle"
+                  ? element.shape
+                  : undefined,
+
+              fill:
+                typeof element.fill === "string"
+                  ? element.fill.slice(0, 100)
+                  : undefined,
+
+              borderRadius:
+                typeof element.borderRadius === "number" &&
+                Number.isFinite(element.borderRadius)
+                  ? Math.max(0, Math.min(1000, element.borderRadius))
+                  : undefined,
+
               assetId:
                 typeof element.assetId === "string"
                   ? element.assetId.slice(0, 100)
                   : undefined,
-              fontSize:
-                typeof element.fontSize === "number" &&
-                Number.isFinite(element.fontSize)
-                  ? Math.max(8, Math.min(120, element.fontSize))
-                  : undefined,
-              fontWeight:
-                typeof element.fontWeight === "number" &&
-                Number.isFinite(element.fontWeight)
-                  ? Math.max(
-                      300,
-                      Math.min(900, element.fontWeight)
-                    )
-                  : undefined,
-              color:
-                typeof element.color === "string"
-                  ? element.color.slice(0, 50)
-                  : undefined,
-              align:
-                element.align === "left" ||
-                element.align === "center" ||
-                element.align === "right"
-                  ? element.align
+
+              zIndex:
+                typeof element.zIndex === "number" &&
+                Number.isFinite(element.zIndex)
+                  ? Math.max(0, Math.min(1000, Math.round(element.zIndex)))
                   : undefined,
             }))
         : [],
+
       texts: Array.isArray(surface.texts)
-        ? surface.texts
+        ? surface.texts.slice(0, 50)
         : [],
+
       background:
         typeof surface.background === "string"
           ? surface.background.slice(0, 1000)
@@ -179,6 +256,29 @@ function sanitizeDesign(value: unknown) {
       surfaces.insideBack
     ),
     back: sanitizeSurface(surfaces.back),
+    canvasWidth:
+      typeof value.canvasWidth === "number" &&
+      Number.isFinite(value.canvasWidth)
+        ? Math.max(100, Math.min(10000, value.canvasWidth))
+        : undefined,
+
+    canvasHeight:
+      typeof value.canvasHeight === "number" &&
+      Number.isFinite(value.canvasHeight)
+        ? Math.max(100, Math.min(10000, value.canvasHeight))
+        : undefined,
+
+    canvasSize:
+      value.canvasSize === "A4" || value.canvasSize === "A5"
+        ? value.canvasSize
+        : undefined,
+
+    canvasOrientation:
+      value.canvasOrientation === "portrait" ||
+      value.canvasOrientation === "landscape"
+        ? value.canvasOrientation
+        : undefined,
+
     branding: {
       mineNote: true,
       auraCraft: false,
@@ -188,6 +288,61 @@ function sanitizeDesign(value: unknown) {
           : "default",
     },
   };
+}
+
+export async function GET(
+  _request: Request,
+  { params }: RouteContext
+) {
+  const { customizationId } = await params;
+
+  if (!isUuid(customizationId)) {
+    return NextResponse.json(
+      { error: "Invalid customization ID." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const { data: customization, error } = await supabase
+      .from("custom_cover_customizations")
+      .select(
+        "id, customer_id, status, product_id, customer_name, customer_text, design"
+      )
+      .eq("id", customizationId)
+      .eq("customer_id", user.id)
+      .single();
+
+    if (error || !customization) {
+      return NextResponse.json(
+        { error: "Customization not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ customization });
+  } catch (error) {
+    console.error("Custom cover customization GET failed:", error);
+
+    return NextResponse.json(
+      { error: "Unable to load customization." },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(
@@ -220,15 +375,22 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const customerName = validateText(
-      body?.customerName,
-      "Customer name"
+    const hasCustomerName = Object.prototype.hasOwnProperty.call(
+      body ?? {},
+      "customerName"
+    );
+    const hasCustomerText = Object.prototype.hasOwnProperty.call(
+      body ?? {},
+      "customerText"
     );
 
-    const customerText = validateText(
-      body?.customerText,
-      "Customer text"
-    );
+    const customerName = hasCustomerName
+      ? validateText(body?.customerName, "Customer name")
+      : undefined;
+
+    const customerText = hasCustomerText
+      ? validateText(body?.customerText, "Customer text")
+      : undefined;
 
     const requestedProductId =
       body?.productId === undefined ||
@@ -251,7 +413,7 @@ export async function PATCH(
       await supabase
         .from("custom_cover_customizations")
         .select(
-          "id, customer_id, status, product_id, design"
+          "id, customer_id, status, product_id, customer_name, customer_text, design"
         )
         .eq("id", customizationId)
         .eq("customer_id", user.id)
@@ -308,8 +470,12 @@ export async function PATCH(
       await supabase
         .from("custom_cover_customizations")
         .update({
-          customer_name: customerName,
-          customer_text: customerText,
+          ...(hasCustomerName
+            ? { customer_name: customerName }
+            : {}),
+          ...(hasCustomerText
+            ? { customer_text: customerText }
+            : {}),
           product_id: productId,
           design,
           updated_at: new Date().toISOString(),

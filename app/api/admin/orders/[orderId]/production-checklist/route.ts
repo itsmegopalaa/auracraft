@@ -3,6 +3,7 @@ import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import { sendOrderStatusEmail } from "@/app/services/orders/order-email";
 import { automateOrderShipping } from "@/app/services/shipping/automation";
+import { hasCompleteCustomCoverProduction } from "@/app/services/customization/production/generate-order";
 
 const PRODUCTION_FIELDS = [
   "product_printed",
@@ -61,7 +62,8 @@ export async function PATCH(
           notebook_assembled,
           quality_checked,
           packed,
-          production_completed_at
+          production_completed_at,
+          custom_cover_id
         `
       )
       .eq("order_id", orderId)
@@ -259,6 +261,43 @@ export async function PATCH(
       );
     }
 
+    if (
+      body.field === "product_printed" &&
+      body.value === true &&
+      order.custom_cover_id
+    ) {
+      let productionReady = false;
+
+      try {
+        productionReady =
+          await hasCompleteCustomCoverProduction(
+            order.order_id,
+          );
+      } catch (error) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              error instanceof Error
+                ? error.message
+                : "Unable to verify custom cover production files.",
+          },
+          { status: 500 },
+        );
+      }
+
+      if (!productionReady) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "All four custom cover production files must exist and match the selected print format before Product Printed can be completed.",
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     const now = new Date().toISOString();
 
     const nextChecklist = {
@@ -318,7 +357,8 @@ export async function PATCH(
             quality_checked,
             packed,
             production_checklist_updated_at,
-            production_completed_at
+            production_completed_at,
+          custom_cover_id
           `
         )
         .single();

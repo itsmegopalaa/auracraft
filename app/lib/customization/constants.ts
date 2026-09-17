@@ -57,7 +57,7 @@ export const CUSTOM_COVER_STATUSES = [
 ] as const;
 
 export const DEFAULT_CUSTOM_COVER_PHYSICAL_CONFIG: CustomCoverPhysicalConfig = {
-  size: "A5",
+  size: "A4",
   pages: 100,
   paper: "plain",
   orientation: "portrait",

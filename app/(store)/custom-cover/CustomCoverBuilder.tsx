@@ -6,6 +6,7 @@ import Footer from "@/app/components/Footer";
 
 type StartOption = "blank" | "existing";
 type Size = "A4" | "A5";
+type Orientation = "portrait" | "landscape";
 type Paper = "plain" | "ruled" | "dotGrid";
 
 type Product = {
@@ -50,6 +51,19 @@ const SIZES = [
   },
 ];
 
+const ORIENTATIONS = [
+  {
+    id: "portrait" as const,
+    title: "Portrait",
+    description: "Standard upright notebook format",
+  },
+  {
+    id: "landscape" as const,
+    title: "Landscape",
+    description: "Wide horizontal notebook format",
+  },
+];
+
 const PAGES = [100, 150, 200];
 
 const PAPERS = [
@@ -86,6 +100,8 @@ export default function CustomCoverBuilder({
   );
 
   const [size, setSize] = useState<Size>("A4");
+  const [orientation, setOrientation] =
+    useState<Orientation>("portrait");
   const [pageCount, setPageCount] = useState(100);
   const [paper, setPaper] = useState<Paper>("plain");
   const [quantity, setQuantity] = useState(1);
@@ -126,6 +142,60 @@ export default function CustomCoverBuilder({
     setError("");
 
     try {
+      const quantityValue = bulkOrder
+        ? Math.max(2, Number(bulkQuantity) || 2)
+        : quantity;
+
+      // Resume the customer's unfinished custom-cover draft.
+      // This prevents Setup -> Editor -> Back -> Setup -> Editor
+      // from silently creating a second customization.
+      const existingDraftId = window.localStorage.getItem(
+        "minenote-custom-cover-draft-id",
+      );
+
+      if (existingDraftId) {
+        const draftResponse = await fetch(
+          `/api/custom-cover/${existingDraftId}`,
+          {
+            method: "GET",
+            cache: "no-store",
+          },
+        );
+
+        const draftText = await draftResponse.text();
+
+        let draftData: any = {};
+
+        try {
+          draftData = draftText ? JSON.parse(draftText) : {};
+        } catch {
+          draftData = {};
+        }
+
+        const draft = draftData?.customization;
+
+        const sameConfiguration =
+          draft &&
+          draft.status === "draft" &&
+          (draft.product_id ?? null) === (selectedProductId ?? null) &&
+          draft.physical_config?.size === size &&
+          draft.physical_config?.pages === pageCount &&
+          draft.physical_config?.paper === paper &&
+          draft.physical_config?.orientation === orientation &&
+          draft.physical_config?.quantity === quantityValue;
+
+        if (sameConfiguration) {
+          router.push(`/custom-cover/${existingDraftId}`);
+          return;
+        }
+
+        // Existing draft is no longer the same setup.
+        // Remove the stale resume pointer and create a fresh draft below.
+        window.localStorage.removeItem(
+          "minenote-custom-cover-draft-id",
+        );
+      }
+
       const response = await fetch("/api/custom-cover", {
         method: "POST",
         headers: {
@@ -137,10 +207,8 @@ export default function CustomCoverBuilder({
           size,
           pages: pageCount,
           paper,
-          orientation: "portrait",
-          quantity: bulkOrder
-            ? Math.max(2, Number(bulkQuantity) || 2)
-            : quantity,
+          orientation,
+          quantity: quantityValue,
           bulkOrder,
         }),
       });
@@ -153,7 +221,14 @@ export default function CustomCoverBuilder({
         );
       }
 
-      router.push(`/custom-cover/${data.customization.id}`);
+      const customizationId = data.customization.id;
+
+      window.localStorage.setItem(
+        "minenote-custom-cover-draft-id",
+        customizationId,
+      );
+
+      router.push(`/custom-cover/${customizationId}`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -381,6 +456,39 @@ export default function CustomCoverBuilder({
             </div>
           </div>
 
+          {/* Orientation */}
+          <div className="mt-8">
+            <Label>Orientation</Label>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {ORIENTATIONS.map((item) => {
+                const active = orientation === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setOrientation(item.id)}
+                    className={[
+                      "mn-transition rounded-2xl border p-4 text-left",
+                      active
+                        ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] shadow-[var(--mn-shadow-sm)]"
+                        : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
+                    ].join(" ")}
+                  >
+                    <p className="text-sm font-semibold">
+                      {item.title}
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-[var(--mn-text-secondary)]">
+                      {item.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Pages */}
           <div className="mt-8">
             <Label>Pages</Label>
@@ -541,7 +649,9 @@ export default function CustomCoverBuilder({
               <p className="font-semibold">{productName}</p>
 
               <p className="mt-1 text-sm text-[var(--mn-text-secondary)]">
-                {size} · {pageCount} pages ·{" "}
+                {size} ·{" "}
+                {orientation === "portrait" ? "Portrait" : "Landscape"} ·{" "}
+                {pageCount} pages ·{" "}
                 {PAPERS.find((item) => item.id === paper)?.title} ·{" "}
                 {bulkOrder ? Math.max(2, Number(bulkQuantity) || 2) : quantity}{" "}
                 {bulkOrder

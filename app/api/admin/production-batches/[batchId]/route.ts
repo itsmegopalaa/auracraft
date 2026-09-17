@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
+import { generateCustomCoverProductionAssets } from "@/app/services/customization/production/generate-order";
 
 const BATCH_SELECT =
   "id,batch_number,status,notes,created_at,started_at,completed_at,updated_at";
@@ -175,6 +176,57 @@ export async function PATCH(
       }
 
       if (next === "in_progress") {
+        /*
+         * Production files are generated from the immutable order
+         * snapshot before the batch is allowed to enter production.
+         * If any custom cover fails, the batch remains draft.
+         */
+        const { data: batchOrders, error: batchOrdersError } =
+          await supabase
+            .from("production_batch_orders")
+            .select(
+              `
+                order_id,
+                orders (
+                  id,
+                  custom_cover_id
+                )
+              `,
+            )
+            .eq("batch_id", batchId);
+
+        if (batchOrdersError) {
+          return NextResponse.json(
+            { error: batchOrdersError.message },
+            { status: 500 },
+          );
+        }
+
+        try {
+          for (const assignment of batchOrders ?? []) {
+            const order = Array.isArray(assignment.orders)
+              ? assignment.orders[0]
+              : assignment.orders;
+
+            if (order?.custom_cover_id) {
+              await generateCustomCoverProductionAssets(
+                assignment.order_id,
+              );
+            }
+          }
+        } catch (error) {
+          return NextResponse.json(
+            {
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Custom cover production generation failed.",
+              batchStarted: false,
+            },
+            { status: 409 },
+          );
+        }
+
         updates.started_at = new Date().toISOString();
       }
 

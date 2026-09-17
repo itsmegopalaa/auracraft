@@ -275,9 +275,10 @@ function detectImage(bytes: Uint8Array) {
 
 async function signedUrl(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
-  storagePath: string
+  storagePath: string,
+  kind: "original" | "preview"
 ) {
-  const bucket = getCustomCoverStorageBucket("original");
+  const bucket = getCustomCoverStorageBucket(kind);
 
   const { data, error } = await supabase.storage
     .from(bucket)
@@ -550,7 +551,8 @@ export async function POST(
 
   const previewUrl = await signedUrl(
     supabase,
-    storagePath
+    storagePath,
+    "original"
   );
 
   return NextResponse.json(
@@ -663,7 +665,8 @@ export async function GET(
   for (const asset of latestBySideAndKind.values()) {
     const previewUrl = await signedUrl(
       supabase,
-      asset.storage_path
+      asset.storage_path,
+      asset.kind
     );
 
     result.push({

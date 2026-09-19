@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/app/lib/supabase";
+import {
+  createServerSupabaseClient,
+  createSupabaseAdminClient,
+} from "@/app/lib/supabase";
+import { getCustomCoverStorageBucket } from "@/app/services/ai/persistence/storage";
 
 type RouteContext = {
   params: Promise<{
@@ -343,6 +347,183 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: RouteContext
+) {
+  const { customizationId } = await params;
+
+  if (!isUuid(customizationId)) {
+    return NextResponse.json(
+      { error: "Invalid customization ID." },
+      { status: 400 }
+    );
+  }
+
+  const supabase = await createServerSupabaseClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json(
+      { error: "Authentication required." },
+      { status: 401 }
+    );
+  }
+
+  const { data: customization, error: customizationError } =
+    await supabase
+      .from("custom_cover_customizations")
+      .select("id, customer_id, status")
+      .eq("id", customizationId)
+      .eq("customer_id", user.id)
+      .single();
+
+  if (customizationError || !customization) {
+    return NextResponse.json(
+      { error: "Customization not found." },
+      { status: 404 }
+    );
+  }
+
+  if (customization.status !== "draft") {
+    return NextResponse.json(
+      { error: "Only draft customizations can be deleted." },
+      { status: 409 }
+    );
+  }
+
+  const { data: assets, error: assetsError } =
+    await supabase
+      .from("custom_cover_assets")
+      .select("storage_path, kind")
+      .eq("customization_id", customizationId);
+
+  if (assetsError) {
+    return NextResponse.json(
+      { error: "Unable to prepare customization deletion." },
+      { status: 500 }
+    );
+  }
+
+  const storagePathsByBucket = new Map<string, string[]>();
+
+  for (const asset of assets ?? []) {
+    const kind =
+      asset.kind === "preview" ? "preview" : "original";
+
+    const bucket = getCustomCoverStorageBucket(kind);
+    const paths = storagePathsByBucket.get(bucket) ?? [];
+
+    if (asset.storage_path) {
+      paths.push(asset.storage_path);
+    }
+
+    storagePathsByBucket.set(bucket, paths);
+  }
+
+  if (storagePathsByBucket.size > 0) {
+    let adminSupabase;
+
+    try {
+      adminSupabase = createSupabaseAdminClient();
+    } catch (error) {
+      console.error(
+        "Custom cover admin storage client failed:",
+        error
+      );
+
+      return NextResponse.json(
+        { error: "Unable to delete customization assets." },
+        { status: 500 }
+      );
+    }
+
+    for (const [bucket, paths] of storagePathsByBucket) {
+      if (paths.length === 0) continue;
+
+      const { error: storageError } =
+        await adminSupabase.storage
+          .from(bucket)
+          .remove(paths);
+
+      if (storageError) {
+        console.error(
+          "Custom cover storage cleanup failed:",
+          storageError
+        );
+
+        return NextResponse.json(
+          {
+            error:
+              storageError.message ||
+              "Unable to delete customization assets.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+  }
+
+  const adminSupabase = createSupabaseAdminClient();
+
+  const { error: assetsDeleteError } =
+    await adminSupabase
+      .from("custom_cover_assets")
+      .delete()
+      .eq("customization_id", customizationId);
+
+  if (assetsDeleteError) {
+    console.error(
+      "Custom cover asset row deletion failed:",
+      assetsDeleteError
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          assetsDeleteError.message ||
+          assetsDeleteError.details ||
+          assetsDeleteError.hint ||
+          "Unable to delete customization assets.",
+      },
+      { status: 500 }
+    );
+  }
+
+  const { error: customizationDeleteError } =
+    await adminSupabase
+      .from("custom_cover_customizations")
+      .delete()
+      .eq("id", customizationId)
+      .eq("customer_id", user.id)
+      .eq("status", "draft");
+
+  if (customizationDeleteError) {
+    console.error(
+      "Custom cover customization delete failed:",
+      customizationDeleteError
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          customizationDeleteError.message ||
+          customizationDeleteError.details ||
+          "Unable to delete customization.",
+      },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    success: true,
+  });
 }
 
 export async function PATCH(

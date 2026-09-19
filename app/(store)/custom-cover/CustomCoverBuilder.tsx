@@ -174,23 +174,16 @@ export default function CustomCoverBuilder({
 
         const draft = draftData?.customization;
 
-        const sameConfiguration =
-          draft &&
-          draft.status === "draft" &&
-          (draft.product_id ?? null) === (selectedProductId ?? null) &&
-          draft.physical_config?.size === size &&
-          draft.physical_config?.pages === pageCount &&
-          draft.physical_config?.paper === paper &&
-          draft.physical_config?.orientation === orientation &&
-          draft.physical_config?.quantity === quantityValue;
-
-        if (sameConfiguration) {
+        // An unfinished custom-cover project is resumable until the
+        // customer explicitly deletes it or completes the cart flow.
+        // Do not invalidate the project just because Setup values changed.
+        if (draft?.status === "draft") {
           router.push(`/custom-cover/${existingDraftId}`);
           return;
         }
 
-        // Existing draft is no longer the same setup.
-        // Remove the stale resume pointer and create a fresh draft below.
+        // Only clear the resume pointer when the saved project is no
+        // longer an active draft.
         window.localStorage.removeItem(
           "minenote-custom-cover-draft-id",
         );

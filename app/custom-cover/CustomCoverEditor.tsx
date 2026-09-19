@@ -4,11 +4,45 @@ import {
   CSSProperties,
   PointerEvent as ReactPointerEvent,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+
+type CustomCoverApiErrorPayload = {
+  error?: string;
+};
+
+type CustomCoverLoadPayload = {
+  customization?: {
+    design?: Record<string, unknown>;
+  };
+  design?: Record<string, unknown>;
+  error?: string;
+};
+
+type CustomCoverAssetsPayload = {
+  assets?: Array<{
+    id: string;
+    side: EditorSide;
+    kind?: string;
+    previewUrl?: string;
+    storagePath?: string;
+    width?: number;
+    height?: number;
+    mimeType?: string;
+    fileSize?: number;
+  }>;
+  error?: string;
+};
+
+type CustomCoverUploadPayload = {
+  asset?: {
+    id: string;
+    previewUrl?: string;
+  };
+  error?: string;
+};
 
 type EditorSide = "front" | "insideFront" | "insideBack" | "back";
 
@@ -1053,6 +1087,8 @@ export default function CustomCoverEditor({
 
   const [previewOpen, setPreviewOpen] =
     useState(false);
+  const [backDialogOpen, setBackDialogOpen] =
+    useState(false);
 
   const [busy, setBusy] = useState(false);
 
@@ -1094,7 +1130,14 @@ export default function CustomCoverEditor({
   const hydratedRef = useRef(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
+  const saveAgainRef = useRef(false);
+  const savePromiseRef = useRef<Promise<void> | null>(null);
+  const skipDirtyEffectRef = useRef(false);
+  const dirtyVersionRef = useRef(0);
+  const savedVersionRef = useRef(0);
+  const hasEditedRef = useRef(false);
   const latestSurfacesRef = useRef(surfaces);
+  const flushSaveRef = useRef<() => Promise<void>>(async () => {});
 
   const activeSurface = surfaces[activeSide];
 
@@ -1127,8 +1170,8 @@ export default function CustomCoverEditor({
         const assetsText =
           await assetsResponse.text();
 
-        let customizationPayload: any = {};
-        let assetsPayload: any = {};
+        let customizationPayload: CustomCoverLoadPayload = {};
+        let assetsPayload: CustomCoverAssetsPayload = {};
 
         try {
           customizationPayload = customizationText
@@ -1206,8 +1249,13 @@ export default function CustomCoverEditor({
           ),
         };
 
+        skipDirtyEffectRef.current = true;
         setSurfaces(loaded);
         latestSurfacesRef.current = loaded;
+        dirtyVersionRef.current = 0;
+        savedVersionRef.current = 0;
+        hasEditedRef.current = false;
+        saveAgainRef.current = false;
         setHistory({
           past: [],
           future: [],
@@ -1234,53 +1282,24 @@ export default function CustomCoverEditor({
   ]);
 
   useEffect(() => {
-    latestSurfacesRef.current = surfaces;
-
     if (!hydratedRef.current) return;
+
+    if (skipDirtyEffectRef.current) {
+      skipDirtyEffectRef.current = false;
+      latestSurfacesRef.current = surfaces;
+      return;
+    }
+
+    latestSurfacesRef.current = surfaces;
+    dirtyVersionRef.current += 1;
+    hasEditedRef.current = true;
 
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
     }
 
-    saveTimerRef.current = setTimeout(async () => {
-      if (savingRef.current) return;
-
-      savingRef.current = true;
-
-      try {
-        await fetch(`/api/custom-cover/${customizationId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            productId,
-            design: {
-              front: latestSurfacesRef.current.front,
-              insideFront: latestSurfacesRef.current.insideFront,
-              insideBack: latestSurfacesRef.current.insideBack,
-              back: latestSurfacesRef.current.back,
-              canvasWidth:
-                latestSurfacesRef.current[activeSide].canvasWidth,
-              canvasHeight:
-                latestSurfacesRef.current[activeSide].canvasHeight,
-              canvasSize:
-                latestSurfacesRef.current[activeSide].canvasSize,
-              canvasOrientation:
-                latestSurfacesRef.current[activeSide].canvasOrientation,
-              branding: {
-                mineNote: true,
-                auraCraft: false,
-                logoVariant: "default",
-              },
-            },
-          }),
-        });
-      } catch (error) {
-        console.error("Custom cover autosave failed:", error);
-      } finally {
-        savingRef.current = false;
-      }
+    saveTimerRef.current = setTimeout(() => {
+      void flushSaveRef.current();
     }, 700);
 
     return () => {
@@ -1289,26 +1308,27 @@ export default function CustomCoverEditor({
         saveTimerRef.current = null;
       }
     };
-  }, [surfaces, customizationId, productId, activeSide]);
+  }, [surfaces]);
 
   const commit = (
     updater: (
       current: Record<EditorSide, DesignSurface>,
     ) => Record<EditorSide, DesignSurface>,
   ) => {
-    setSurfaces((current) => {
-      const next = updater(current);
+    const current = latestSurfacesRef.current;
+    const next = updater(current);
 
-      setHistory((previous) => ({
-        past: [
-          ...previous.past,
-          structuredClone(current),
-        ].slice(-50),
-        future: [],
-      }));
+    latestSurfacesRef.current = next;
 
-      return next;
-    });
+    setHistory((previous) => ({
+      past: [
+        ...previous.past,
+        structuredClone(current),
+      ].slice(-50),
+      future: [],
+    }));
+
+    setSurfaces(next);
   };
 
   const updateActiveSurface = (
@@ -1384,17 +1404,13 @@ export default function CustomCoverEditor({
     x: number,
     y: number,
   ) => {
-    setSurfaces((current) => ({
+    updateActiveSurface((current) => ({
       ...current,
-      [activeSide]: {
-        ...current[activeSide],
-        elements: current[activeSide].elements.map(
-          (element) =>
-            element.id === elementId
-              ? { ...element, x, y }
-              : element,
-        ),
-      },
+      elements: current.elements.map((element) =>
+        element.id === elementId
+          ? { ...element, x, y }
+          : element,
+      ),
     }));
   };
 
@@ -1524,10 +1540,12 @@ export default function CustomCoverEditor({
 
       const text = await response.text();
 
-      let payload: any = {};
+      let payload: CustomCoverUploadPayload = {};
 
       try {
-        payload = text ? JSON.parse(text) : {};
+        payload = text
+          ? (JSON.parse(text) as CustomCoverUploadPayload)
+          : {};
       } catch {
         payload = {};
       }
@@ -1568,9 +1586,8 @@ export default function CustomCoverEditor({
       latestSurfacesRef.current = savedSurfaces;
       setSurfaces(savedSurfaces);
 
-      // Do NOT wait for the autosave timer.
-      // The uploaded image is persisted immediately.
-      await saveDesign(savedSurfaces);
+      // Wait until the uploaded asset ID is persisted with the design.
+      await flushSave();
 
       URL.revokeObjectURL(localUrl);
     } catch (error) {
@@ -1759,30 +1776,107 @@ export default function CustomCoverEditor({
       },
     );
 
-    const text = await response.text();
+    const responseText = await response.text();
 
-    let payload: any = {};
+    let payload: CustomCoverApiErrorPayload = {};
 
     try {
-      payload = text ? JSON.parse(text) : {};
+      payload = responseText
+        ? (JSON.parse(responseText) as CustomCoverApiErrorPayload)
+        : {};
     } catch {
       payload = {};
     }
 
     if (!response.ok) {
       throw new Error(
-        payload?.error || "Unable to save customization.",
+        payload.error || "Unable to save customization.",
       );
     }
 
     return true;
   };
 
+  const flushSave = async () => {
+    if (!hydratedRef.current) return;
+
+    // If another save is already running, wait for it.
+    // Save/Back must never continue before that request finishes.
+    if (savePromiseRef.current) {
+      await savePromiseRef.current;
+
+      if (dirtyVersionRef.current > savedVersionRef.current) {
+        await flushSave();
+      }
+
+      return;
+    }
+
+    const promise = (async () => {
+      savingRef.current = true;
+
+      try {
+        while (
+          dirtyVersionRef.current > savedVersionRef.current
+        ) {
+          const versionToSave = dirtyVersionRef.current;
+          const snapshot = latestSurfacesRef.current;
+
+          await saveDesign(snapshot);
+
+          savedVersionRef.current = Math.max(
+            savedVersionRef.current,
+            versionToSave,
+          );
+        }
+      } finally {
+        savingRef.current = false;
+      }
+    })();
+
+    savePromiseRef.current = promise;
+
+    try {
+      await promise;
+    } finally {
+      if (savePromiseRef.current === promise) {
+        savePromiseRef.current = null;
+      }
+
+      if (
+        dirtyVersionRef.current > savedVersionRef.current &&
+        hydratedRef.current
+      ) {
+        if (saveTimerRef.current) {
+          clearTimeout(saveTimerRef.current);
+        }
+
+        saveTimerRef.current = setTimeout(() => {
+          void flushSaveRef.current();
+        }, 100);
+      }
+    }
+  };
+
+  useEffect(() => {
+    flushSaveRef.current = flushSave;
+  });
+
   const save = async () => {
     setBusy(true);
 
     try {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+
+      // Save the exact latest editor state directly.
       await saveDesign(latestSurfacesRef.current);
+
+      dirtyVersionRef.current = 0;
+      savedVersionRef.current = 0;
+      hasEditedRef.current = false;
     } catch (error) {
       window.alert(
         error instanceof Error
@@ -1794,7 +1888,7 @@ export default function CustomCoverEditor({
     }
   };
 
-  const handleEditorBack = async () => {
+  const saveAndLeave = async () => {
     if (busy) return;
 
     setBusy(true);
@@ -1805,8 +1899,14 @@ export default function CustomCoverEditor({
         saveTimerRef.current = null;
       }
 
+      // Back must always persist the exact latest editor state.
       await saveDesign(latestSurfacesRef.current);
 
+      dirtyVersionRef.current = 0;
+      savedVersionRef.current = 0;
+      hasEditedRef.current = false;
+
+      setBackDialogOpen(false);
       window.history.back();
     } catch (error) {
       window.alert(
@@ -1817,6 +1917,58 @@ export default function CustomCoverEditor({
     } finally {
       setBusy(false);
     }
+  };
+
+  const deleteCustomization = async () => {
+    if (busy) return;
+
+    setBusy(true);
+
+    try {
+      const response = await fetch(
+        `/api/custom-cover/${customizationId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const text = await response.text();
+
+      let payload: { error?: string } = {};
+
+      try {
+        payload = text
+          ? (JSON.parse(text) as { error?: string })
+          : {};
+      } catch {
+        payload = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          payload.error || "Unable to delete project.",
+        );
+      }
+
+      setBackDialogOpen(false);
+      window.history.back();
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete project.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleEditorBack = () => {
+    if (busy) return;
+
+    // Every Back action goes through the project decision dialog.
+    // The project itself is never deleted just by leaving the editor.
+    setBackDialogOpen(true);
   };
 
   const approve = async () => {
@@ -1889,10 +2041,6 @@ export default function CustomCoverEditor({
     setSelectedElementId(copy.id);
   };
 
-  useEffect(() => {
-    setSelectedElementId(null);
-  }, [activeSide]);
-
   return (
     <div className="h-dvh w-full overflow-hidden">
       <input
@@ -1938,6 +2086,225 @@ export default function CustomCoverEditor({
         setActiveSide={setActiveSide}
         onBack={handleEditorBack}
       />
+
+      {backDialogOpen && (
+        <div
+          className="
+            fixed inset-0 z-[100]
+            flex items-center justify-center
+            bg-[var(--mn-overlay)]
+            px-4 py-6
+            backdrop-blur-md
+          "
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="back-dialog-title"
+          aria-describedby="back-dialog-description"
+        >
+          <div
+            className="
+              relative w-full max-w-[440px]
+              overflow-hidden
+              rounded-[28px]
+              border border-[var(--mn-border-strong)]
+              bg-[var(--mn-surface)]
+              text-[var(--mn-text)]
+              shadow-[var(--mn-shadow-lg)]
+              ring-1 ring-black/[0.03]
+            "
+          >
+            <div
+              className="
+                pointer-events-none absolute inset-x-0 top-0 h-px
+                bg-gradient-to-r
+                from-transparent
+                via-[var(--mn-accent)]
+                to-transparent
+                opacity-70
+              "
+            />
+
+            <div className="px-6 pb-5 pt-6 sm:px-7 sm:pt-7">
+              <div className="flex items-start gap-4">
+                <div
+                  className="
+                    flex h-11 w-11 shrink-0 items-center justify-center
+                    rounded-2xl
+                    border border-[var(--mn-border)]
+                    bg-[var(--mn-accent-soft)]
+                    text-[var(--mn-accent)]
+                  "
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v6l4 2"
+                    />
+                    <circle cx="12" cy="12" r="8.5" />
+                  </svg>
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--mn-accent)]">
+                    MineNote Studio
+                  </p>
+
+                  <h2
+                    id="back-dialog-title"
+                    className="
+                      mt-1.5
+                      text-[21px] font-semibold
+                      leading-tight tracking-[-0.025em]
+                      text-[var(--mn-text)]
+                    "
+                  >
+                    Leave your project?
+                  </h2>
+
+                  <p
+                    id="back-dialog-description"
+                    className="
+                      mt-2.5
+                      text-sm leading-6
+                      text-[var(--mn-text-secondary)]
+                    "
+                  >
+                    Your custom cover is saved as a draft. Choose how you
+                    want to continue.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--mn-border)] px-6 py-5 sm:px-7">
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => void saveAndLeave()}
+                  disabled={busy}
+                  className="
+                    group flex w-full items-center justify-between
+                    rounded-2xl
+                    border border-[var(--mn-accent)]
+                    bg-[var(--mn-accent)]
+                    px-4 py-3.5
+                    text-sm font-semibold
+                    text-[var(--mn-accent-contrast)]
+                    shadow-[var(--mn-shadow-sm)]
+                    transition-all duration-200
+                    hover:-translate-y-0.5
+                    hover:shadow-[var(--mn-shadow-md)]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[var(--mn-focus)]
+                    focus-visible:ring-offset-2
+                    focus-visible:ring-offset-[var(--mn-surface)]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                    disabled:hover:translate-y-0
+                  "
+                >
+                  <span>{busy ? "Saving..." : "Save & Back"}</span>
+
+                  {!busy && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 12h14M13 6l6 6-6 6"
+                      />
+                    </svg>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void deleteCustomization()}
+                  disabled={busy}
+                  className="
+                    group flex w-full items-center justify-between
+                    rounded-2xl
+                    border border-[var(--mn-danger)]/25
+                    bg-[var(--mn-danger-soft)]
+                    px-4 py-3.5
+                    text-sm font-semibold
+                    text-[var(--mn-danger)]
+                    transition-all duration-200
+                    hover:border-[var(--mn-danger)]/40
+                    hover:bg-[var(--mn-danger)]/[0.10]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[var(--mn-danger)]
+                    focus-visible:ring-offset-2
+                    focus-visible:ring-offset-[var(--mn-surface)]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
+                >
+                  <span>Delete Project</span>
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    className="h-4 w-4 opacity-80 transition-transform duration-200 group-hover:scale-105"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 7h16M9 7V4h6v3M8 11v6M16 11v6M6 7l1 13h10l1-13"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBackDialogOpen(false)}
+                  disabled={busy}
+                  className="
+                    w-full rounded-2xl
+                    px-4 py-3
+                    text-sm font-medium
+                    text-[var(--mn-text-secondary)]
+                    transition-all duration-200
+                    hover:bg-[var(--mn-control-hover)]
+                    hover:text-[var(--mn-text)]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[var(--mn-focus)]
+                    focus-visible:ring-offset-2
+                    focus-visible:ring-offset-[var(--mn-surface)]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <p className="mt-4 text-center text-[10px] leading-4 text-[var(--mn-text-muted)]">
+                Your draft remains available until you delete it or add it
+                to your cart.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {previewOpen && (
         <PreviewOverlay

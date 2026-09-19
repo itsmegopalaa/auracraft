@@ -8,6 +8,93 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/app/context/CartContext";
+
+
+function StudioIcon({
+  name,
+  size = 18,
+  strokeWidth = 1.8,
+  className = "",
+}: {
+  name:
+    | "back"
+    | "save"
+    | "preview"
+    | "cart"
+    | "check"
+    | "undo"
+    | "redo"
+    | "select"
+    | "sparkles"
+    | "text"
+    | "image"
+    | "shape"
+    | "close"
+    | "delete"
+    | "duplicate"
+    | "forward"
+    | "backward"
+    | "front"
+    | "layers";
+  size?: number;
+  strokeWidth?: number;
+  className?: string;
+}) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className,
+    "aria-hidden": true,
+  };
+
+  switch (name) {
+    case "back":
+      return <svg {...common}><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>;
+    case "save":
+      return <svg {...common}><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6h8V4"/><path d="M8 20v-6h8v6"/></svg>;
+    case "preview":
+      return <svg {...common}><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>;
+    case "cart":
+      return <svg {...common}><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="19" r="1"/><circle cx="18" cy="19" r="1"/></svg>;
+    case "check":
+      return <svg {...common}><path d="m5 12 4 4L19 6"/></svg>;
+    case "undo":
+      return <svg {...common}><path d="M9 7H5v4"/><path d="M5 11c1.8-3.6 5-5.2 8.5-4.2 3.3.9 5.5 3.5 5.5 7.2 0 3.9-3 6.5-7 6.5-2.8 0-5.1-1.1-6.5-3"/></svg>;
+    case "redo":
+      return <svg {...common}><path d="M15 7h4v4"/><path d="M19 11c-1.8-3.6-5-5.2-8.5-4.2C7.2 7.7 5 10.3 5 14c0 3.9 3 6.5 7 6.5 2.8 0 5.1-1.1 6.5-3"/></svg>;
+    case "select":
+      return <svg {...common}><path d="m5 3 6.5 14 2-6 6-2L5 3Z"/><path d="m14 15 4 4"/></svg>;
+    case "sparkles":
+      return <svg {...common}><path d="m12 3-1.2 4.3L7 8.5l3.8 1.2L12 14l1.2-4.3L17 8.5l-3.8-1.2L12 3Z"/><path d="m19 13-.7 2.3L16 16l2.3.7L19 19l.7-2.3L22 16l-2.3-.7L19 13Z"/></svg>;
+    case "text":
+      return <svg {...common}><path d="M5 5h14"/><path d="M12 5v14"/><path d="M8 19h8"/></svg>;
+    case "image":
+      return <svg {...common}><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L6 20"/></svg>;
+    case "shape":
+      return <svg {...common}><rect x="4" y="4" width="8" height="8" rx="1"/><circle cx="16.5" cy="16.5" r="4.5"/></svg>;
+    case "close":
+      return <svg {...common}><path d="m6 6 12 12M18 6 6 18"/></svg>;
+    case "delete":
+      return <svg {...common}><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="m7 7 1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg>;
+    case "duplicate":
+      return <svg {...common}><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>;
+    case "forward":
+      return <svg {...common}><path d="m9 6 6 6-6 6"/></svg>;
+    case "backward":
+      return <svg {...common}><path d="m15 6-6 6 6 6"/></svg>;
+    case "front":
+      return <svg {...common}><path d="M4 7h16M4 12h16M4 17h16"/></svg>;
+    case "layers":
+      return <svg {...common}><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m4 12 8 4 8-4"/><path d="m4 16 8 5 8-5"/></svg>;
+  }
+}
 
 type CustomCoverApiErrorPayload = {
   error?: string;
@@ -330,7 +417,7 @@ function CoverCanvas({
             containerType: "inline-size",
           }}
         >
-          {productImage && surface.elements.length === 0 && (
+          {productImage && (
             <img
               src={productImage}
               alt={productName || "Product"}
@@ -403,13 +490,19 @@ function CoverCanvas({
                 )}
 
                 {element.type === "image" && element.src && (
-                  <img
-                    src={element.src}
-                    alt=""
-                    draggable={false}
-                    className="h-full w-full select-none"
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0"
                     style={{
-                      objectFit: element.objectFit ?? "contain",
+                      backgroundImage: `url(${JSON.stringify(element.src)})`,
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize:
+                        element.objectFit === "cover"
+                          ? "cover"
+                          : element.objectFit === "fill"
+                            ? "100% 100%"
+                            : "contain",
                       borderRadius: element.borderRadius ?? 0,
                       transform: `translate(${element.imageOffsetX ?? 0}px, ${
                         element.imageOffsetY ?? 0
@@ -445,11 +538,19 @@ function Inspector({
   onUpdate,
   onDelete,
   onDuplicate,
+  onBringForward,
+  onSendBackward,
+  onBringToFront,
+  onSendToBack,
 }: {
   element: CanvasElement | null;
   onUpdate: (patch: Partial<CanvasElement>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onBringForward: () => void;
+  onSendBackward: () => void;
+  onBringToFront: () => void;
+  onSendToBack: () => void;
 }) {
   if (!element) {
     return (
@@ -576,6 +677,50 @@ function Inspector({
               <option value="right">Right</option>
             </select>
           </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <label className="text-xs font-semibold">
+              Line Height
+              <input
+                type="number"
+                className={field}
+                min={0.7}
+                max={3}
+                step={0.1}
+                value={element.lineHeight ?? 1.2}
+                onChange={(event) =>
+                  onUpdate({
+                    lineHeight: clamp(
+                      Number(event.target.value) || 1.2,
+                      0.7,
+                      3,
+                    ),
+                  })
+                }
+              />
+            </label>
+
+            <label className="text-xs font-semibold">
+              Letter Spacing
+              <input
+                type="number"
+                className={field}
+                min={-10}
+                max={30}
+                step={0.5}
+                value={element.letterSpacing ?? 0}
+                onChange={(event) =>
+                  onUpdate({
+                    letterSpacing: clamp(
+                      Number(event.target.value) || 0,
+                      -10,
+                      30,
+                    ),
+                  })
+                }
+              />
+            </label>
+          </div>
         </div>
       )}
 
@@ -733,10 +878,47 @@ function Inspector({
           />
         </label>
 
+        <div className="mt-5 border-t border-[var(--mn-border)] pt-5">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--mn-text-muted)]">
+            Layer
+          </p>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onBringForward}
+              className="h-9 rounded-lg border border-[var(--mn-border-strong)] text-xs font-semibold hover:bg-[var(--mn-control-hover)]"
+            >
+              ↑ Forward
+            </button>
+            <button
+              type="button"
+              onClick={onSendBackward}
+              className="h-9 rounded-lg border border-[var(--mn-border-strong)] text-xs font-semibold hover:bg-[var(--mn-control-hover)]"
+            >
+              ↓ Backward
+            </button>
+            <button
+              type="button"
+              onClick={onBringToFront}
+              className="h-9 rounded-lg border border-[var(--mn-border-strong)] text-xs font-semibold hover:bg-[var(--mn-control-hover)]"
+            >
+              ↑↑ Front
+            </button>
+            <button
+              type="button"
+              onClick={onSendToBack}
+              className="h-9 rounded-lg border border-[var(--mn-border-strong)] text-xs font-semibold hover:bg-[var(--mn-control-hover)]"
+            >
+              ↓↓ Back
+            </button>
+          </div>
+        </div>
+
         <button
           type="button"
           onClick={onDuplicate}
-          className="mt-5 h-10 w-full rounded-xl border border-[var(--mn-border-strong)] text-xs font-semibold hover:bg-[var(--mn-control-hover)]"
+          className="mt-4 h-10 w-full rounded-xl border border-[var(--mn-border-strong)] text-xs font-semibold hover:bg-[var(--mn-control-hover)]"
         >
           Duplicate Element
         </button>
@@ -749,10 +931,14 @@ function PreviewOverlay({
   surfaces,
   activeSide,
   onClose,
+  onAddToCart,
+  busy,
 }: {
   surfaces: Record<EditorSide, DesignSurface>;
   activeSide: EditorSide;
   onClose: () => void;
+  onAddToCart?: () => void;
+  busy?: boolean;
 }) {
   const surface = surfaces[activeSide];
 
@@ -762,7 +948,8 @@ function PreviewOverlay({
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--mn-border)] px-5">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--mn-accent)]">
-              Preview
+              <StudioIcon name="preview" size={16} />
+            Preview
             </p>
             <p className="text-sm font-semibold">
               {SIDES.find((item) => item.id === activeSide)?.label}
@@ -772,7 +959,7 @@ function PreviewOverlay({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[var(--mn-border)] px-4 py-2 text-xs font-semibold"
+            className="flex h-10 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 text-sm font-semibold text-[var(--mn-text-secondary)] shadow-[var(--mn-shadow-sm)] transition hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] active:scale-[0.98]"
           >
             Close
           </button>
@@ -787,6 +974,25 @@ function PreviewOverlay({
             onSelectElement={() => undefined}
             onMoveElement={() => undefined}
           />
+        </div>
+
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--mn-border)] bg-[var(--mn-surface)] px-5 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-11 rounded-xl px-4 text-sm font-semibold text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] active:scale-[0.98]"
+          >
+            Keep Editing
+          </button>
+          <button
+            type="button"
+            onClick={onAddToCart}
+            disabled={busy}
+            className="flex h-11 items-center gap-2 rounded-xl bg-[var(--mn-accent)] px-5 text-sm font-semibold text-white shadow-[var(--mn-shadow-sm)] transition hover:brightness-95 hover:shadow-[var(--mn-shadow-md)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <StudioIcon name="cart" size={17} />
+            {busy ? "Adding…" : "Add to Cart"}
+          </button>
         </div>
       </div>
     </div>
@@ -808,11 +1014,14 @@ function DesktopEditor({
   onBackground,
   onAiDesign,
   onPreview,
-  onApprove,
   onSave,
   onUpdateElement,
   onDeleteElement,
   onDuplicateElement,
+  onBringForward,
+  onSendBackward,
+  onBringToFront,
+  onSendToBack,
   onUndo,
   onRedo,
   canUndo,
@@ -834,11 +1043,14 @@ function DesktopEditor({
   onBackground: () => void;
   onAiDesign: () => void;
   onPreview: () => void;
-  onApprove: () => void;
   onSave: () => void;
   onUpdateElement: (patch: Partial<CanvasElement>) => void;
   onDeleteElement: () => void;
   onDuplicateElement: () => void;
+  onBringForward: () => void;
+  onSendBackward: () => void;
+  onBringToFront: () => void;
+  onSendToBack: () => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -847,11 +1059,11 @@ function DesktopEditor({
   onBack: () => void;
 }) {
   const tools = [
-    { icon: "⌁", label: "Select" },
-    { icon: "✦", label: "AI Design" },
-    { icon: "T", label: "Text" },
-    { icon: "▧", label: "Image" },
-    { icon: "□", label: "Shape" },
+    { icon: "select", label: "Select" },
+    { icon: "sparkles", label: "AI Design" },
+    { icon: "text", label: "Text" },
+    { icon: "image", label: "Image" },
+    { icon: "shape", label: "Shape" },
     { icon: "◐", label: "Background" },
   ];
 
@@ -869,10 +1081,15 @@ function DesktopEditor({
             onClick={onBack}
             className="rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-bg)]"
           >
-            ← Back
+            <StudioIcon name="back" size={17} />
+            Back
           </button>
 
           <div className="h-7 w-px bg-[var(--mn-border)]" />
+
+          <span className="hidden xl:inline-flex rounded-lg border border-[var(--mn-border-strong)] bg-[var(--mn-surface-soft)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+            🖥️ Desktop Editor · Full Screen
+          </span>
 
           <div>
             <div className="flex items-center gap-2">
@@ -893,26 +1110,19 @@ function DesktopEditor({
             type="button"
             onClick={onSave}
             disabled={busy}
-            className="h-11 rounded-xl border border-[var(--mn-border-strong)] px-4 text-sm font-semibold hover:bg-[var(--mn-control-hover)] disabled:opacity-50"
+            className="flex h-11 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 text-sm font-semibold text-[var(--mn-text)] shadow-[var(--mn-shadow-sm)] transition hover:border-[var(--mn-border-strong)] hover:bg-[var(--mn-control-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {busy ? "Working…" : "Save"}
+            <StudioIcon name="save" size={16} />
+            <span>{busy ? "Saving…" : "Save"}</span>
           </button>
 
           <button
             type="button"
             onClick={onPreview}
-            className="h-11 rounded-xl border border-[var(--mn-border-strong)] px-5 text-sm font-semibold hover:bg-[var(--mn-accent-soft)]"
+            className="flex h-11 items-center gap-2 rounded-xl bg-[var(--mn-accent)] px-5 text-sm font-semibold text-white shadow-[var(--mn-shadow-sm)] transition hover:brightness-95 hover:shadow-[var(--mn-shadow-md)] active:scale-[0.98]"
           >
-            Preview
-          </button>
-
-          <button
-            type="button"
-            onClick={onApprove}
-            disabled={busy}
-            className="h-11 rounded-xl bg-[var(--mn-accent)] px-5 text-sm font-semibold text-[var(--mn-accent-contrast)] shadow-[var(--mn-shadow-sm)] disabled:opacity-50"
-          >
-            Approve ✓
+            <StudioIcon name="preview" size={17} />
+            <span>Preview</span>
           </button>
         </div>
       </header>
@@ -926,34 +1136,51 @@ function DesktopEditor({
           </div>
 
           <nav className="flex flex-1 flex-col gap-0.5 px-2">
-            {tools.map((tool, index) => (
-              <button
-                key={tool.label}
-                type="button"
-                disabled={busy && tool.label === "AI Design"}
-                onClick={() => {
-                  if (tool.label === "AI Design") onAiDesign();
-                  if (tool.label === "Text") onAddText();
-                  if (tool.label === "Image") onUploadImage();
-                  if (tool.label === "Shape") onAddShape("rectangle");
-                  if (tool.label === "Background") onBackground();
-                }}
-                className={[
-                  "group flex h-[62px] w-full flex-col items-center justify-center gap-1.5 rounded-xl px-1 transition-all",
-                  index === 0
-                    ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]"
-                    : "text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]",
-                ].join(" ")}
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-sm font-semibold">
-                  {tool.icon}
-                </span>
+            {tools.map((tool, index) => {
+              const isSelectTool = tool.label === "Select";
+              const label = isSelectTool && selectedElementId
+                ? "Deselect"
+                : tool.label;
+              const icon = isSelectTool && selectedElementId
+                ? "×"
+                : tool.icon;
 
-                <span className="text-[10px] font-semibold">
-                  {tool.label}
-                </span>
-              </button>
-            ))}
+              return (
+                <button
+                  key={tool.label}
+                  type="button"
+                  disabled={busy && tool.label === "AI Design"}
+                  onClick={() => {
+                    if (isSelectTool) {
+                      if (selectedElementId) {
+                        onSelectElement("");
+                      }
+                      return;
+                    }
+
+                    if (tool.label === "AI Design") onAiDesign();
+                    if (tool.label === "Text") onAddText();
+                    if (tool.label === "Image") onUploadImage();
+                    if (tool.label === "Shape") onAddShape("rectangle");
+                    if (tool.label === "Background") onBackground();
+                  }}
+                  className={[
+                    "group flex h-[62px] w-full flex-col items-center justify-center gap-1.5 rounded-xl px-1 transition-all",
+                    index === 0
+                      ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]"
+                      : "text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]",
+                  ].join(" ")}
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-sm font-semibold">
+                    <StudioIcon name={icon as any} size={17} />
+                  </span>
+
+                  <span className="text-[10px] font-semibold">
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </nav>
 
           <div className="border-t border-[var(--mn-border)] p-2">
@@ -964,7 +1191,7 @@ function DesktopEditor({
                 disabled={!canUndo}
                 className="flex h-9 items-center justify-center rounded-lg text-sm hover:bg-[var(--mn-control-hover)] disabled:opacity-30"
               >
-                ↶
+                <StudioIcon name="undo" size={18} />
               </button>
 
               <button
@@ -973,21 +1200,24 @@ function DesktopEditor({
                 disabled={!canRedo}
                 className="flex h-9 items-center justify-center rounded-lg text-sm hover:bg-[var(--mn-control-hover)] disabled:opacity-30"
               >
-                ↷
+                <StudioIcon name="redo" size={18} />
               </button>
             </div>
           </div>
         </aside>
 
         <main className="min-w-0 flex-1 overflow-hidden bg-[var(--mn-surface-soft)]">
-          <CoverCanvas
-            surface={surface}
-            productImage={productImage}
-            productName={productName}
-            selectedElementId={selectedElementId}
-            onSelectElement={onSelectElement}
-            onMoveElement={onMoveElement}
-          />
+          <div className="relative flex h-full min-h-0 w-full flex-1 items-center justify-center">
+            <CoverCanvas
+              surface={surface}
+              productImage={productImage}
+              productName={productName}
+              selectedElementId={selectedElementId}
+              onSelectElement={onSelectElement}
+              onMoveElement={onMoveElement}
+            />
+
+          </div>
         </main>
 
         <aside className="flex w-[320px] shrink-0 flex-col overflow-hidden border-l border-[var(--mn-border)] bg-[var(--mn-surface)]">
@@ -1005,6 +1235,10 @@ function DesktopEditor({
             onUpdate={onUpdateElement}
             onDelete={onDeleteElement}
             onDuplicate={onDuplicateElement}
+            onBringForward={onBringForward}
+            onSendBackward={onSendBackward}
+            onBringToFront={onBringToFront}
+            onSendToBack={onSendToBack}
           />
         </aside>
       </div>
@@ -1023,50 +1257,402 @@ function PlaceholderEditor({
   activeSide,
   setActiveSide,
   onBack,
+  surface,
+  productImage,
+  productName,
+  selectedElementId,
+  onSelectElement,
+  onMoveElement,
+  onAddText,
+  onAddShape,
+  onUploadImage,
+  onBackground,
+  onAiDesign,
+  onPreview,
+  onSave,
+  onUpdateElement,
+  onDeleteElement,
+  onDuplicateElement,
+  onBringForward,
+  onSendBackward,
+  onBringToFront,
+  onSendToBack,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+  busy,
 }: {
   activeSide: EditorSide;
   setActiveSide: (side: EditorSide) => void;
   onBack: () => void;
+  surface: DesignSurface;
+  productImage: string;
+  productName: string;
+  selectedElementId: string | null;
+  onSelectElement: (elementId: string) => void;
+  onMoveElement: (elementId: string, x: number, y: number) => void;
+  onAddText: () => void;
+  onAddShape: (shape: "rectangle" | "circle") => void;
+  onUploadImage: () => void;
+  onBackground: () => void;
+  onAiDesign: () => void;
+  onPreview: () => void;
+  onSave: () => void;
+  onUpdateElement: (patch: Partial<CanvasElement>) => void;
+  onDeleteElement: () => void;
+  onDuplicateElement: () => void;
+  onBringForward: () => void;
+  onSendBackward: () => void;
+  onBringToFront: () => void;
+  onSendToBack: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  busy: boolean;
 }) {
+  const tools = [
+    { icon: "select", label: "Select" },
+    { icon: "sparkles", label: "AI Design" },
+    { icon: "text", label: "Text" },
+    { icon: "image", label: "Image" },
+    { icon: "shape", label: "Shape" },
+    { icon: "◐", label: "Background" },
+  ];
+
+  const selectedElement =
+    surface.elements.find(
+      (element) => element.id === selectedElementId,
+    ) ?? null;
+
+  const handleTool = (label: string) => {
+    if (label === "AI Design") onAiDesign();
+    if (label === "Text") onAddText();
+    if (label === "Image") onUploadImage();
+    if (label === "Shape") onAddShape("rectangle");
+    if (label === "Background") onBackground();
+  };
+
   return (
-    <section className="flex h-dvh flex-col bg-[var(--mn-bg)] lg:hidden">
-      <header className="flex h-14 items-center justify-between border-b border-[var(--mn-border)] px-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="rounded-xl px-3 py-2 text-sm"
-        >
-          ← Back
-        </button>
+    <>
+      {/* TABLET EDITOR */}
+      <section className="hidden h-dvh w-full min-w-0 flex-col overflow-hidden bg-[var(--mn-bg)] text-[var(--mn-text)] md:flex lg:hidden">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--mn-border)] px-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-xl px-3 py-2 text-sm font-semibold text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-bg)]"
+            >
+              <StudioIcon name="back" size={17} />
+            Back
+            </button>
 
-        <p className="text-sm font-semibold">
-          Custom Cover
-        </p>
+            <div className="h-6 w-px bg-[var(--mn-border)]" />
 
-        <span className="text-xs text-[var(--mn-text-muted)]">
-          Desktop editor
-        </span>
-      </header>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-black tracking-[-0.05em]">
+                  MineNote
+                </span>
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--mn-accent)]" />
+              </div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-[var(--mn-text-muted)]">
+                Custom Cover Studio
+              </p>
+            </div>
 
-      <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-center">
-        <div>
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]">
-            ✦
+            <span className="ml-3 hidden sm:inline-flex rounded-lg border border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-accent)]">
+
+            </span>
           </div>
-          <p className="font-semibold">Custom Cover Studio</p>
-          <p className="mt-2 text-xs text-[var(--mn-text-muted)]">
-            Tablet and mobile controls will use the same editor engine.
-          </p>
-        </div>
-      </div>
 
-      <div className="border-t border-[var(--mn-border)] p-2">
-        <SideTabs
-          activeSide={activeSide}
-          onChange={setActiveSide}
-        />
-      </div>
-    </section>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={busy}
+              className="flex h-10 items-center gap-2 rounded-xl bg-[var(--mn-accent)] px-4 text-sm font-semibold text-white shadow-[var(--mn-shadow-sm)] transition hover:brightness-95 hover:shadow-[var(--mn-shadow-md)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <StudioIcon name="save" size={16} />
+              <span>{busy ? "Saving…" : "Save"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onPreview}
+              className="flex h-10 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 text-sm font-semibold text-[var(--mn-text)] shadow-[var(--mn-shadow-sm)] transition hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)] hover:text-[var(--mn-accent)] active:scale-[0.98]"
+            >
+              <StudioIcon name="preview" size={16} />
+              <span>Preview</span>
+            </button>
+          </div>
+        </header>
+
+        <div className="shrink-0 border-b border-[var(--mn-border)] bg-[var(--mn-bg)] px-3 py-2">
+          <SideTabs
+            activeSide={activeSide}
+            onChange={setActiveSide}
+          />
+        </div>
+
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <main className="min-w-0 flex-1 overflow-hidden bg-[var(--mn-surface-soft)]">
+            <CoverCanvas
+              surface={surface}
+              productImage={productImage}
+              productName={productName}
+              selectedElementId={selectedElementId}
+              onSelectElement={onSelectElement}
+              onMoveElement={onMoveElement}
+            />
+          </main>
+
+          <aside className="flex w-[300px] shrink-0 flex-col overflow-hidden border-l border-[var(--mn-border)] bg-[var(--mn-surface)]">
+            <div className="border-b border-[var(--mn-border)] px-5 py-4">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--mn-accent)]">
+                Inspector
+              </p>
+              <h2 className="mt-1 text-base font-semibold">
+                Properties
+              </h2>
+            </div>
+
+            <Inspector
+              element={selectedElement}
+              onUpdate={onUpdateElement}
+              onDelete={onDeleteElement}
+              onDuplicate={onDuplicateElement}
+              onBringForward={onBringForward}
+              onSendBackward={onSendBackward}
+              onBringToFront={onBringToFront}
+              onSendToBack={onSendToBack}
+            />
+          </aside>
+        </div>
+
+        <footer className="flex shrink-0 items-center gap-2 overflow-x-auto border-t border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2">
+          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-1 shadow-[var(--mn-shadow-sm)]">
+            <button
+              type="button"
+              onClick={onUndo}
+              disabled={!canUndo}
+              aria-label="Undo"
+              title="Undo"
+              className="flex h-9 w-10 items-center justify-center rounded-lg border border-transparent text-lg font-medium text-[var(--mn-text)] transition hover:border-[var(--mn-border)] hover:bg-[var(--mn-surface)] hover:shadow-[var(--mn-shadow-sm)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              <StudioIcon name="undo" size={18} />
+            </button>
+
+            <button
+              type="button"
+              onClick={onRedo}
+              disabled={!canRedo}
+              aria-label="Redo"
+              title="Redo"
+              className="flex h-9 w-10 items-center justify-center rounded-lg border border-transparent text-lg font-medium text-[var(--mn-text)] transition hover:border-[var(--mn-border)] hover:bg-[var(--mn-surface)] hover:shadow-[var(--mn-shadow-sm)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              <StudioIcon name="redo" size={18} />
+            </button>
+          </div>
+
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
+            {tools.map((tool) => {
+              const isSelectTool = tool.label === "Select";
+              const label = isSelectTool && selectedElementId
+                ? "Deselect"
+                : tool.label;
+              const icon = isSelectTool && selectedElementId
+                ? "×"
+                : tool.icon;
+
+              return (
+                <button
+                  key={tool.label}
+                  type="button"
+                  disabled={busy && tool.label === "AI Design"}
+                  onClick={() => {
+                    if (isSelectTool) {
+                      if (selectedElementId) {
+                        onSelectElement("");
+                      }
+                      return;
+                    }
+
+                    handleTool(tool.label);
+                  }}
+                  className={[
+                    "flex h-11 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-semibold",
+                    isSelectTool
+                      ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]"
+                      : "text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)]",
+                  ].join(" ")}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-sm">
+                    <StudioIcon name={icon as any} size={17} />
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+        </footer>
+      </section>
+
+      {/* MOBILE — SEPARATE TOUCH-FIRST EDITOR */}
+      <section className="flex h-dvh flex-col overflow-hidden bg-[var(--mn-bg)] md:hidden">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--mn-border)] bg-[var(--mn-surface)] px-3">
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] active:scale-95"
+          >
+            <StudioIcon name="back" size={18} />
+          </button>
+
+          <div className="text-center">
+            <p className="text-sm font-semibold">MineNote</p>
+            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+              Custom Cover Studio
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={busy}
+            className="flex h-10 items-center gap-1.5 rounded-xl bg-[var(--mn-accent)] px-3.5 text-xs font-semibold text-white shadow-[var(--mn-shadow-sm)] transition hover:brightness-95 hover:shadow-[var(--mn-shadow-md)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <StudioIcon name="save" size={15} />
+            <span>{busy ? "Saving…" : "Save"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onPreview}
+            aria-label="Preview"
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 text-xs font-semibold text-[var(--mn-text)] shadow-[var(--mn-shadow-sm)] transition hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)] hover:text-[var(--mn-accent)] active:scale-[0.97]"
+          >
+            <StudioIcon name="preview" size={15} />
+            <span>Preview</span>
+          </button>
+        </header>
+
+        <div className="shrink-0 overflow-x-auto border-b border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2">
+          <SideTabs
+            activeSide={activeSide}
+            onChange={setActiveSide}
+          />
+        </div>
+
+        <main className="min-h-0 flex-1 overflow-hidden bg-[var(--mn-surface-soft)] p-3">
+          <div className="flex h-full w-full items-center justify-center">
+            <CoverCanvas
+              surface={surface}
+              productImage={productImage}
+              productName={productName}
+              selectedElementId={selectedElementId}
+              onSelectElement={onSelectElement}
+              onMoveElement={onMoveElement}
+            />
+          </div>
+        </main>
+
+        <footer className="shrink-0 border-t border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2">
+          <div className="mx-auto flex max-w-full items-center justify-center gap-2 overflow-x-auto">
+            <div className="flex shrink-0 items-center gap-1 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] p-1">
+              <button
+                type="button"
+                onClick={onUndo}
+                disabled={!canUndo}
+                aria-label="Undo"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-lg text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-surface)] hover:text-[var(--mn-text)] active:scale-95 disabled:opacity-30"
+              >
+                <StudioIcon name="undo" size={18} />
+              </button>
+
+              <button
+                type="button"
+                onClick={onRedo}
+                disabled={!canRedo}
+                aria-label="Redo"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-lg text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-surface)] hover:text-[var(--mn-text)] active:scale-95 disabled:opacity-30"
+              >
+                <StudioIcon name="redo" size={18} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedElementId) {
+                  onSelectElement("");
+                }
+              }}
+              className={[
+                "flex h-11 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition active:scale-95",
+                selectedElementId
+                  ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent)]"
+                  : "border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-[var(--mn-text-secondary)] hover:bg-[var(--mn-control-hover)]",
+              ].join(" ")}
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] text-sm">
+                ⌁
+              </span>
+              <span>{selectedElementId ? "Deselect" : "Select"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTool("AI Design")}
+              disabled={busy}
+              aria-label="AI Design"
+              className="flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-3 text-xs font-semibold text-[var(--mn-accent)] transition hover:border-[var(--mn-accent)] active:scale-95 disabled:opacity-40"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--mn-accent)]/20 bg-[var(--mn-surface)]/60 text-sm">
+                ✦
+              </span>
+              <span>AI Design</span>
+            </button>
+
+            <div className="h-7 w-px shrink-0 bg-[var(--mn-border)]" />
+
+            <button
+              type="button"
+              onClick={() => handleTool("Text")}
+              aria-label="Text"
+              className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] active:scale-95"
+            >
+              <span className="text-sm font-bold leading-none">T</span>
+              <span className="text-[8px] font-medium leading-none">Text</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTool("Image")}
+              aria-label="Image"
+              className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] active:scale-95"
+            >
+              <span className="text-sm leading-none">▧</span>
+              <span className="text-[8px] font-medium leading-none">Image</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTool("Shape")}
+              aria-label="Shape"
+              className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-soft)] text-[var(--mn-text-secondary)] transition hover:bg-[var(--mn-control-hover)] hover:text-[var(--mn-text)] active:scale-95"
+            >
+              <span className="text-sm leading-none">□</span>
+              <span className="text-[8px] font-medium leading-none">Shape</span>
+            </button>
+          </div>
+        </footer>
+      </section>
+    </>
   );
 }
 
@@ -1414,6 +2000,43 @@ export default function CustomCoverEditor({
     }));
   };
 
+  const reorderSelectedElement = (
+    mode: "forward" | "backward" | "front" | "back",
+  ) => {
+    if (!selectedElementId) return;
+
+    updateActiveSurface((current) => {
+      const elements = [...current.elements];
+      const index = elements.findIndex(
+        (element) => element.id === selectedElementId,
+      );
+
+      if (index < 0) return current;
+
+      const nextIndex =
+        mode === "front"
+          ? elements.length - 1
+          : mode === "back"
+            ? 0
+            : mode === "forward"
+              ? Math.min(index + 1, elements.length - 1)
+              : Math.max(index - 1, 0);
+
+      if (nextIndex === index) return current;
+
+      const [selected] = elements.splice(index, 1);
+      elements.splice(nextIndex, 0, selected);
+
+      return {
+        ...current,
+        elements: elements.map((element, position) => ({
+          ...element,
+          zIndex: position + 1,
+        })),
+      };
+    });
+  };
+
   const addText = () => {
     const element: CanvasElement = {
       id: makeId("text"),
@@ -1574,8 +2197,7 @@ export default function CustomCoverEditor({
                 item.id === element.id
                   ? {
                       ...item,
-                      src:
-                        asset.previewUrl || localUrl,
+                      src: localUrl,
                       assetId: asset.id,
                     }
                   : item,
@@ -1587,9 +2209,8 @@ export default function CustomCoverEditor({
       setSurfaces(savedSurfaces);
 
       // Wait until the uploaded asset ID is persisted with the design.
+      // Keep the local object URL alive for the current canvas session.
       await flushSave();
-
-      URL.revokeObjectURL(localUrl);
     } catch (error) {
       const rolledBackSurfaces = {
         ...latestSurfacesRef.current,
@@ -1883,6 +2504,7 @@ export default function CustomCoverEditor({
           ? error.message
           : "Unable to save customization.",
       );
+      throw error;
     } finally {
       setBusy(false);
     }
@@ -1969,6 +2591,83 @@ export default function CustomCoverEditor({
     // Every Back action goes through the project decision dialog.
     // The project itself is never deleted just by leaving the editor.
     setBackDialogOpen(true);
+  };
+
+
+  const { addCustomCoverToCart } = useCart();
+
+  const addToCartFromPreview = async () => {
+    if (busy) return;
+
+    if (!productId) {
+      window.alert("Please select a notebook before adding it to cart.");
+      return;
+    }
+
+    const quantity = Math.max(
+      1,
+      Math.floor(
+        Number.isFinite(Number(physicalConfig?.quantity))
+          ? Number(physicalConfig?.quantity)
+          : 1,
+      ),
+    );
+
+    setBusy(true);
+
+    try {
+      await save();
+
+      const response = await fetch(
+        `/api/custom-cover/${customizationId}/approve`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload?.error || "Unable to prepare your custom cover.",
+        );
+      }
+
+      const product = payload?.product;
+
+      if (
+        !product?.id ||
+        typeof product.name !== "string" ||
+        !Number.isFinite(Number(product.price))
+      ) {
+        throw new Error("Product details were unavailable.");
+      }
+
+      addCustomCoverToCart(
+        {
+          id: String(product.id),
+          name: product.name,
+          price: Number(product.price),
+          image: productImage || null,
+        },
+        customizationId,
+        quantity,
+      );
+
+      router.push("/cart");
+    } catch (error) {
+      console.error("CUSTOM COVER ADD TO CART FAILED:", error);
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to add your custom cover to cart.",
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   const approve = async () => {
@@ -2069,11 +2768,14 @@ export default function CustomCoverEditor({
         onBackground={changeBackground}
         onAiDesign={generateAi}
         onPreview={() => setPreviewOpen(true)}
-        onApprove={approve}
         onSave={save}
         onUpdateElement={updateElement}
         onDeleteElement={deleteElement}
         onDuplicateElement={duplicateElement}
+        onBringForward={() => reorderSelectedElement("forward")}
+        onSendBackward={() => reorderSelectedElement("backward")}
+        onBringToFront={() => reorderSelectedElement("front")}
+        onSendToBack={() => reorderSelectedElement("back")}
         onUndo={handleUndo}
         onRedo={handleRedo}
         canUndo={history.past.length > 0}
@@ -2085,6 +2787,33 @@ export default function CustomCoverEditor({
         activeSide={activeSide}
         setActiveSide={setActiveSide}
         onBack={handleEditorBack}
+        surface={activeSurface ?? defaultSurface}
+        productImage={productImage}
+        productName={productName}
+        selectedElementId={selectedElementId}
+        onSelectElement={(id) =>
+          setSelectedElementId(id || null)
+        }
+        onMoveElement={moveElement}
+        onAddText={addText}
+        onAddShape={addShape}
+        onUploadImage={uploadImage}
+        onBackground={changeBackground}
+        onAiDesign={generateAi}
+        onPreview={() => setPreviewOpen(true)}
+        onSave={save}
+        onUpdateElement={updateElement}
+        onDeleteElement={deleteElement}
+        onDuplicateElement={duplicateElement}
+        onBringForward={() => reorderSelectedElement("forward")}
+        onSendBackward={() => reorderSelectedElement("backward")}
+        onBringToFront={() => reorderSelectedElement("front")}
+        onSendToBack={() => reorderSelectedElement("back")}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={history.past.length > 0}
+        canRedo={history.future.length > 0}
+        busy={busy}
       />
 
       {backDialogOpen && (
@@ -2307,11 +3036,7 @@ export default function CustomCoverEditor({
       )}
 
       {previewOpen && (
-        <PreviewOverlay
-          surfaces={surfaces}
-          activeSide={activeSide}
-          onClose={() => setPreviewOpen(false)}
-        />
+        <PreviewOverlay surfaces={surfaces} activeSide={activeSide} onClose={() => setPreviewOpen(false)} onAddToCart={addToCartFromPreview} busy={busy} />
       )}
     </div>
   );

@@ -127,71 +127,6 @@ export default async function CustomCoverPage({
             : "mx-auto max-w-6xl"
         }
       >
-        {!selectedProduct && (
-          <div className="mb-10 max-w-4xl">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex rounded-full border border-[var(--mn-accent)]/20 bg-[var(--mn-accent-soft)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)]">
-              ✨ Custom Creation Studio
-            </span>
-
-            {!selectedProduct && (
-              <span className="inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-text-secondary)]">
-                Create Your Own
-              </span>
-            )}
-          </div>
-
-          <h1 className="mt-5 text-4xl font-black tracking-[-0.045em] sm:text-5xl lg:text-6xl">
-            {selectedProduct ? (
-              <>
-                Make it{" "}
-                <span className="text-[var(--mn-accent)]">yours.</span>
-              </>
-            ) : (
-              <>
-                Create something{" "}
-                <span className="text-[var(--mn-accent)]">original.</span>
-              </>
-            )}
-          </h1>
-
-          <p className="mt-5 max-w-3xl text-base leading-7 text-[var(--mn-text-secondary)] sm:text-lg sm:leading-8">
-            {selectedProduct
-              ? "Personalise this MineNote notebook with your own front and back cover."
-              : "Start with a blank idea, choose your physical notebook, and create a cover that does not have to look like anything else in our catalogue."}
-          </p>
-        </div>
-        )}
-
-        {!selectedProduct && (
-          <div className="mb-8 rounded-[2rem] border border-[var(--mn-accent)]/20 bg-[var(--mn-accent-soft)] p-5 sm:p-7">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)]">
-                  🔥 Your design. Your rules.
-                </p>
-
-                <h2 className="mt-2 text-xl font-black text-[var(--mn-text)] sm:text-2xl">
-                  Nothing from the catalogue is required.
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--mn-text-secondary)]">
-                  The catalogue only contains ready-made products.
-                  Your custom creation remains private unless you
-                  explicitly give MineNote permission to publish it.
-                </p>
-              </div>
-
-              <div className="shrink-0 rounded-[1.5rem] border border-[var(--mn-border)] bg-[var(--mn-bg)]/40 px-5 py-4 text-center">
-                <p className="text-2xl">🔒</p>
-                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--mn-text-muted)]">
-                  Private by default
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         <CustomCoverBuilder
           product={
             selectedProduct
@@ -206,6 +141,9 @@ export default async function CustomCoverPage({
           products={availableProducts}
           createYourOwn={!selectedProduct}
         />
+
+
+
       </section>
     </main>
   );

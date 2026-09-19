@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/app/lib/supabase";
+import { createServerSupabaseClient, createSupabaseAdminClient } from "@/app/lib/supabase";
 import {
   buildCustomCoverStoragePath,
   getCustomCoverStorageBucket,
 } from "@/app/services/ai/persistence/storage";
 import type { CoverSide } from "@/app/lib/customization";
+
+const supabaseAdmin = createSupabaseAdminClient();
 
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 const MIN_WIDTH = 600;
@@ -443,7 +445,7 @@ export async function POST(
     extension: detected.extension,
   });
 
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await supabaseAdmin.storage
     .from(bucket)
     .upload(storagePath, bytes, {
       contentType: detected.mimeType,
@@ -502,7 +504,7 @@ export async function POST(
       assetError
     );
 
-    await supabase.storage
+    await supabaseAdmin.storage
       .from(bucket)
       .remove([storagePath]);
 
@@ -536,7 +538,7 @@ export async function POST(
     }
 
     if (previousPaths.length) {
-      const { error } = await supabase.storage
+      const { error } = await supabaseAdmin.storage
         .from(bucket)
         .remove(previousPaths);
 
@@ -550,7 +552,7 @@ export async function POST(
   }
 
   const previewUrl = await signedUrl(
-    supabase,
+    supabaseAdmin,
     storagePath,
     "original"
   );

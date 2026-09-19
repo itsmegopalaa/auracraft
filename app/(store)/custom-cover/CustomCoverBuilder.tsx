@@ -234,25 +234,6 @@ export default function CustomCoverBuilder({
 
   return (
     <main className="min-h-screen bg-[var(--mn-bg)] text-[var(--mn-text)]">
-      {/* HERO */}
-      <section className="border-b border-[var(--mn-border)]">
-        <div className="mn-container-wide mx-auto px-5 pb-11 pt-14 sm:px-6 lg:pb-13 lg:pt-18">
-          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--mn-accent)]">
-            MineNote · Custom Creation Studio
-          </p>
-
-          <div className="max-w-3xl">
-            <h1 className="font-[var(--mn-font-display)] text-[clamp(2.35rem,5vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.045em]">
-              Create something that’s yours.
-            </h1>
-
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--mn-text-secondary)] sm:text-lg">
-              Build a notebook around your ideas, identity and imagination.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <div className="mn-container-wide mx-auto px-5 py-10 sm:px-6 lg:py-13">
         {/* 01 */}
         <section>
@@ -710,6 +691,59 @@ export default function CustomCoverBuilder({
         </section>
       </div>
 
+
+
+        {!selectedProduct && (
+          <section className="mx-auto mt-14 max-w-6xl border-t border-[var(--mn-border)] px-5 pt-14 sm:px-6 lg:mt-18 lg:pt-18">
+            <div className="mb-10 max-w-4xl">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex rounded-full border border-[var(--mn-accent)]/20 bg-[var(--mn-accent-soft)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)]">
+                  ✨ Custom Creation Studio
+                </span>
+                <span className="inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-text-secondary)]">
+                  Create Your Own
+                </span>
+              </div>
+
+              <h1 className="mt-5 text-4xl font-black tracking-[-0.045em] sm:text-5xl lg:text-6xl">
+                Create something{" "}
+                <span className="text-[var(--mn-accent)]">original.</span>
+              </h1>
+
+              <p className="mt-5 max-w-3xl text-base leading-7 text-[var(--mn-text-secondary)] sm:text-lg sm:leading-8">
+                Start with a blank idea, choose your physical notebook, and create a cover that does not have to look like anything else in our catalogue.
+              </p>
+            </div>
+
+            <div className="rounded-[2rem] border border-[var(--mn-accent)]/20 bg-[var(--mn-accent-soft)] p-5 sm:p-7">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--mn-accent)]">
+                🔥 Your design. Your rules.
+              </p>
+
+              <h2 className="mt-2 text-xl font-black text-[var(--mn-text)] sm:text-2xl">
+                Nothing from the catalogue is required.
+              </h2>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--mn-text-secondary)]">
+                The catalogue only contains ready-made products. Your custom creation remains private unless you explicitly give MineNote permission to publish it.
+              </p>
+
+              <div className="mt-10 border-t border-[var(--mn-border)] pt-8">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--mn-accent)]">
+                  MineNote · Custom Creation Studio
+                </p>
+
+                <h2 className="mt-4 text-3xl font-black tracking-[-0.035em] sm:text-4xl">
+                  Create something that’s yours.
+                </h2>
+
+                <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--mn-text-secondary)] sm:text-lg">
+                  Build a notebook around your ideas, identity and imagination.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
       <Footer />
     </main>
   );

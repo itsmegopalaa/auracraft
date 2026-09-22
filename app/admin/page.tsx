@@ -101,6 +101,70 @@ export default async function AdminPage() {
 
   const recentOrders = allOrders.slice(0, 8);
 
+  const today = new Date();
+  const isToday = (value: string) => {
+    const date = new Date(value);
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
+  };
+
+  const todaysOrders = allOrders.filter((order) => isToday(order.created_at));
+  const todaysRevenue = todaysOrders
+    .filter((order) => order.payment_status === "paid")
+    .reduce((sum, order) => sum + order.total, 0);
+
+  const awaitingConfirmation = allOrders.filter(
+    (order) =>
+      order.order_status === "placed" &&
+      order.payment_status === "paid"
+  ).length;
+
+  const [{ count: unreadInboxCount }, { count: readyForPickupCount }, { count: productionQueueCount }] =
+    await Promise.all([
+      supabase
+        .from("contact_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("is_read", false),
+
+      supabase
+        .from("shipments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "ready_for_pickup"),
+
+      supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("payment_status", "paid")
+        .in("order_status", ["confirmed", "processing"])
+        .is("production_completed_at", null),
+    ]);
+
+  const actionRequired = [
+    {
+      label: "Orders awaiting confirmation",
+      value: awaitingConfirmation,
+      href: "/admin/orders",
+    },
+    {
+      label: "Production queue",
+      value: productionQueueCount ?? 0,
+      href: "/admin/production-batches",
+    },
+    {
+      label: "Ready for pickup",
+      value: readyForPickupCount ?? 0,
+      href: "/admin/shipping",
+    },
+    {
+      label: "Unread customer messages",
+      value: unreadInboxCount ?? 0,
+      href: "/admin/inbox",
+    },
+  ];
+
   const cards = [
     {
       label: "Total Orders",
@@ -209,6 +273,82 @@ export default async function AdminPage() {
           </div>
         </header>
 
+        {/* Today / Action Center */}
+        <section className="mt-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
+                  Today
+                </p>
+                <h2 className="mt-2 text-xl font-bold tracking-tight text-zinc-950 dark:text-white">
+                  Store activity
+                </h2>
+              </div>
+
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                Live
+              </span>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Today&apos;s orders
+                </p>
+                <p className="mt-2 text-2xl font-bold text-zinc-950 dark:text-white">
+                  {todaysOrders.length}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-950">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Today&apos;s revenue
+                </p>
+                <p className="mt-2 text-2xl font-bold text-zinc-950 dark:text-white">
+                  ₹{todaysRevenue.toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-5 shadow-sm dark:border-amber-900/50 dark:bg-amber-500/5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700 dark:text-amber-400">
+                  Action Required
+                </p>
+                <h2 className="mt-2 text-xl font-bold tracking-tight text-zinc-950 dark:text-white">
+                  Admin attention
+                </h2>
+              </div>
+
+              <span className="text-xl">⚡</span>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              {actionRequired.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center justify-between rounded-2xl border border-white/80 bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    {item.label}
+                  </span>
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                    {item.value}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            <p className="mt-4 text-[11px] leading-5 text-amber-800/70 dark:text-amber-300/70">
+              Automated systems may prepare work, but final operational authority remains with Admin.
+            </p>
+          </div>
+        </section>
+
         {/* KPI Cards */}
         <section className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {cards.map((card) => (
@@ -234,6 +374,46 @@ export default async function AdminPage() {
                 {card.description}
               </p>
             </div>
+          ))}
+        </section>
+
+        {/* Quick Actions */}
+        <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            {
+              href: "/admin/orders",
+              label: "Manage Orders",
+              icon: "🛒",
+            },
+            {
+              href: "/admin/production-batches",
+              label: "Production",
+              icon: "🎨",
+            },
+            {
+              href: "/admin/shipping",
+              label: "Shipping",
+              icon: "🚚",
+            },
+            {
+              href: "/admin/inbox",
+              label: "Customer Inbox",
+              icon: "📩",
+            },
+          ].map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="group rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-yellow-700"
+            >
+              <span className="text-xl">{action.icon}</span>
+              <p className="mt-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                {action.label}
+              </p>
+              <span className="mt-1 block text-xs text-zinc-400 transition group-hover:text-yellow-600 dark:text-zinc-500 dark:group-hover:text-yellow-400">
+                Open →
+              </span>
+            </Link>
           ))}
         </section>
 

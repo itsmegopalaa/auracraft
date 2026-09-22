@@ -116,22 +116,36 @@ export default function AdminNav({
   const links = [
     {
       href: "/admin",
-      label: "Dashboard",
+      label: "📊 Dashboard",
       active: pathname === "/admin",
     },
     {
       href: "/admin/orders",
-      label: "Orders",
+      label: "🛒 Orders",
       active: pathname.startsWith("/admin/orders"),
     },
     {
+      href: "/admin/production-batches",
+      label: "🎨 Production",
+      active:
+        pathname.startsWith("/admin/production-batches") ||
+        pathname.startsWith("/admin/production"),
+    },
+    {
+      href: "/admin/shipping",
+      label: "🚚 Shipping",
+      active:
+        pathname.startsWith("/admin/shipping") ||
+        pathname.startsWith("/admin/shipping"),
+    },
+    {
       href: "/admin/products",
-      label: "Products",
+      label: "📚 Products",
       active: pathname.startsWith("/admin/products"),
     },
     {
       href: "/admin/inbox",
-      label: "Inbox",
+      label: "📩 Inbox",
       active: pathname.startsWith("/admin/inbox"),
       badge: unreadInboxCount,
     },

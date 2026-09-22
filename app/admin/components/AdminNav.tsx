@@ -135,7 +135,6 @@ export default function AdminNav({
       href: "/admin/shipping",
       label: "🚚 Shipping",
       active:
-        pathname.startsWith("/admin/shipping") ||
         pathname.startsWith("/admin/shipping"),
     },
     {
@@ -148,6 +147,21 @@ export default function AdminNav({
       label: "📩 Inbox",
       active: pathname.startsWith("/admin/inbox"),
       badge: unreadInboxCount,
+    },
+    {
+      href: "/admin/customers",
+      label: "👥 Customers",
+      active: pathname.startsWith("/admin/customers"),
+    },
+    {
+      href: "/admin/payments",
+      label: "💳 Payments",
+      active: pathname.startsWith("/admin/payments"),
+    },
+    {
+      href: "/admin/settings",
+      label: "⚙️ Settings",
+      active: pathname.startsWith("/admin/settings"),
     },
   ];
 
@@ -168,6 +182,7 @@ export default function AdminNav({
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={link.active ? "page" : undefined}
                 className={`flex items-center gap-2 text-sm font-medium transition ${
                   link.active
                     ? "text-zinc-900 dark:text-zinc-100"
@@ -358,6 +373,7 @@ export default function AdminNav({
                   key={link.href}
                   href={link.href}
                   onClick={closeMenu}
+                  aria-current={link.active ? "page" : undefined}
                   className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition ${
                     link.active
                       ? "bg-yellow-50 text-zinc-900 dark:text-zinc-100"

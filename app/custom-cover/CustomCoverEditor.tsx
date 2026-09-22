@@ -2641,7 +2641,12 @@ export default function CustomCoverEditor({
       if (
         !product?.id ||
         typeof product.name !== "string" ||
-        !Number.isFinite(Number(product.price))
+        !Number.isFinite(Number(product.price)) ||
+        !(
+          product.pages === 100 ||
+          product.pages === 150 ||
+          product.pages === 200
+        )
       ) {
         throw new Error("Product details were unavailable.");
       }
@@ -2652,6 +2657,7 @@ export default function CustomCoverEditor({
           name: product.name,
           price: Number(product.price),
           image: productImage || null,
+          pages: product.pages,
         },
         customizationId,
         quantity,

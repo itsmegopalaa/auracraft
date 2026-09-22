@@ -1,6 +1,7 @@
 import ProductCard from "./ProductCard";
 import { createClient } from "@/utils/supabase/server";
 import { getProductRatings } from "../lib/product-rating";
+import { getCatalogBasePrices } from "../lib/catalog-pricing";
 
 export default async function FeaturedNotebooks() {
   const supabase = await createClient();
@@ -23,6 +24,17 @@ export default async function FeaturedNotebooks() {
     });
     return null;
   }
+
+  const catalogBasePrices = await getCatalogBasePrices(
+    (products ?? []).map((product) => product.id)
+  );
+
+  const productsWithCanonicalPrices = (products ?? []).map((product) => ({
+    ...product,
+    price:
+      catalogBasePrices.get(String(product.id)) ??
+      product.price,
+  }));
 
   const ratings = await getProductRatings(
     (products ?? []).map((product) => product.id)
@@ -63,7 +75,7 @@ export default async function FeaturedNotebooks() {
         </div>
 
         <div className="mt-10 grid gap-[var(--mn-space-card)] sm:mt-12 sm:grid-cols-2 sm:gap-[var(--mn-space-card)] lg:grid-cols-4 lg:gap-7">
-          {products?.map((product) => (
+          {productsWithCanonicalPrices.map((product) => (
             <ProductCard
               key={product.id}
               id={product.id}

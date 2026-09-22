@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 export type CartItem = {
   id: string;
@@ -15,6 +16,7 @@ export type CartItem = {
   description?: string | null;
   category?: string | null;
   quantity: number;
+  pages?: 100 | 150 | 200;
 
   /*
    * Custom-cover metadata.
@@ -37,6 +39,7 @@ type CustomCoverCartProduct = {
   image?: string | null;
   description?: string | null;
   category?: string | null;
+  pages: 100 | 150 | 200;
 };
 
 type CartContextType = {
@@ -63,6 +66,7 @@ function getCartItemKey(item: {
   id: string;
   cartKey?: string;
   customCoverId?: string | null;
+  pages?: 100 | 150 | 200;
 }) {
   if (item.cartKey) {
     return String(item.cartKey);
@@ -74,7 +78,9 @@ function getCartItemKey(item: {
     )}`;
   }
 
-  return String(item.id);
+  return item.pages
+    ? `${String(item.id)}::pages::${String(item.pages)}`
+    : String(item.id);
 }
 
 export function CartProvider({
@@ -84,6 +90,77 @@ export function CartProvider({
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+
+  async function refreshCartPrices(items: CartItem[]) {
+    if (items.length === 0) return items;
+
+    const productIds = [
+      ...new Set(items.map((item) => String(item.id))),
+    ];
+
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from("product_page_prices")
+      .select("product_id, pages, price")
+      .in("product_id", productIds)
+      .in("pages", [100, 150, 200]);
+
+    if (error) {
+      console.error(
+        "CART CANONICAL PRICES LOAD FAILED:",
+        error
+      );
+      return items;
+    }
+
+    const priceMap = new Map<string, Map<number, number>>();
+
+    for (const row of data ?? []) {
+      const productId = String(row.product_id);
+      const pages = Number(row.pages);
+      const price = Number(row.price);
+
+      if (
+        !Number.isFinite(price) ||
+        price < 0 ||
+        ![100, 150, 200].includes(pages)
+      ) {
+        continue;
+      }
+
+      if (!priceMap.has(productId)) {
+        priceMap.set(productId, new Map());
+      }
+
+      priceMap.get(productId)!.set(pages, price);
+    }
+
+    return items.map((item) => {
+      const productPrices = priceMap.get(String(item.id));
+
+      if (!productPrices) {
+        return item;
+      }
+
+      const pagePrice =
+        item.pages
+          ? productPrices.get(Number(item.pages))
+          : productPrices.get(100);
+
+      if (
+        pagePrice === undefined ||
+        !Number.isFinite(pagePrice)
+      ) {
+        return item;
+      }
+
+      return {
+        ...item,
+        price: pagePrice,
+      };
+    });
+  }
 
   useEffect(() => {
     try {
@@ -146,8 +223,11 @@ export function CartProvider({
             []
           );
 
-          queueMicrotask(() => {
-            setCart(normalized);
+          queueMicrotask(async () => {
+            const refreshed =
+              await refreshCartPrices(normalized);
+
+            setCart(refreshed);
           });
         }
       }
@@ -173,15 +253,19 @@ export function CartProvider({
   function addToCart(product: CartProduct) {
     setCart((prev) => {
       const productId = String(product.id);
+      const productKey = getCartItemKey({
+        id: productId,
+        pages: product.pages,
+      });
 
       const existing = prev.find(
         (item) =>
-          getCartItemKey(item) === productId
+          getCartItemKey(item) === productKey
       );
 
       if (existing) {
         return prev.map((item) =>
-          getCartItemKey(item) === productId
+          getCartItemKey(item) === productKey
             ? {
                 ...item,
                 name: product.name,
@@ -189,6 +273,7 @@ export function CartProvider({
                 image: product.image,
                 description: product.description,
                 category: product.category,
+                pages: product.pages,
                 quantity: item.quantity + 1,
               }
             : item
@@ -200,7 +285,7 @@ export function CartProvider({
         {
           ...product,
           id: productId,
-          cartKey: productId,
+          cartKey: productKey,
           customCoverId: null,
           quantity: 1,
         },
@@ -261,6 +346,7 @@ export function CartProvider({
           description: product.description ?? null,
           category: product.category ?? null,
           quantity: normalizedQuantity,
+          pages: product.pages,
           cartKey,
           customCoverId: customizationId,
         },

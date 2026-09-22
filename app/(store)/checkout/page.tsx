@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useCart } from "@/app/context/CartContext";
 import RazorpayCheckout from "@/app/components/RazorpayCheckout";
+import { getCustomCoverFee } from "@/app/lib/custom-cover-pricing";
 
 export default function CheckoutPage() {
   const { cart } = useCart();
@@ -22,10 +23,31 @@ export default function CheckoutPage() {
   const [payment] = useState("ONLINE");
   const [loading, setLoading] = useState(false);
 
-  const total = cart.reduce(
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const customCoverIds = [
+    ...new Set(
+      cart
+        .map((item) => item.customCoverId)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+
+  const customCoverQuantity = customCoverIds.length === 1
+    ? cart
+        .filter((item) => item.customCoverId === customCoverIds[0])
+        .reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
+
+  const customCoverFee =
+    customCoverIds.length === 1
+      ? getCustomCoverFee(customCoverQuantity)
+      : 0;
+
+  const total = subtotal + customCoverFee;
 
   const validateDetails = () => {
     if (
@@ -350,8 +372,19 @@ export default function CheckoutPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between text-[var(--mn-text-secondary)]">
                     <span>Subtotal</span>
-                    <span className="font-semibold text-[var(--mn-text)]">₹{total}</span>
+                    <span className="font-semibold text-[var(--mn-text)]">
+                      ₹{subtotal}
+                    </span>
                   </div>
+
+                  {customCoverFee > 0 && (
+                    <div className="flex justify-between text-[var(--mn-text-secondary)]">
+                      <span>Custom cover</span>
+                      <span className="font-semibold text-[var(--mn-text)]">
+                        ₹{customCoverFee}
+                      </span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between text-[var(--mn-text-secondary)]">
                     <span>Delivery</span>

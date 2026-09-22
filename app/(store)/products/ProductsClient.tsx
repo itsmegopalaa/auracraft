@@ -42,13 +42,13 @@ export default function ProductsClient({ products }: Props) {
 
       const matchesPrice =
         priceFilter === "All" ||
-        (priceFilter === "Under ₹500" &&
-          product.price < 500) ||
-        (priceFilter === "₹500–₹1000" &&
-          product.price >= 500 &&
-          product.price <= 1000) ||
-        (priceFilter === "₹1000+" &&
-          product.price > 1000);
+        (priceFilter === "Under ₹1,000" &&
+          product.price < 1000) ||
+        (priceFilter === "₹1,000–₹1,200" &&
+          product.price >= 1000 &&
+          product.price <= 1200) ||
+        (priceFilter === "₹1,200+" &&
+          product.price > 1200);
 
       const matchesRating =
         ratingFilter === "All" ||
@@ -149,9 +149,9 @@ export default function ProductsClient({ products }: Props) {
           className="w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-3.5 text-sm font-medium text-[var(--mn-text)] outline-none transition-all duration-200 focus:border-[var(--mn-border-strong)] focus:ring-2 focus:ring-[var(--mn-accent-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
         >
           <option>All</option>
-          <option>Under ₹500</option>
-          <option>₹500–₹1000</option>
-          <option>₹1000+</option>
+          <option>Under ₹1,000</option>
+          <option>₹1,000–₹1,200</option>
+          <option>₹1,200+</option>
         </select>
 
         <select

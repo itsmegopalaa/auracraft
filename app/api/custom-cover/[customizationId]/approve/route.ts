@@ -111,6 +111,48 @@ export async function POST(
       );
     }
 
+    const selectedPages =
+      (physicalConfig as Record<string, unknown>).pages;
+
+    if (
+      selectedPages !== 100 &&
+      selectedPages !== 150 &&
+      selectedPages !== 200
+    ) {
+      return NextResponse.json(
+        { error: "Notebook page selection is invalid." },
+        { status: 400 }
+      );
+    }
+
+    const { data: pagePrice, error: pagePriceError } =
+      await supabase
+        .from("product_page_prices")
+        .select("pages, price")
+        .eq("product_id", product.id)
+        .eq("pages", selectedPages)
+        .maybeSingle();
+
+    if (
+      pagePriceError ||
+      !pagePrice ||
+      !Number.isFinite(Number(pagePrice.price)) ||
+      Number(pagePrice.price) < 0
+    ) {
+      console.error(
+        "CUSTOM COVER PAGE PRICE LOOKUP FAILED:",
+        pagePriceError
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Pricing for the selected notebook page count is unavailable.",
+        },
+        { status: 409 }
+      );
+    }
+
     if (
       customization.creation_method === "ai" ||
       customization.creation_method === "upload"
@@ -201,7 +243,8 @@ export async function POST(
       product: {
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: Number(pagePrice.price),
+        pages: selectedPages,
       },
     });
   } catch (error) {

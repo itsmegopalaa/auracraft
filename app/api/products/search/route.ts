@@ -1,6 +1,7 @@
 import { errorResponse } from "@/app/lib/api-response";
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
+import { getCatalogBasePrices } from "@/app/lib/catalog-pricing";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -26,5 +27,16 @@ export async function GET(request: Request) {
     return errorResponse("Unable to search products.", 500);
   }
 
-  return NextResponse.json(data ?? []);
+  const catalogBasePrices = await getCatalogBasePrices(
+    (data ?? []).map((product) => product.id)
+  );
+
+  const productsWithCanonicalPrices = (data ?? []).map((product) => ({
+    ...product,
+    price:
+      catalogBasePrices.get(String(product.id)) ??
+      product.price,
+  }));
+
+  return NextResponse.json(productsWithCanonicalPrices);
 }

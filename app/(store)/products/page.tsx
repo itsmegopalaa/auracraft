@@ -3,6 +3,7 @@ import Footer from "@/app/components/Footer";
 import ProductsClient from "./ProductsClient";
 import { createClient } from "@/utils/supabase/server";
 import { getProductRatings } from "@/app/lib/product-rating";
+import { getCatalogBasePrices } from "@/app/lib/catalog-pricing";
 
 export const metadata: Metadata = {
   title: "Shop Premium Notebooks",
@@ -36,11 +37,22 @@ export default async function ProductsPage() {
 
   const storefrontProducts = products ?? [];
 
+  const catalogBasePrices = await getCatalogBasePrices(
+    storefrontProducts.map((product) => product.id)
+  );
+
+  const productsWithCanonicalPrices = storefrontProducts.map((product) => ({
+    ...product,
+    price:
+      catalogBasePrices.get(String(product.id)) ??
+      product.price,
+  }));
+
   const ratings = await getProductRatings(
     storefrontProducts.map((product) => product.id)
   );
 
-  const productsWithLiveRatings = storefrontProducts.map((product) => {
+  const productsWithLiveRatings = productsWithCanonicalPrices.map((product) => {
     const rating = ratings[product.id];
 
     return {

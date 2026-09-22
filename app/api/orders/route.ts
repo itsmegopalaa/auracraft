@@ -156,6 +156,12 @@ export async function POST(request: Request) {
       customCoverSnapshot = {
         customization,
         assets: assets ?? [],
+        pricing: {
+          items: calculatedOrder.items,
+          subtotal: calculatedOrder.subtotal,
+          customCoverFee: calculatedOrder.customCoverFee,
+          total: calculatedOrder.total,
+        },
       };
     }
 

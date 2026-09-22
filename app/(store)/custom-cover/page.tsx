@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import type { Metadata } from "next";
 import CustomCoverBuilder from "./CustomCoverBuilder";
+import { getCatalogBasePrices } from "@/app/lib/catalog-pricing";
 
 type Props = {
   searchParams: Promise<{
@@ -81,9 +82,20 @@ export default async function CustomCoverPage({
     );
   }
 
+  const catalogBasePrices = await getCatalogBasePrices(
+    (products ?? []).map((product) => product.id)
+  );
+
+  const productsWithCanonicalPrices = (products ?? []).map((product) => ({
+    ...product,
+    price:
+      catalogBasePrices.get(String(product.id)) ??
+      product.price,
+  }));
+
   const selectedProduct =
     productId && isUuid(productId)
-      ? products?.find(
+      ? productsWithCanonicalPrices.find(
           (product) => String(product.id) === productId
         )
       : null;
@@ -105,7 +117,7 @@ export default async function CustomCoverPage({
   }
 
   const availableProducts =
-    products?.map((product) => ({
+    productsWithCanonicalPrices.map((product) => ({
       id: String(product.id),
       name: product.name,
       price: Number(product.price),

@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 type WishlistProduct = {
   id: string;
@@ -29,6 +30,52 @@ const LEGACY_PRODUCT_IDS: Record<string, string> = {
   "2": "4a076972-33ad-4370-a15f-2d9595a7b25d",
   "3": "141af13d-e155-42c3-971d-21d90b679312",
 };
+
+async function refreshWishlistPrices(
+  items: WishlistProduct[]
+): Promise<WishlistProduct[]> {
+  if (items.length === 0) {
+    return items;
+  }
+
+  const productIds = [
+    ...new Set(items.map((item) => String(item.id))),
+  ];
+
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("product_page_prices")
+    .select("product_id, pages, price")
+    .in("product_id", productIds)
+    .eq("pages", 100);
+
+  if (error) {
+    console.error(
+      "WISHLIST CANONICAL PRICES LOAD FAILED:",
+      error
+    );
+    return items;
+  }
+
+  const priceMap = new Map<string, number>();
+
+  for (const row of data ?? []) {
+    const price = Number(row.price);
+
+    if (Number.isFinite(price) && price >= 0) {
+      priceMap.set(String(row.product_id), price);
+    }
+  }
+
+  return items.map((item) => {
+    const price = priceMap.get(String(item.id));
+
+    return price === undefined
+      ? item
+      : { ...item, price };
+  });
+}
 
 function migrateWishlist(items: unknown): WishlistProduct[] {
   if (!Array.isArray(items)) {
@@ -88,14 +135,17 @@ export function WishlistProvider({
         const parsed = JSON.parse(saved);
         const migrated = migrateWishlist(parsed);
 
-        queueMicrotask(() => {
-          setWishlist(migrated);
-        });
+        queueMicrotask(async () => {
+          const refreshed =
+            await refreshWishlistPrices(migrated);
 
-        localStorage.setItem(
-          "wishlist",
-          JSON.stringify(migrated)
-        );
+          setWishlist(refreshed);
+
+          localStorage.setItem(
+            "wishlist",
+            JSON.stringify(refreshed)
+          );
+        });
       }
     } catch (error) {
       console.error(

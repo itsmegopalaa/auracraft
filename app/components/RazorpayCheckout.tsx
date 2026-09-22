@@ -110,6 +110,8 @@ export default function RazorpayCheckout({
             items: items.map((item) => ({
               id: item.id,
               quantity: item.quantity,
+              pages: item.pages,
+              customCoverId: item.customCoverId ?? null,
             })),
             receipt: `MN_${Date.now()}`,
           }),

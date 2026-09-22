@@ -1332,7 +1332,12 @@ export default function CustomCoverEditor({
       if (
         !approvedProduct?.id ||
         typeof approvedProduct.name !== "string" ||
-        !Number.isFinite(Number(approvedProduct.price))
+        !Number.isFinite(Number(approvedProduct.price)) ||
+        !(
+          approvedProduct.pages === 100 ||
+          approvedProduct.pages === 150 ||
+          approvedProduct.pages === 200
+        )
       ) {
         throw new Error(
           "Custom cover was approved, but product details were unavailable.",
@@ -1345,6 +1350,7 @@ export default function CustomCoverEditor({
           name: approvedProduct.name,
           price: Number(approvedProduct.price),
           image: productImage || null,
+          pages: approvedProduct.pages,
         },
         customizationId,
         approvedQuantity,

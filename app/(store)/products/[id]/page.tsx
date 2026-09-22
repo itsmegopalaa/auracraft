@@ -100,6 +100,51 @@ export default async function ProductPage({
 
   const typedProduct = product as Product;
 
+  const { data: pagePricesData, error: pagePricesError } = await supabase
+    .from("product_page_prices")
+    .select("pages, price")
+    .eq("product_id", typedProduct.id)
+    .order("pages", { ascending: true });
+
+  if (pagePricesError) {
+    console.error("PRODUCT PAGE PRICES LOAD FAILED:", pagePricesError);
+  }
+
+  const pagePrices = (pagePricesData ?? [])
+    .map((item) => ({
+      pages: Number(item.pages),
+      price: Number(item.price),
+    }))
+    .filter(
+      (item) =>
+        (item.pages === 100 ||
+          item.pages === 150 ||
+          item.pages === 200) &&
+        Number.isFinite(item.price) &&
+        item.price >= 0,
+    )
+    .map((item) => ({
+      pages: item.pages as 100 | 150 | 200,
+      price: item.price,
+    }));
+
+  const typedPagePrices: Array<{
+    pages: 100 | 150 | 200;
+    price: number;
+  }> = pagePrices;
+
+  if (typedPagePrices.length === 0) {
+    console.error(
+      "PRODUCT PAGE PRICES MISSING:",
+      typedProduct.id
+    );
+    notFound();
+  }
+
+  const defaultPagePrice =
+    typedPagePrices.find((item) => item.pages === 100)?.price ??
+    typedPagePrices[0].price;
+
   const productImage = typedProduct.image
     ? typedProduct.image.startsWith("http")
       ? typedProduct.image
@@ -140,7 +185,7 @@ export default async function ProductPage({
       "@type": "Offer",
       url: `https://minenote.in/products/${typedProduct.id}`,
       priceCurrency: "INR",
-      price: typedProduct.price,
+      price: defaultPagePrice,
       availability:
         typedProduct.stock > 0
           ? "https://schema.org/InStock"
@@ -280,7 +325,7 @@ export default async function ProductPage({
             {/* Price */}
             <div className="mt-6 border-y border-[var(--mn-border)] py-5 sm:mt-7 sm:py-6">
               <p className="text-3xl font-black tracking-tight text-[var(--mn-accent)] sm:text-4xl">
-                ₹{typedProduct.price}
+                ₹{defaultPagePrice}
               </p>
 
               <p className="mt-2 text-[12px] uppercase tracking-[0.13em] text-[var(--mn-text-secondary)]">
@@ -365,11 +410,12 @@ export default async function ProductPage({
                 product={{
                   id: String(typedProduct.id),
                   name: typedProduct.name,
-                  price: typedProduct.price,
+                  price: defaultPagePrice,
                   image:
                     typedProduct.image ??
                     "/images/notebooks/placeholder.png",
                 }}
+                pagePrices={typedPagePrices}
               />
 
               <div className="mt-3">
@@ -377,7 +423,7 @@ export default async function ProductPage({
                   product={{
                     id: String(typedProduct.id),
                     name: typedProduct.name,
-                    price: typedProduct.price,
+                    price: defaultPagePrice,
                     image:
                       typedProduct.image ??
                       "/images/notebooks/placeholder.png",

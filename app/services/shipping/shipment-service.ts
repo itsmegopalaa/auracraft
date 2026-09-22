@@ -256,40 +256,32 @@ export async function createShipment(input: CreateShipmentInput) {
       );
     }
 
-    const pickup = await provider.schedulePickup(
-      pushed.shipment_id
-    );
+    /*
+     * IMPORTANT:
+     * Creating/assigning a shipment must not schedule the courier pickup.
+     * Pickup is an explicit Admin-authorized action from Shipping Control.
+     */
+    const finalAwb = awb;
 
-    await appendProviderStage(
-      supabase,
-      shipmentId,
-      "schedule_pickup",
-      pickup.raw_response
-    );
-
-    const finalAwb = pickup.awb || awb;
-
-    const { error: readySaveError } = await supabase
+    const { error: createdSaveError } = await supabase
       .from("shipments")
       .update({
         awb: finalAwb,
         courier_name:
-          pickup.courier_name ||
           assigned.courier_name ||
           pushed.courier_name,
         courier_id:
-          pickup.courier_id ||
           assigned.courier_id ||
           pushed.courier_id,
-        status: "ready_for_pickup",
+        status: "created",
         shipped_at: null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", shipmentId);
 
-    if (readySaveError) {
+    if (createdSaveError) {
       throw new Error(
-        `Pickup scheduled, but saving shipment state failed: ${readySaveError.message}`
+        `Courier assigned, but saving shipment state failed: ${createdSaveError.message}`
       );
     }
 
@@ -421,4 +413,201 @@ export async function createShipment(input: CreateShipmentInput) {
 
     throw error;
   }
+}
+
+
+export async function scheduleShipmentPickup(shipmentId: string) {
+  const supabase = createSupabaseAdminClient();
+  const provider = new ShipmozoProvider();
+
+  const { data: shipment, error: shipmentError } = await supabase
+    .from("shipments")
+    .select(
+      "id,order_id,shipment_id,awb,status,courier_name,courier_id"
+    )
+    .eq("id", shipmentId)
+    .single();
+
+  if (shipmentError || !shipment) {
+    throw new Error(
+      shipmentError?.message || "Shipment not found."
+    );
+  }
+
+  if (!shipment.shipment_id) {
+    throw new Error(
+      "This shipment has not been created at the shipping provider yet."
+    );
+  }
+
+  if (!shipment.awb) {
+    throw new Error(
+      "This shipment does not have an AWB yet."
+    );
+  }
+
+  if (shipment.status === "ready_for_pickup") {
+    return shipment;
+  }
+
+  if (
+    !["created", "serviceable"].includes(shipment.status)
+  ) {
+    throw new Error(
+      `Shipment cannot be scheduled for pickup from status "${shipment.status}".`
+    );
+  }
+
+  const pickup = await provider.schedulePickup(
+    shipment.shipment_id
+  );
+
+  await appendProviderStage(
+    supabase,
+    shipment.id,
+    "schedule_pickup",
+    pickup.raw_response
+  );
+
+  const finalAwb = pickup.awb || shipment.awb;
+
+  const { data: updatedShipment, error: updateError } =
+    await supabase
+      .from("shipments")
+      .update({
+        awb: finalAwb,
+        courier_name:
+          pickup.courier_name ||
+          shipment.courier_name,
+        courier_id:
+          pickup.courier_id ||
+          shipment.courier_id,
+        status: "ready_for_pickup",
+        shipped_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", shipment.id)
+      .select("*")
+      .single();
+
+  if (updateError || !updatedShipment) {
+    throw new Error(
+      updateError?.message ||
+        "Pickup was scheduled, but the shipment state could not be saved."
+    );
+  }
+
+  await supabase
+    .from("orders")
+    .update({
+      shipment_id: shipment.id,
+      shipping_partner:
+        updatedShipment.courier_name ||
+        provider.name,
+      tracking_id: updatedShipment.awb,
+      tracking_url: updatedShipment.tracking_url,
+    })
+    .eq("id", shipment.order_id);
+
+  return updatedShipment;
+}
+
+export async function refreshShipmentTracking(shipmentId: string) {
+  const supabase = createSupabaseAdminClient();
+  const provider = new ShipmozoProvider();
+
+  const { data: shipment, error: shipmentError } =
+    await supabase
+      .from("shipments")
+      .select("id,order_id,awb,status")
+      .eq("id", shipmentId)
+      .single();
+
+  if (shipmentError || !shipment) {
+    throw new Error(
+      shipmentError?.message || "Shipment not found."
+    );
+  }
+
+  if (!shipment.awb) {
+    throw new Error("Shipment does not have an AWB.");
+  }
+
+  const tracking = await provider.getTracking(shipment.awb);
+
+  const normalized = (tracking.status || "")
+    .trim()
+    .toLowerCase();
+
+  let status: string | null = null;
+
+  if (normalized.includes("delivered")) {
+    status = "delivered";
+  } else if (
+    normalized.includes("out for delivery") ||
+    normalized.includes("out_for_delivery")
+  ) {
+    status = "out_for_delivery";
+  } else if (
+    normalized.includes("picked") ||
+    normalized.includes("pickup") ||
+    normalized.includes("in transit") ||
+    normalized.includes("in_transit") ||
+    normalized.includes("transit")
+  ) {
+    status = "in_transit";
+  } else if (
+    normalized.includes("ready") ||
+    normalized.includes("assigned")
+  ) {
+    status = "ready_for_pickup";
+  }
+
+  const update: Record<string, unknown> = {
+    provider_status: tracking.status,
+    tracking_url: tracking.tracking_url,
+    provider_response: tracking.raw_response,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status) {
+    update.status = status;
+  }
+
+  if (status === "delivered") {
+    update.delivered_at = new Date().toISOString();
+  }
+
+  const { data: updatedShipment, error: updateError } =
+    await supabase
+      .from("shipments")
+      .update(update)
+      .eq("id", shipment.id)
+      .select("*")
+      .single();
+
+  if (updateError || !updatedShipment) {
+    throw new Error(
+      updateError?.message ||
+        "Unable to save tracking update."
+    );
+  }
+
+  const orderUpdate: Record<string, unknown> = {
+    tracking_id: shipment.awb,
+    tracking_url: tracking.tracking_url,
+    shipping_partner: updatedShipment.courier_name || "shipmozo",
+  };
+
+  if (status === "delivered") {
+    orderUpdate.order_status = "delivered";
+    orderUpdate.delivered_at = new Date().toISOString();
+  }
+
+  await supabase
+    .from("orders")
+    .update(orderUpdate)
+    .eq("id", shipment.order_id);
+
+  return updatedShipment;
 }

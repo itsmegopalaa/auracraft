@@ -27,6 +27,7 @@ export async function GET() {
           courier_id,
           awb,
           tracking_url,
+          label_url,
           shipping_charge,
           weight_grams,
           length_cm,
@@ -34,29 +35,29 @@ export async function GET() {
           height_cm,
           created_at,
           updated_at
-        `
+        `,
       )
-      .eq("status", "ready_for_pickup")
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("READY SHIPMENTS FETCH ERROR:", error);
+      console.error("ADMIN SHIPMENTS FETCH ERROR:", error);
 
       return NextResponse.json(
-        { error: "Unable to load ready shipments." },
-        { status: 500 }
+        { error: "Unable to load shipments." },
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
+      success: true,
       shipments: data ?? [],
     });
   } catch (error) {
-    console.error("Admin ready shipments error:", error);
+    console.error("Admin shipments error:", error);
 
     return NextResponse.json(
-      { error: "Unable to load ready shipments." },
-      { status: 500 }
+      { error: "Unable to load shipments." },
+      { status: 500 },
     );
   }
 }

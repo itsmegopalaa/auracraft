@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import { sendOrderStatusEmail } from "@/app/services/orders/order-email";
-import { automateOrderShipping } from "@/app/services/shipping/automation";
 import { hasCompleteCustomCoverProduction } from "@/app/services/customization/production/generate-order";
 
 const PRODUCTION_FIELDS = [
@@ -375,30 +374,26 @@ export async function PATCH(
       );
     }
 
+    /*
+     * Production completion no longer schedules courier pickup.
+     * Shipment preparation remains automated, but final pickup
+     * authorization belongs to Admin in Shipping Control.
+     */
     let shippingAttempted = false;
     let shippingError: string | null = null;
 
-    /*
-     * Production is now complete.
-     * Shipping automation is deliberately triggered AFTER
-     * the production checklist is saved.
-     */
     if (
       productionComplete &&
       !order.production_completed_at &&
       order.payment_status === "paid" &&
       ["confirmed", "processing"].includes(order.order_status)
     ) {
-      shippingAttempted = true;
-
-      try {
-        await automateOrderShipping(order.order_id);
-      } catch (error) {
-        shippingError =
-          error instanceof Error
-            ? error.message
-            : "Shipping automation failed.";
-      }
+      /*
+       * Intentionally do not call automateOrderShipping() here.
+       * Shipping Control owns the explicit shipment-preparation
+       * action so courier pickup can never happen silently.
+       */
+      shippingAttempted = false;
     }
 
     return NextResponse.json({

@@ -17,7 +17,14 @@ export async function POST(
   { params }: RouteContext,
 ) {
   try {
-    await requireAdminApi();
+    const auth = await requireAdminApi();
+
+    if (auth.error) {
+      return NextResponse.json(
+        { error: auth.error },
+        { status: auth.status },
+      );
+    }
 
     const { batchId } = await params;
     const body = await request.json().catch(() => ({}));

@@ -7,7 +7,14 @@ export async function POST(
   { params }: { params: Promise<{ orderId: string }> },
 ) {
   try {
-    await requireAdminApi();
+    const auth = await requireAdminApi();
+
+    if (auth.error) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: auth.status },
+      );
+    }
 
     const { orderId } = await params;
 

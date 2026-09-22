@@ -45,6 +45,24 @@ type BatchDetails = {
 
 type QueueOrder = ProductionOrder;
 
+type ProductionCoverAsset = {
+  id: string;
+  side: "front" | "insideFront" | "insideBack" | "back";
+  label: string;
+  url: string;
+  width: number | null;
+  height: number | null;
+  mime_type: string | null;
+  file_size: number | null;
+  created_at: string;
+  source: string;
+};
+
+type ProductionCoverSet = {
+  ready: boolean;
+  assets: ProductionCoverAsset[];
+};
+
 const statusLabels: Record<Batch["status"], string> = {
   draft: "Draft",
   in_progress: "In Progress",
@@ -93,6 +111,9 @@ export default function ProductionBatchesClient() {
 
   const [productionOrders, setProductionOrders] = useState<QueueOrder[]>([]);
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [customCoverSets, setCustomCoverSets] = useState<
+    Record<string, ProductionCoverSet>
+  >({});
 
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
@@ -155,6 +176,47 @@ export default function ProductionBatchesClient() {
     }
   }
 
+  async function loadCustomCoverProduction(orderId: string) {
+    try {
+      const response = await fetch(
+        `/api/admin/orders/${orderId}/custom-cover/production-assets`,
+        {
+          cache: "no-store",
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ?? "Failed to load production cover assets",
+        );
+      }
+
+      setCustomCoverSets((current) => ({
+        ...current,
+        [orderId]: {
+          ready: Boolean(data.ready),
+          assets: Array.isArray(data.assets) ? data.assets : [],
+        },
+      }));
+    } catch (error) {
+      setCustomCoverSets((current) => ({
+        ...current,
+        [orderId]: {
+          ready: false,
+          assets: [],
+        },
+      }));
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to load production cover assets",
+      );
+    }
+  }
+
   async function loadBatch(batchId: string) {
     setDetailLoading(true);
     setMessage("");
@@ -174,6 +236,21 @@ export default function ProductionBatchesClient() {
       }
 
       setSelectedBatch(data);
+
+      const customOrders: ProductionOrder[] = (data.orders ?? [])
+        .map((assignment: BatchAssignment) =>
+          getOrder(assignment.orders),
+        )
+        .filter(
+          (order: ProductionOrder | null): order is ProductionOrder =>
+            Boolean(order?.custom_cover_id),
+        );
+
+      await Promise.all(
+        customOrders.map((order: ProductionOrder) =>
+          loadCustomCoverProduction(order.order_id),
+        ),
+      );
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Failed to load batch",
@@ -449,6 +526,173 @@ export default function ProductionBatchesClient() {
     } finally {
       setActionLoading(false);
     }
+  }
+
+  function printCustomCoverSet(
+    orderId: string,
+    coverSet: ProductionCoverSet | undefined,
+  ) {
+    if (!coverSet?.ready || coverSet.assets.length !== 4) {
+      setMessage(
+        `Print set for ${orderId} is not ready. All 4 production files are required.`,
+      );
+      return;
+    }
+
+    const orderedSides = [
+      "front",
+      "insideFront",
+      "insideBack",
+      "back",
+    ] as const;
+
+    const orderedAssets = orderedSides
+      .map((side) =>
+        coverSet.assets.find((asset) => asset.side === side),
+      )
+      .filter(
+        (asset): asset is ProductionCoverAsset =>
+          Boolean(asset),
+      );
+
+    if (orderedAssets.length !== 4) {
+      setMessage(
+        `Print set for ${orderId} is incomplete. All 4 production files are required.`,
+      );
+      return;
+    }
+
+    const escapeHtml = (value: string) =>
+      value
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+
+    const pages = orderedAssets
+      .map(
+        (asset, index) => `
+          <section class="print-page">
+            <div class="meta">
+              <strong>${escapeHtml(asset.label)}</strong>
+              <span>Order #${escapeHtml(orderId)}</span>
+              <span>${asset.width ?? "—"} × ${asset.height ?? "—"} px</span>
+            </div>
+            <img src="${escapeHtml(asset.url)}" alt="${escapeHtml(asset.label)}" />
+          </section>
+        `,
+      )
+      .join("");
+
+    const printWindow = window.open(
+      "",
+      "_blank",
+      "noopener,noreferrer,width=1200,height=900",
+    );
+
+    if (!printWindow) {
+      setMessage(
+        "Print window was blocked. Allow pop-ups for MineNote Admin and try again.",
+      );
+      return;
+    }
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>MineNote Print Set — Order #${escapeHtml(orderId)}</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+
+            * {
+              box-sizing: border-box;
+            }
+
+            html,
+            body {
+              margin: 0;
+              padding: 0;
+              background: white;
+              color: black;
+              font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .print-page {
+              min-height: calc(297mm - 20mm);
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+              align-items: center;
+              page-break-after: always;
+              break-after: page;
+              padding: 8mm;
+            }
+
+            .print-page:last-child {
+              page-break-after: auto;
+              break-after: auto;
+            }
+
+            .meta {
+              width: 100%;
+              display: flex;
+              gap: 12px;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 8mm;
+              font-size: 10px;
+            }
+
+            .print-page img {
+              display: block;
+              max-width: 100%;
+              max-height: 245mm;
+              width: auto;
+              height: auto;
+              object-fit: contain;
+            }
+
+            @media screen {
+              body {
+                padding: 20px;
+                background: #f4f4f5;
+              }
+
+              .print-page {
+                background: white;
+                margin: 0 auto 24px;
+                max-width: 210mm;
+                box-shadow: 0 10px 30px rgba(0,0,0,.12);
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${pages}
+
+          <script>
+            const images = Array.from(document.images);
+            Promise.all(
+              images.map((image) => {
+                if (image.complete) return Promise.resolve();
+                return new Promise((resolve) => {
+                  image.addEventListener("load", resolve, { once: true });
+                  image.addEventListener("error", resolve, { once: true });
+                });
+              })
+            ).then(() => {
+              setTimeout(() => window.print(), 300);
+            });
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
   }
 
   useEffect(() => {
@@ -801,11 +1045,22 @@ export default function ProductionBatchesClient() {
                                 {order.name} · {formatMoney(order.total)}
                               </p>
 
-                              <p className="mt-1 text-xs text-zinc-600">
-                                {order.custom_cover_id
-                                  ? "Custom cover"
-                                  : "Ready-made product"}
-                              </p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                                {order.custom_cover_id ? (
+                                  <>
+                                    <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2 py-1 font-semibold text-yellow-300">
+                                      CUSTOM ORDER
+                                    </span>
+                                    <span className="text-zinc-600">
+                                      Ordered cover
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-zinc-600">
+                                    Catalog order
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
                             <span
@@ -883,6 +1138,22 @@ export default function ProductionBatchesClient() {
                             />
                           </div>
 
+                          {order.custom_cover_id && (
+                            <CustomCoverProductionPanel
+                              orderId={order.order_id}
+                              coverSet={
+                                customCoverSets[order.order_id]
+                              }
+                              disabled={actionLoading}
+                              onPrint={() =>
+                                printCustomCoverSet(
+                                  order.order_id,
+                                  customCoverSets[order.order_id],
+                                )
+                              }
+                            />
+                          )}
+
                           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                             <span className="text-xs text-zinc-600">
                               {order.production_completed_at
@@ -933,6 +1204,177 @@ export default function ProductionBatchesClient() {
         </div>
       </section>
     </main>
+  );
+}
+
+function CustomCoverProductionPanel({
+  orderId,
+  coverSet,
+  disabled,
+  onPrint,
+}: {
+  orderId: string;
+  coverSet?: ProductionCoverSet;
+  disabled: boolean;
+  onPrint: () => void;
+}) {
+  const orderedSides = [
+    "front",
+    "insideFront",
+    "insideBack",
+    "back",
+  ] as const;
+
+  const assets = orderedSides
+    .map((side) =>
+      coverSet?.assets.find((asset) => asset.side === side),
+    )
+    .filter(
+      (asset): asset is ProductionCoverAsset =>
+        Boolean(asset),
+    );
+
+  const ready = Boolean(
+    coverSet?.ready && assets.length === 4,
+  );
+
+  return (
+    <section className="mt-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/[0.04] p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-yellow-300">
+              Ordered custom cover
+            </p>
+
+            <span
+              className={[
+                "rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide",
+                ready
+                  ? "bg-emerald-500/10 text-emerald-300"
+                  : "bg-red-500/10 text-red-300",
+              ].join(" ")}
+            >
+              {ready ? "4/4 Print Ready" : "Not Ready"}
+            </span>
+          </div>
+
+          <p className="mt-1 text-xs leading-5 text-zinc-500">
+            Exact production artwork from this order&apos;s immutable
+            approved snapshot. No regenerated or substitute preview.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          disabled={disabled || !ready}
+          onClick={onPrint}
+          className="shrink-0 rounded-xl bg-white px-3 py-2 text-xs font-bold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          🖨️ Print 4-Page Set
+        </button>
+      </div>
+
+      {assets.length === 0 ? (
+        <div className="mt-4 rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 px-4 py-5 text-center">
+          <p className="text-sm font-semibold text-zinc-300">
+            Production cover files not ready
+          </p>
+          <p className="mt-1 text-xs text-zinc-600">
+            Generate/verify all four production surfaces before printing.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {orderedSides.map((side) => {
+            const asset = coverSet?.assets.find(
+              (candidate) => candidate.side === side,
+            );
+
+            if (!asset) {
+              return (
+                <div
+                  key={side}
+                  className="flex min-h-64 items-center justify-center rounded-xl border border-dashed border-red-500/20 bg-zinc-950/40 p-4 text-center"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-red-300">
+                      {side === "front"
+                        ? "Front Cover"
+                        : side === "insideFront"
+                          ? "Inside Front"
+                          : side === "insideBack"
+                            ? "Inside Back"
+                            : "Back Cover"}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      Production asset missing
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={asset.id}
+                className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/70"
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-zinc-800 px-3 py-2">
+                  <div>
+                    <p className="text-xs font-bold text-zinc-200">
+                      {asset.label}
+                    </p>
+                    <p className="text-[10px] text-zinc-600">
+                      HQ · {asset.width ?? "—"} ×{" "}
+                      {asset.height ?? "—"} px
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-300">
+                    PRODUCTION
+                  </span>
+                </div>
+
+                <a
+                  href={asset.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group block bg-white p-3"
+                  aria-label={`Open ${asset.label} HQ preview`}
+                >
+                  <img
+                    src={asset.url}
+                    alt={`${asset.label} — ordered production artwork`}
+                    className="mx-auto max-h-[420px] w-full object-contain transition group-hover:scale-[1.01]"
+                    loading="lazy"
+                  />
+                </a>
+
+                <div className="flex items-center justify-between gap-2 border-t border-zinc-800 px-3 py-2">
+                  <a
+                    href={asset.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-semibold text-zinc-300 underline decoration-zinc-700 underline-offset-4 transition hover:text-white hover:decoration-white"
+                  >
+                    View HQ
+                  </a>
+
+                  <a
+                    href={asset.url}
+                    download={`minenote-${orderId}-${asset.side}.png`}
+                    className="text-xs font-semibold text-zinc-300 underline decoration-zinc-700 underline-offset-4 transition hover:text-white hover:decoration-white"
+                  >
+                    Print-ready ↓
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
 

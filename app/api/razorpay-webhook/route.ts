@@ -1,8 +1,8 @@
 import { getServerEnv } from "@/app/config";
-
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
+import { finalizePaymentIntent } from "@/app/services/payments/finalize-payment-intent";
 
 const supabaseAdmin = createSupabaseAdminClient();
 
@@ -44,7 +44,8 @@ export function verifyWebhookSignature(
 
 export async function POST(request: Request) {
   try {
-    const webhookSecret = getServerEnv().razorpayWebhookSecret;
+    const webhookSecret =
+      getServerEnv().razorpayWebhookSecret;
 
     if (!webhookSecret) {
       console.error(
@@ -74,13 +75,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const signaturesMatch = verifyWebhookSignature(
-      rawBody,
-      signature,
-      webhookSecret
-    );
-
-    if (!signaturesMatch) {
+    if (
+      !verifyWebhookSignature(
+        rawBody,
+        signature,
+        webhookSecret
+      )
+    ) {
       console.error(
         "Invalid Razorpay webhook signature."
       );
@@ -113,12 +114,9 @@ export async function POST(request: Request) {
 
     const event = payload.event;
 
-    
     /*
-     * We only need to change order/payment state for
-     * these two payment events.
-     *
-     * Other Razorpay events are acknowledged safely.
+     * Only payment lifecycle events require processing.
+     * Everything else is safely acknowledged.
      */
     if (
       event !== "payment.captured" &&
@@ -133,8 +131,11 @@ export async function POST(request: Request) {
     const payment =
       payload.payload?.payment?.entity;
 
-    const razorpayOrderId = payment?.order_id;
-    const razorpayPaymentId = payment?.id;
+    const razorpayOrderId =
+      payment?.order_id;
+
+    const razorpayPaymentId =
+      payment?.id;
 
     if (!razorpayOrderId) {
       console.error(
@@ -150,59 +151,76 @@ export async function POST(request: Request) {
     }
 
     /*
-     * Load our order using the Razorpay order ID.
+     * The payment intent is the recovery source of truth
+     * before the real MineNote order exists.
      */
-    const { data: existingOrder, error: orderLoadError } =
+    const { data: intent, error: intentError } =
       await supabaseAdmin
-        .from("orders")
+        .from("payment_intents")
         .select(
-          "order_id, total, payment_status, order_status, razorpay_order_id, razorpay_payment_id, paid_at"
+          "id, customer_id, mine_note_order_id, razorpay_order_id, status, payment_status, amount, currency, razorpay_payment_id, paid_at"
         )
-        .eq("razorpay_order_id", razorpayOrderId)
+        .eq(
+          "razorpay_order_id",
+          razorpayOrderId
+        )
         .maybeSingle();
 
-    if (orderLoadError) {
+    if (intentError) {
       console.error(
-        "SUPABASE WEBHOOK ORDER LOAD ERROR:",
-        orderLoadError
+        "SUPABASE PAYMENT INTENT LOAD ERROR:",
+        intentError
       );
 
       return NextResponse.json(
         {
-          error: "Unable to load order.",
+          error:
+            "Unable to load payment recovery record.",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!intent) {
+      /*
+       * This should not normally happen because the payment
+       * intent is created as part of checkout preparation.
+       *
+       * Return 500 so Razorpay retries rather than silently
+       * losing a legitimate payment event.
+       */
+      console.error(
+        "No payment intent found for Razorpay order:",
+        razorpayOrderId
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Payment recovery record not found. Retry required.",
         },
         { status: 500 }
       );
     }
 
     /*
-     * If the browser/payment flow has not created our
-     * internal order yet, don't invent an order here.
-     *
-     * The webhook is acknowledged so Razorpay doesn't
-     * endlessly retry a legitimate event.
+     * Verify currency for both captured and failed events
+     * whenever Razorpay supplied it.
      */
-    if (!existingOrder) {
+    if (
+      payment?.currency &&
+      payment.currency !== "INR"
+    ) {
       console.error(
-        "No MineNote order found for Razorpay order:",
-        razorpayOrderId
+        "Unexpected Razorpay payment currency:",
+        payment.currency
       );
 
-      /*
-       * IMPORTANT:
-       *
-       * Do not acknowledge this webhook as successfully
-       * processed. The browser may still be completing the
-       * internal MineNote order creation.
-       *
-       * Returning 500 tells Razorpay to retry the webhook.
-       */
       return NextResponse.json(
         {
-          error:
-            "MineNote order not found yet. Please retry webhook.",
+          error: "Invalid payment currency.",
         },
-        { status: 500 }
+        { status: 400 }
       );
     }
 
@@ -224,35 +242,14 @@ export async function POST(request: Request) {
       }
 
       /*
-       * Verify currency.
-       */
-      if (payment?.currency !== "INR") {
-        console.error(
-          "Unexpected Razorpay payment currency:",
-          payment?.currency
-        );
-
-        return NextResponse.json(
-          {
-            error: "Invalid payment currency.",
-          },
-          { status: 400 }
-        );
-      }
-
-      /*
-       * Verify the captured amount against the
-       * amount stored in our order.
-       *
-       * Our database stores rupees.
-       * Razorpay sends amount in paise.
+       * Razorpay amount is paise.
+       * payment_intents.amount is also stored in paise.
        */
       const expectedAmount =
-        Number(existingOrder.total) * 100;
+        Number(intent.amount);
 
-      const receivedAmount = Number(
-        payment.amount
-      );
+      const receivedAmount =
+        Number(payment.amount);
 
       if (
         !Number.isFinite(expectedAmount) ||
@@ -262,7 +259,8 @@ export async function POST(request: Request) {
         console.error(
           "RAZORPAY PAYMENT AMOUNT MISMATCH:",
           {
-            orderId: existingOrder.order_id,
+            mineNoteOrderId:
+              intent.mine_note_order_id,
             razorpayOrderId,
             expectedAmount,
             receivedAmount,
@@ -278,74 +276,105 @@ export async function POST(request: Request) {
       }
 
       /*
-       * Idempotency:
-       *
-       * If the order is already marked paid, do not
-       * overwrite paid_at on a repeated webhook.
+       * If a different payment ID was already attached to
+       * this intent, never overwrite it.
        */
-      if (existingOrder.payment_status === "paid") {
-        
-        return NextResponse.json({
-          received: true,
-          handled: true,
-          alreadyProcessed: true,
-        });
-      }
-
-      const paidAt =
-        existingOrder.paid_at ??
-        new Date().toISOString();
-
-      const { error: updateError } =
-        await supabaseAdmin
-          .from("orders")
-          .update({
-            payment_status: "paid",
-            order_status: "confirmed",
-            razorpay_payment_id:
-              razorpayPaymentId,
-            paid_at: paidAt,
-          })
-          .eq(
-            "razorpay_order_id",
-            razorpayOrderId
-          );
-
-      if (updateError) {
+      if (
+        intent.razorpay_payment_id &&
+        intent.razorpay_payment_id !==
+          razorpayPaymentId
+      ) {
         console.error(
-          "SUPABASE WEBHOOK CAPTURE UPDATE ERROR:",
-          updateError
+          "RAZORPAY PAYMENT ID MISMATCH:",
+          {
+            razorpayOrderId,
+            existingPaymentId:
+              intent.razorpay_payment_id,
+            receivedPaymentId:
+              razorpayPaymentId,
+          }
         );
 
         return NextResponse.json(
           {
-            error: "Unable to update paid order.",
+            error:
+              "Payment reference mismatch.",
+          },
+          { status: 400 }
+        );
+      }
+
+      /*
+       * Finalizer handles:
+       *
+       * 1. Browser already created order
+       * 2. Webhook creates order first
+       * 3. Browser + webhook race
+       * 4. Duplicate webhook
+       *
+       * Inventory remains protected by the existing atomic
+       * order RPC.
+       */
+      try {
+        const result =
+          await finalizePaymentIntent({
+            razorpayOrderId,
+            razorpayPaymentId,
+            paidAt:
+              intent.paid_at ??
+              new Date().toISOString(),
+          });
+
+        return NextResponse.json({
+          received: true,
+          handled: true,
+          alreadyProcessed:
+            result.alreadyExists,
+          paymentStatus: "paid",
+          orderId:
+            result.order?.order_id ??
+            intent.mine_note_order_id,
+        });
+      } catch (error) {
+        console.error(
+          "WEBHOOK PAYMENT FINALIZATION ERROR:",
+          error
+        );
+
+        /*
+         * Returning 500 is intentional.
+         *
+         * If finalization failed before the real order
+         * existed, Razorpay should retry the webhook.
+         */
+        return NextResponse.json(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Unable to finalize paid order.",
           },
           { status: 500 }
         );
       }
-
-      return NextResponse.json({
-        received: true,
-        handled: true,
-        paymentStatus: "paid",
-      });
     }
 
     /*
      * PAYMENT FAILED
      *
-     * A failed payment should NOT automatically cancel
-     * the customer's order. They may retry payment.
+     * No MineNote order is created for a failed payment.
+     * The recovery record is marked failed so it remains
+     * auditable.
      */
     if (event === "payment.failed") {
       /*
-       * If payment is already successfully paid,
-       * never downgrade it because of a later/replayed
-       * failed event.
+       * Never downgrade a payment intent that is already
+       * successfully finalized.
        */
-      if (existingOrder.payment_status === "paid") {
-        
+      if (
+        intent.payment_status === "paid" ||
+        intent.status === "finalized"
+      ) {
         return NextResponse.json({
           received: true,
           handled: true,
@@ -353,20 +382,29 @@ export async function POST(request: Request) {
         });
       }
 
+      const updatePayload: {
+        status: "failed";
+        payment_status: "failed";
+        razorpay_payment_id?: string;
+      } = {
+        status: "failed",
+        payment_status: "failed",
+      };
+
+      if (razorpayPaymentId) {
+        updatePayload.razorpay_payment_id =
+          razorpayPaymentId;
+      }
+
       const { error: updateError } =
         await supabaseAdmin
-          .from("orders")
-          .update({
-            payment_status: "failed",
-          })
-          .eq(
-            "razorpay_order_id",
-            razorpayOrderId
-          );
+          .from("payment_intents")
+          .update(updatePayload)
+          .eq("id", intent.id);
 
       if (updateError) {
         console.error(
-          "SUPABASE FAILED PAYMENT UPDATE ERROR:",
+          "SUPABASE PAYMENT INTENT FAILED UPDATE ERROR:",
           updateError
         );
 
@@ -379,7 +417,6 @@ export async function POST(request: Request) {
         );
       }
 
-      
       return NextResponse.json({
         received: true,
         handled: true,
@@ -389,6 +426,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       received: true,
+      handled: false,
     });
   } catch (error) {
     console.error(

@@ -52,6 +52,12 @@ interface RazorpayCheckoutProps {
   email: string;
   phone: string;
   items: CartItem[];
+  checkoutDetails: {
+    address: string;
+    city: string;
+    state: string;
+    pin: string;
+  };
   onSuccess: (
     response: RazorpayResponse,
     mineNoteOrderId: string
@@ -64,6 +70,7 @@ export default function RazorpayCheckout({
   email,
   phone,
   items,
+  checkoutDetails,
   onSuccess,
 }: RazorpayCheckoutProps) {
   const [loading, setLoading] = useState(false);

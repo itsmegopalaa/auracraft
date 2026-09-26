@@ -644,6 +644,12 @@ export default function CheckoutPage() {
                         email={email}
                         phone={phone}
                         items={checkoutItems}
+                        checkoutDetails={{
+                          address: address.trim(),
+                          city: city.trim(),
+                          state: state.trim(),
+                          pin: pin.trim(),
+                        }}
                         onSuccess={async (
                           paymentResponse,
                           mineNoteOrderId

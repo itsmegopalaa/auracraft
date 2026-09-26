@@ -460,6 +460,40 @@ export async function scheduleShipmentPickup(shipmentId: string) {
     return shipment;
   }
 
+  const { data: linkedOrder, error: linkedOrderError } =
+    await supabase
+      .from("orders")
+      .select("payment_status, order_status")
+      .eq("id", shipment.order_id)
+      .maybeSingle();
+
+  if (linkedOrderError) {
+    throw new Error(
+      `Unable to verify linked order before pickup: ${linkedOrderError.message}`
+    );
+  }
+
+  if (!linkedOrder) {
+    throw new Error(
+      "The shipment is linked to an order that no longer exists."
+    );
+  }
+
+  if (linkedOrder.payment_status !== "paid") {
+    throw new Error(
+      "A shipment cannot be scheduled for pickup because the linked order payment is not marked as paid."
+    );
+  }
+
+  if (
+    linkedOrder.order_status !== "confirmed" &&
+    linkedOrder.order_status !== "processing"
+  ) {
+    throw new Error(
+      `A shipment cannot be scheduled for pickup while the linked order status is "${linkedOrder.order_status}".`
+    );
+  }
+
   const pickup = await provider.schedulePickup(
     shipment.shipment_id
   );

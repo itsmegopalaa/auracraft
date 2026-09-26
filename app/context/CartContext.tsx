@@ -17,6 +17,10 @@ export type CartItem = {
   category?: string | null;
   quantity: number;
   pages?: 100 | 150 | 200;
+  paper?: "plain" | "ruled" | "dotGrid" | null;
+  paperGsm?: number | null;
+  size?: "A4" | "A5" | null;
+  orientation?: "portrait" | "landscape" | null;
 
   /*
    * Custom-cover metadata.
@@ -40,6 +44,10 @@ type CustomCoverCartProduct = {
   description?: string | null;
   category?: string | null;
   pages: 100 | 150 | 200;
+  paper?: "plain" | "ruled" | "dotGrid" | null;
+  paperGsm?: number | null;
+  size?: "A4" | "A5" | null;
+  orientation?: "portrait" | "landscape" | null;
 };
 
 type CartContextType = {
@@ -62,11 +70,15 @@ const CartContext = createContext<CartContextType | undefined>(
   undefined
 );
 
-function getCartItemKey(item: {
+export function getCartItemKey(item: {
   id: string;
   cartKey?: string;
   customCoverId?: string | null;
   pages?: 100 | 150 | 200;
+  paper?: "plain" | "ruled" | "dotGrid" | null;
+  paperGsm?: number | null;
+  size?: "A4" | "A5" | null;
+  orientation?: "portrait" | "landscape" | null;
 }) {
   if (item.cartKey) {
     return String(item.cartKey);
@@ -78,9 +90,25 @@ function getCartItemKey(item: {
     )}`;
   }
 
-  return item.pages
-    ? `${String(item.id)}::pages::${String(item.pages)}`
-    : String(item.id);
+  const pages = item.pages ?? "default";
+  const paper = item.paper ?? "plain";
+  const gsm = item.paperGsm ?? 80;
+  const size = item.size ?? "A4";
+  const orientation = item.orientation ?? "portrait";
+
+  return [
+    String(item.id),
+    "pages",
+    String(pages),
+    "paper",
+    String(paper),
+    "gsm",
+    String(gsm),
+    "size",
+    String(size),
+    "orientation",
+    String(orientation),
+  ].join("::");
 }
 
 export function CartProvider({
@@ -94,9 +122,22 @@ export function CartProvider({
   async function refreshCartPrices(items: CartItem[]) {
     if (items.length === 0) return items;
 
+    const isUuid = (value: string) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        value
+      );
+
     const productIds = [
-      ...new Set(items.map((item) => String(item.id))),
+      ...new Set(
+        items
+          .map((item) => String(item.id))
+          .filter(isUuid)
+      ),
     ];
+
+    if (productIds.length === 0) {
+      return items;
+    }
 
     const supabase = createClient();
 
@@ -107,10 +148,13 @@ export function CartProvider({
       .in("pages", [100, 150, 200]);
 
     if (error) {
-      console.error(
-        "CART CANONICAL PRICES LOAD FAILED:",
-        error
-      );
+      console.error("CART CANONICAL PRICES LOAD FAILED:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        name: error.name,
+      });
       return items;
     }
 
@@ -255,8 +299,14 @@ export function CartProvider({
       const productId = String(product.id);
       const productKey = getCartItemKey({
         id: productId,
-        pages: product.pages,
-      });
+      cartKey: product.cartKey,
+      customCoverId: product.customCoverId,
+      pages: product.pages,
+      paper: product.paper,
+      paperGsm: product.paperGsm,
+      size: product.size,
+      orientation: product.orientation,
+    });
 
       const existing = prev.find(
         (item) =>

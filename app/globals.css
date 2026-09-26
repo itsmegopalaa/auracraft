@@ -565,3 +565,118 @@ html[data-theme="warm"] {
 .mn-card-content {
   padding: var(--mn-space-card);
 }
+
+/* =========================================================
+   MINENOTE ADMIN — PREMIUM WORKSPACE
+   ========================================================= */
+
+.admin-shell {
+  --admin-panel: var(--mn-surface);
+  --admin-panel-soft: var(--mn-surface-soft);
+  --admin-text: var(--mn-text);
+  --admin-text-secondary: var(--mn-text-secondary);
+  --admin-text-muted: var(--mn-text-muted);
+  --admin-border: var(--mn-border);
+  --admin-border-strong: var(--mn-border-strong);
+}
+
+.admin-nav-shell {
+  box-shadow: 0 1px 0 var(--mn-border), 0 8px 30px rgb(24 23 22 / 0.035);
+  transition:
+    background-color var(--mn-duration-base) var(--mn-ease),
+    border-color var(--mn-duration-base) var(--mn-ease),
+    box-shadow var(--mn-duration-base) var(--mn-ease);
+}
+
+:root[data-theme="dark"] .admin-nav-shell {
+  box-shadow: 0 1px 0 var(--mn-border), 0 10px 35px rgb(0 0 0 / 0.18);
+}
+
+.admin-nav-link {
+  min-height: 40px;
+}
+
+.admin-nav-link:focus-visible,
+.admin-mobile-nav-link:focus-visible,
+.admin-blank-nav-trigger:focus-visible {
+  outline: 2px solid var(--mn-accent);
+  outline-offset: 3px;
+}
+
+.admin-mobile-nav {
+  animation: admin-nav-reveal var(--mn-duration-base) var(--mn-ease);
+}
+
+@keyframes admin-nav-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-search input::placeholder {
+  color: var(--mn-text-muted);
+}
+
+.admin-theme-switcher option {
+  background: var(--mn-surface);
+  color: var(--mn-text);
+}
+
+/* Stronger admin contrast for muted UI without making it harsh. */
+.admin-shell .text-neutral-400,
+.admin-shell .text-zinc-400 {
+  color: var(--mn-text-muted);
+}
+
+.admin-shell .text-neutral-500,
+.admin-shell .text-zinc-500 {
+  color: var(--mn-text-secondary);
+}
+
+/* Prevent accidental light-theme remnants inside the admin shell. */
+.admin-shell input,
+.admin-shell textarea,
+.admin-shell select {
+  color: var(--mn-text);
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: var(--mn-text-muted);
+}
+
+@media (max-width: 1023px) {
+  .admin-nav-inner {
+    gap: 0.5rem;
+  }
+
+  .admin-brand {
+    min-width: max-content;
+  }
+
+  .admin-blank-nav-trigger {
+    display: block;
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-nav-inner {
+    padding-inline: 1rem;
+  }
+
+  .admin-theme-switcher {
+    max-width: 9.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-mobile-nav {
+    animation: none;
+  }
+}

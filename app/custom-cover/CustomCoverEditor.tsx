@@ -2658,6 +2658,18 @@ export default function CustomCoverEditor({
           price: Number(product.price),
           image: productImage || null,
           pages: product.pages,
+          paper:
+            physicalConfig?.paper === "ruled"
+              ? "ruled"
+              : physicalConfig?.paper === "dotGrid"
+                ? "dotGrid"
+                : "plain",
+          paperGsm: 80,
+          size: physicalConfig?.size === "A5" ? "A5" : "A4",
+          orientation:
+            physicalConfig?.orientation === "landscape"
+              ? "landscape"
+              : "portrait",
         },
         customizationId,
         quantity,

@@ -6,6 +6,9 @@ import {
   type CreateCustomizationInput,
 } from "@/app/services/customization/customization-service";
 import type { CustomCoverCreationMethod } from "@/app/lib/customization";
+import {
+  normalizePhysicalConfig,
+} from "@/app/lib/order-pricing-core";
 
 const CREATION_METHODS: readonly CustomCoverCreationMethod[] = [
   "ai",
@@ -143,20 +146,31 @@ export async function POST(request: Request) {
     const normalizedTheme =
       typeof theme === "string" ? theme.trim() : "";
 
-    const normalizedSize = size === "A5" ? "A5" : "A4";
+    let normalizedPhysicalConfig;
 
-    const normalizedPages =
-      pages === 150 ? 150 : pages === 200 ? 200 : 100;
+    try {
+      normalizedPhysicalConfig = normalizePhysicalConfig({
+        pages,
+        paper,
+        paperGsm: 80,
+        size,
+        orientation,
+      });
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid notebook physical configuration.",
+        },
+        { status: 400 }
+      );
+    }
 
-    const normalizedPaper =
-      paper === "ruled"
-        ? "ruled"
-        : paper === "dotGrid"
-          ? "dotGrid"
-          : "plain";
-
+    const normalizedSize = normalizedPhysicalConfig.size;
+    const normalizedPages = normalizedPhysicalConfig.pages;
+    const normalizedPaper = normalizedPhysicalConfig.paper;
     const normalizedOrientation =
-      orientation === "landscape" ? "landscape" : "portrait";
+      normalizedPhysicalConfig.orientation;
 
     if (
       typeof quantity !== "number" ||
@@ -251,6 +265,7 @@ export async function POST(request: Request) {
         size: normalizedSize,
         pages: normalizedPages,
         paper: normalizedPaper,
+        paperGsm: normalizedPhysicalConfig.paperGsm,
         orientation: normalizedOrientation,
         quantity: normalizedQuantity,
       },

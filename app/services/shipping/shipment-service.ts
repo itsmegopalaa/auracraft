@@ -446,16 +446,18 @@ export async function scheduleShipmentPickup(shipmentId: string) {
     );
   }
 
-  if (shipment.status === "ready_for_pickup") {
-    return shipment;
-  }
-
   if (
-    !["created", "serviceable"].includes(shipment.status)
+    !["created", "serviceable", "ready_for_pickup"].includes(
+      shipment.status
+    )
   ) {
     throw new Error(
       `Shipment cannot be scheduled for pickup from status "${shipment.status}".`
     );
+  }
+
+  if (shipment.status === "ready_for_pickup") {
+    return shipment;
   }
 
   const pickup = await provider.schedulePickup(
@@ -600,8 +602,26 @@ export async function refreshShipmentTracking(shipmentId: string) {
   };
 
   if (status === "delivered") {
-    orderUpdate.order_status = "delivered";
-    orderUpdate.delivered_at = new Date().toISOString();
+    const { data: linkedOrder, error: linkedOrderError } =
+      await supabase
+        .from("orders")
+        .select("order_status")
+        .eq("id", shipment.order_id)
+        .maybeSingle();
+
+    if (linkedOrderError) {
+      throw new Error(
+        `Unable to verify linked order before delivery update: ${linkedOrderError.message}`
+      );
+    }
+
+    if (
+      linkedOrder &&
+      linkedOrder.order_status !== "cancelled"
+    ) {
+      orderUpdate.order_status = "delivered";
+      orderUpdate.delivered_at = new Date().toISOString();
+    }
   }
 
   await supabase

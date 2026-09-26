@@ -3,7 +3,7 @@ import { requireAdminApi } from "@/app/lib/admin-auth";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
 
 const PRODUCT_SELECT =
-  "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size, theme, badge, shipping_weight_grams, package_length_cm, package_width_cm, package_height_cm, created_at, updated_at";
+  "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size, theme, badge, shipping_weight_grams, package_length_cm, package_width_cm, package_height_cm, production_assets, production_template_version, created_at, updated_at";
 
 const VALID_BADGES = new Set([
   "best_seller",
@@ -153,14 +153,6 @@ function validateBaseProductFields(
   }
 
   if (
-    typeof body.price !== "number" ||
-    !Number.isInteger(body.price) ||
-    body.price < 0
-  ) {
-    return "Price must be a non-negative integer.";
-  }
-
-  if (
     typeof body.stock !== "number" ||
     !Number.isInteger(body.stock) ||
     body.stock < 0
@@ -189,7 +181,9 @@ function buildCreateData(
   return {
     data: {
       name: (body.name as string).trim(),
-      price: body.price as number,
+      // Legacy/default compatibility field.
+      // Canonical catalog pricing lives in product_page_prices.
+      price: 849,
       description: nullableString(body.description),
       category: nullableString(body.category),
       image: nullableString(body.image),
@@ -216,10 +210,6 @@ function buildUpdateData(
       typeof body.name === "string"
         ? body.name.trim()
         : body.name;
-  }
-
-  if ("price" in body) {
-    updateData.price = body.price;
   }
 
   if ("description" in body) {
@@ -336,19 +326,6 @@ export async function PATCH(request: Request) {
     ) {
       return NextResponse.json(
         { error: "Product name must be a non-empty string." },
-        { status: 400 }
-      );
-    }
-  }
-
-  if ("price" in body) {
-    if (
-      typeof body.price !== "number" ||
-      !Number.isInteger(body.price) ||
-      body.price < 0
-    ) {
-      return NextResponse.json(
-        { error: "Price must be a non-negative integer." },
         { status: 400 }
       );
     }
@@ -514,8 +491,41 @@ export async function POST(request: Request) {
       );
     }
 
+    const { data: pagePrices, error: pagePriceError } = await supabase
+      .from("product_page_prices")
+      .upsert(
+        [
+          { product_id: data.id, pages: 100, price: 849 },
+          { product_id: data.id, pages: 150, price: 1049 },
+          { product_id: data.id, pages: 200, price: 1249 },
+        ],
+        { onConflict: "product_id,pages" }
+      )
+      .select("product_id, pages, price");
+
+    if (pagePriceError) {
+      console.error(
+        "Product page pricing creation error:",
+        pagePriceError
+      );
+
+      // Do not leave a product without its canonical pricing.
+      await supabase
+        .from("products")
+        .delete()
+        .eq("id", data.id);
+
+      return NextResponse.json(
+        { error: "Unable to initialize product pricing." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { product: data },
+      {
+        product: data,
+        pagePrices: pagePrices ?? [],
+      },
       { status: 201 }
     );
   } catch (error) {

@@ -14,6 +14,17 @@ export default async function AdminProductsPage() {
     )
     .order("created_at", { ascending: false });
 
+  const productIds = (products ?? []).map((product) => product.id);
+
+  const { data: pagePrices } =
+    productIds.length > 0
+      ? await supabase
+          .from("product_page_prices")
+          .select("product_id, pages, price")
+          .in("product_id", productIds)
+          .in("pages", [100, 150, 200])
+      : { data: [] };
+
   return (
     <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
 
@@ -44,7 +55,10 @@ export default async function AdminProductsPage() {
           </div>
         ) : (
           <div className="mt-6 sm:mt-8">
-            <AdminProductsClient products={products ?? []} />
+            <AdminProductsClient
+              products={products ?? []}
+              pagePrices={pagePrices ?? []}
+            />
           </div>
         )}
       </div>

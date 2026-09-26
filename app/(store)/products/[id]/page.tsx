@@ -11,6 +11,11 @@ import RelatedProducts from "@/app/components/products/RelatedProducts";
 import ProductReviews from "@/app/components/products/ProductReviews";
 import TrustBadges from "@/app/components/TrustBadges";
 import type { Metadata } from "next";
+import { getProductProductionPreview } from "@/app/lib/product-production-preview";
+import {
+  hasCompleteProductProductionAssets,
+  normalizeProductProductionAssets,
+} from "@/app/lib/product-production-assets";
 
 export async function generateMetadata({
   params,
@@ -87,7 +92,7 @@ export default async function ProductPage({
   const { data: product, error } = await supabase
     .from("products")
     .select(
-      "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size"
+      "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size, production_assets, production_template_version"
     )
     .eq("id", id)
     .eq("active", true)
@@ -99,6 +104,34 @@ export default async function ProductPage({
   }
 
   const typedProduct = product as Product;
+
+  const productionPreviewAssets =
+    await getProductProductionPreview(typedProduct.production_assets);
+
+  const hasProductionPreview =
+    productionPreviewAssets.length === 4;
+
+  const productionPreviewPages = productionPreviewAssets.map(
+    (asset) => ({
+      id: asset.side,
+      label:
+        asset.side === "front"
+          ? "Front"
+          : asset.side === "insideFront"
+            ? "Inside Front"
+            : asset.side === "insideBack"
+              ? "Inside Back"
+              : "Back",
+      content: (
+        <img
+          src={asset.url}
+          alt={`${typedProduct.name} ${asset.side}`}
+          className="h-full w-full object-cover"
+          draggable={false}
+        />
+      ),
+    }),
+  );
 
   const { data: pagePricesData, error: pagePricesError } = await supabase
     .from("product_page_prices")
@@ -212,7 +245,7 @@ export default async function ProductPage({
     await supabase
       .from("products")
       .select(
-        "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size"
+        "id, name, price, description, category, image, stock, active, rating, bestseller, featured, new_arrival, pages, paper, size, production_assets, production_template_version"
       )
       .eq("active", true)
       .neq("id", typedProduct.id)
@@ -261,10 +294,25 @@ export default async function ProductPage({
               </span>
             )}
 
-            <ProductGallery
-              image={typedProduct.image ?? "/images/notebooks/placeholder.png"}
-              name={typedProduct.name}
-            />
+            {hasProductionPreview ? (
+              <ProductGallery
+                image={
+                  typedProduct.image ??
+                  "/images/notebooks/placeholder.png"
+                }
+                name={typedProduct.name}
+                pages={productionPreviewPages}
+              />
+            ) : (
+              <ProductGallery
+                image={
+                  typedProduct.image ??
+                  "/images/notebooks/placeholder.png"
+                }
+                name={typedProduct.name}
+                pages={[]}
+              />
+            )}
           </div>
 
           {/* Product Details */}

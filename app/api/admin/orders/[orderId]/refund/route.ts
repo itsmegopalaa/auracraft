@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/app/lib/admin-auth";
+import { logAdminAction } from "@/app/lib/admin-audit";
 import { createServerSupabaseClient } from "@/app/lib/supabase";
 import { refundRazorpayPayment } from "@/app/services/payments";
 
@@ -67,6 +68,7 @@ export async function POST(
       .select(
         [
           "order_id",
+          "order_status",
           "total",
           "payment_method",
           "payment_status",
@@ -110,6 +112,7 @@ export async function POST(
 
     const refundOrder = order as unknown as {
       order_id: string;
+      order_status: string | null;
       total: number | string | null;
       payment_method: string | null;
       payment_status: string | null;
@@ -120,6 +123,17 @@ export async function POST(
       refund_amount: number | null;
       refund_processed_at: string | null;
     };
+
+    if (refundOrder.order_status !== "cancelled") {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            `Order cannot be refunded because its status is "${refundOrder.order_status}". Cancel the order before processing a refund.`,
+        },
+        { status: 409 }
+      );
+    }
 
     if (refundOrder.payment_method !== "Razorpay") {
       return NextResponse.json(
@@ -188,31 +202,52 @@ export async function POST(
       );
     }
 
-    const refundAmount = requestedAmount ?? totalAmount;
+    const previouslyRefundedAmount =
+      refundOrder.refund_amount === null
+        ? 0
+        : Number(refundOrder.refund_amount);
 
-    if (refundAmount > totalAmount) {
+    if (!Number.isInteger(previouslyRefundedAmount) || previouslyRefundedAmount < 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "Refund amount cannot exceed the order total.",
+          error: "Invalid existing refund amount.",
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
 
-    if (
-      refundOrder.refund_amount !== null &&
-      Number(refundOrder.refund_amount) + refundAmount > totalAmount
-    ) {
+    if (previouslyRefundedAmount >= totalAmount) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "The full refundable amount has already been refunded.",
+          refundAmount: previouslyRefundedAmount,
+        },
+        { status: 409 }
+      );
+    }
+
+    const remainingRefundableAmount =
+      totalAmount - previouslyRefundedAmount;
+
+    const refundAmount =
+      requestedAmount ?? remainingRefundableAmount;
+
+    if (refundAmount > remainingRefundableAmount) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "This refund would exceed the total amount already refunded.",
+            `Refund amount cannot exceed the remaining refundable amount of ₹${remainingRefundableAmount}.`,
+          remainingRefundableAmount,
         },
         { status: 400 }
       );
     }
+
+    const cumulativeRefundAmount =
+      previouslyRefundedAmount + refundAmount;
 
     /*
      * Mark the refund as pending before calling Razorpay.
@@ -302,9 +337,11 @@ export async function POST(
     const refundData = refundResult.raw;
 
     const finalRefundStatus =
-      refundAmount === totalAmount
+      cumulativeRefundAmount === totalAmount
         ? "processed"
         : "partial";
+
+    const refundProcessedAt = new Date().toISOString();
 
     const { data: updatedOrder, error: updateError } =
       await supabase
@@ -312,8 +349,8 @@ export async function POST(
         .update({
           refund_status: finalRefundStatus,
           refund_id: refundId,
-          refund_amount: refundAmount,
-          refund_processed_at: new Date().toISOString(),
+          refund_amount: cumulativeRefundAmount,
+          refund_processed_at: refundProcessedAt,
         })
         .eq("order_id", refundOrder.order_id)
         .eq("refund_status", "pending")
@@ -358,6 +395,32 @@ export async function POST(
       );
     }
 
+    await logAdminAction({
+      adminUserId: adminAuth.user?.id ?? null,
+      source: "admin",
+      action: "order.refund_processed",
+      entityType: "order",
+      entityId: refundOrder.order_id,
+      beforeData: {
+        refund_status: refundOrder.refund_status,
+        refund_amount: refundOrder.refund_amount,
+        refund_processed_at: refundOrder.refund_processed_at,
+      },
+      afterData: {
+        refund_status: finalRefundStatus,
+        refund_amount: cumulativeRefundAmount,
+        refund_processed_at: refundProcessedAt,
+      },
+      metadata: {
+        refund_type:
+          finalRefundStatus === "processed"
+            ? "full"
+            : "partial",
+        amount_rupees: refundAmount,
+        cumulative_refund_amount_rupees: cumulativeRefundAmount,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message:
@@ -369,6 +432,8 @@ export async function POST(
         id: refundId,
         amount: refundAmount,
         amountPaise: refundAmount * 100,
+        cumulativeAmount: cumulativeRefundAmount,
+        cumulativeAmountPaise: cumulativeRefundAmount * 100,
         status:
           typeof refundData === "object" &&
           refundData !== null &&

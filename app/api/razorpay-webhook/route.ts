@@ -22,7 +22,7 @@ type RazorpayWebhookPayload = {
   };
 };
 
-function verifyWebhookSignature(
+export function verifyWebhookSignature(
   rawBody: string,
   signature: string,
   secret: string

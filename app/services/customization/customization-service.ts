@@ -27,6 +27,7 @@ export type CreateCustomizationInput = {
     size: "A4" | "A5";
     pages: 100 | 150 | 200;
     paper: "plain" | "ruled" | "dotGrid";
+    paperGsm: number;
     orientation: "portrait" | "landscape";
     quantity: number;
   };

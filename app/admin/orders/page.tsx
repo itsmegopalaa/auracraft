@@ -23,6 +23,7 @@ export default async function AdminOrdersPage() {
         order_status,
         total,
         delivery,
+        custom_cover_id,
         created_at
       `
     )

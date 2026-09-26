@@ -6,6 +6,12 @@ import Footer from "@/app/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
+import {
+  OrientationIcon,
+  PaperIcon,
+  PagesIcon,
+  SizeIcon,
+} from "@/app/components/PhysicalConfigVisuals";
 export default function CartPage() {
 const [removeId, setRemoveId] = useState<string | null>(null);
   const {
@@ -118,6 +124,92 @@ md:justify-between
                      ₹{item.price}
                     </p>
 
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                      <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2.5 py-2">
+                        {item.size === "A4" || item.size === "A5" ? (
+                          <SizeIcon value={item.size} size="sm" />
+                        ) : null}
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+                            Size
+                          </p>
+                          <p className="truncate text-xs font-bold">
+                            {item.size === "A4" || item.size === "A5"
+                              ? item.size
+                              : "Not recorded"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2.5 py-2">
+                        {item.orientation === "portrait" ||
+                        item.orientation === "landscape" ? (
+                          <OrientationIcon
+                            value={item.orientation}
+                            size="sm"
+                          />
+                        ) : null}
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+                            Orientation
+                          </p>
+                          <p className="truncate text-xs font-bold">
+                            {item.orientation === "portrait"
+                              ? "Portrait"
+                              : item.orientation === "landscape"
+                                ? "Landscape"
+                                : "Not recorded"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2.5 py-2">
+                        {item.paper === "plain" ||
+                        item.paper === "ruled" ||
+                        item.paper === "dotGrid" ? (
+                          <PaperIcon value={item.paper} size="sm" />
+                        ) : null}
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+                            Paper
+                          </p>
+                          <p className="truncate text-xs font-bold">
+                            {item.paper === "plain"
+                              ? "Plain"
+                              : item.paper === "ruled"
+                                ? "Ruled"
+                                : item.paper === "dotGrid"
+                                  ? "Dot Grid"
+                                  : "Not recorded"}
+                          </p>
+                          {item.paper && item.paperGsm ? (
+                            <p className="text-[9px] text-[var(--mn-text-muted)]">
+                              {item.paperGsm} GSM
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2.5 py-2">
+                        {item.pages === 100 ||
+                        item.pages === 150 ||
+                        item.pages === 200 ? (
+                          <PagesIcon pages={item.pages} size="sm" />
+                        ) : null}
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)]">
+                            Pages
+                          </p>
+                          <p className="truncate text-xs font-bold">
+                            {item.pages === 100 ||
+                            item.pages === 150 ||
+                            item.pages === 200
+                              ? `${item.pages} pages`
+                              : "Not recorded"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="mt-4 flex items-center gap-3 sm:gap-4 md:gap-5">
                       {item.customCoverId ? (

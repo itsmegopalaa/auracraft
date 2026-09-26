@@ -14,6 +14,8 @@ export interface Product {
   package_length_cm?: number | null;
   package_width_cm?: number | null;
   package_height_cm?: number | null;
+  production_assets?: unknown;
+  production_template_version?: string | null;
 
   rating?: number | null;
   review_count?: number;

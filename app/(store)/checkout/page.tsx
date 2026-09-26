@@ -1,17 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useCart } from "@/app/context/CartContext";
+import {
+  OrientationIcon,
+  PaperIcon,
+  PagesIcon,
+  SizeIcon,
+} from "@/app/components/PhysicalConfigVisuals";
 import RazorpayCheckout from "@/app/components/RazorpayCheckout";
 import { getCustomCoverFee } from "@/app/lib/custom-cover-pricing";
 
 export default function CheckoutPage() {
   const { cart } = useCart();
   const router = useRouter();
+
+  const [buyNowItem, setBuyNowItem] = useState<null | (typeof cart[number])>(
+    null,
+  );
+
+  const [buyNowLoaded, setBuyNowLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("minenote_buy_now");
+
+      if (!raw) {
+        setBuyNowLoaded(true);
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        typeof parsed.id !== "undefined" &&
+        typeof parsed.name === "string" &&
+        Number.isFinite(Number(parsed.price)) &&
+        Number(parsed.quantity) > 0
+      ) {
+        setBuyNowItem({
+          ...parsed,
+          id: String(parsed.id),
+          price: Number(parsed.price),
+          quantity: Number(parsed.quantity),
+          pages:
+            parsed.pages === 100 ||
+            parsed.pages === 150 ||
+            parsed.pages === 200
+              ? parsed.pages
+              : null,
+          paper:
+            parsed.paper === "plain" ||
+            parsed.paper === "ruled" ||
+            parsed.paper === "dotGrid"
+              ? parsed.paper
+              : null,
+          paperGsm:
+            parsed.paperGsm != null &&
+            Number.isFinite(Number(parsed.paperGsm))
+              ? Number(parsed.paperGsm)
+              : null,
+          size:
+            parsed.size === "A4" || parsed.size === "A5"
+              ? parsed.size
+              : null,
+          orientation:
+            parsed.orientation === "portrait" ||
+            parsed.orientation === "landscape"
+              ? parsed.orientation
+              : null,
+          customCoverId: parsed.customCoverId ?? null,
+        });
+      } else {
+        localStorage.removeItem("minenote_buy_now");
+      }
+    } catch (error) {
+      console.error("BUY NOW STATE LOAD FAILED:", error);
+      localStorage.removeItem("minenote_buy_now");
+    } finally {
+      setBuyNowLoaded(true);
+    }
+  }, []);
+
+  const checkoutItems = buyNowItem ? [buyNowItem] : cart;
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -23,21 +100,21 @@ export default function CheckoutPage() {
   const [payment] = useState("ONLINE");
   const [loading, setLoading] = useState(false);
 
-  const subtotal = cart.reduce(
+  const subtotal = checkoutItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
   const customCoverIds = [
     ...new Set(
-      cart
+      checkoutItems
         .map((item) => item.customCoverId)
         .filter((id): id is string => Boolean(id))
     ),
   ];
 
   const customCoverQuantity = customCoverIds.length === 1
-    ? cart
+    ? checkoutItems
         .filter((item) => item.customCoverId === customCoverIds[0])
         .reduce((sum, item) => sum + item.quantity, 0)
     : 0;
@@ -78,7 +155,7 @@ export default function CheckoutPage() {
       return false;
     }
 
-    if (cart.length === 0) {
+    if (checkoutItems.length === 0) {
       toast.error("Your cart is empty.");
       return false;
     }
@@ -120,9 +197,9 @@ export default function CheckoutPage() {
         paymentMethod,
         paymentStatus,
         orderStatus,
-        items: cart,
+        items: checkoutItems,
         customCoverId:
-          cart.find((item) => item.customCoverId)?.customCoverId ?? null,
+          checkoutItems.find((item) => item.customCoverId)?.customCoverId ?? null,
         total,
         razorpayOrderId: razorpayOrderId || null,
         razorpayPaymentId: razorpayPaymentId || null,
@@ -141,7 +218,11 @@ export default function CheckoutPage() {
     return result.order;
   };
 
-  if (cart.length === 0) {
+  if (!buyNowLoaded) {
+    return null;
+  }
+
+  if (checkoutItems.length === 0) {
     return (
       <>
         <main className="flex min-h-screen items-center justify-center bg-[var(--mn-bg)] px-4 py-16 text-[var(--mn-text)] sm:px-6 sm:py-[clamp(5rem,8vw,7rem)]">
@@ -344,7 +425,7 @@ export default function CheckoutPage() {
 
                 {/* Items */}
                 <div className="space-y-3.5 sm:space-y-4">
-                  {cart.map((item) => (
+                  {checkoutItems.map((item) => (
                     <div
                       key={item.id}
                       className="flex items-start justify-between gap-4"
@@ -357,6 +438,93 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-[var(--mn-text-secondary)]">
                           Quantity × {item.quantity}
                         </p>
+
+                        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          <div className="flex min-w-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2 py-1.5">
+                            {item.size === "A4" || item.size === "A5" ? (
+                              <SizeIcon value={item.size} size="sm" />
+                            ) : null}
+                            <div className="min-w-0">
+                              <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--mn-text-muted)]">
+                                Size
+                              </p>
+                              <p className="truncate text-[10px] font-bold">
+                                {item.size === "A4" || item.size === "A5"
+                                  ? item.size
+                                  : "Not recorded"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex min-w-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2 py-1.5">
+                            {item.orientation === "portrait" ||
+                            item.orientation === "landscape" ? (
+                              <OrientationIcon
+                                value={item.orientation}
+                                size="sm"
+                              />
+                            ) : null}
+                            <div className="min-w-0">
+                              <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--mn-text-muted)]">
+                                Orientation
+                              </p>
+                              <p className="truncate text-[10px] font-bold">
+                                {item.orientation === "portrait"
+                                  ? "Portrait"
+                                  : item.orientation === "landscape"
+                                    ? "Landscape"
+                                    : "Not recorded"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex min-w-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2 py-1.5">
+                            {item.paper === "plain" ||
+                            item.paper === "ruled" ||
+                            item.paper === "dotGrid" ? (
+                              <PaperIcon value={item.paper} size="sm" />
+                            ) : null}
+                            <div className="min-w-0">
+                              <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--mn-text-muted)]">
+                                Paper
+                              </p>
+                              <p className="truncate text-[10px] font-bold">
+                                {item.paper === "plain"
+                                  ? "Plain"
+                                  : item.paper === "ruled"
+                                    ? "Ruled"
+                                    : item.paper === "dotGrid"
+                                      ? "Dot Grid"
+                                      : "Not recorded"}
+                              </p>
+                              {item.paper && item.paperGsm ? (
+                                <p className="text-[8px] text-[var(--mn-text-muted)]">
+                                  {item.paperGsm} GSM
+                                </p>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="flex min-w-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-bg)] px-2 py-1.5">
+                            {item.pages === 100 ||
+                            item.pages === 150 ||
+                            item.pages === 200 ? (
+                              <PagesIcon pages={item.pages} size="sm" />
+                            ) : null}
+                            <div className="min-w-0">
+                              <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--mn-text-muted)]">
+                                Pages
+                              </p>
+                              <p className="truncate text-[10px] font-bold">
+                                {item.pages === 100 ||
+                                item.pages === 150 ||
+                                item.pages === 200
+                                  ? `${item.pages} pages`
+                                  : "Not recorded"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       <span className="shrink-0 font-bold text-[var(--mn-text)]">
@@ -475,7 +643,7 @@ export default function CheckoutPage() {
                         name={name}
                         email={email}
                         phone={phone}
-                        items={cart}
+                        items={checkoutItems}
                         onSuccess={async (
                           paymentResponse,
                           mineNoteOrderId
@@ -509,7 +677,7 @@ export default function CheckoutPage() {
                               state,
                               pin,
                               payment: "Razorpay",
-                              items: cart,
+                              items: checkoutItems,
                               total,
                               delivery: "3-5 Working Days",
                               databaseOrderId: savedOrder.id,
@@ -523,6 +691,8 @@ export default function CheckoutPage() {
                               "auracraft_last_order",
                               JSON.stringify(order)
                             );
+
+                            localStorage.removeItem("minenote_buy_now");
 
                             toast.success(
                               "Payment successful! Order confirmed."

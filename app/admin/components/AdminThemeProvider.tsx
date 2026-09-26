@@ -33,6 +33,7 @@ function applyTheme(theme: AdminTheme) {
 
   root.classList.toggle("dark", isDark);
   root.dataset.adminTheme = theme;
+  root.dataset.theme = isDark ? "dark" : "warm";
 }
 
 export default function AdminThemeProvider({
@@ -40,17 +41,19 @@ export default function AdminThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setThemeState] = useState<AdminTheme>(() => {
-    if (typeof window === "undefined") {
-      return "system";
-    }
+  const [theme, setThemeState] = useState<AdminTheme>("system");
 
+  useEffect(() => {
     const saved = localStorage.getItem("minenote-admin-theme");
 
-    return saved === "light" || saved === "dark" || saved === "system"
-      ? saved
-      : "system";
-  });
+    if (
+      saved === "light" ||
+      saved === "dark" ||
+      saved === "system"
+    ) {
+      setThemeState(saved);
+    }
+  }, []);
 
   useEffect(() => {
     applyTheme(theme);

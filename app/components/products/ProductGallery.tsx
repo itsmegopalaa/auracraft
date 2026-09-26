@@ -1,78 +1,68 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import NotebookPageFlip, {
+  type NotebookFlipPage,
+} from "@/app/components/notebook/NotebookPageFlip";
 
 type Props = {
   image: string;
   name: string;
+  pages: NotebookFlipPage[];
 };
 
 export default function ProductGallery({
   image,
   name,
+  pages,
 }: Props) {
-  const [activeImage, setActiveImage] = useState(image);
-
-  const images = [image];
-
-  return (
-    <div className="space-y-5">
-      {/* Main product showcase */}
-      <div className="group relative overflow-hidden rounded-[2rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] shadow-[var(--mn-shadow-lg)]">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,var(--mn-product-glow),transparent_55%)]"
-          aria-hidden="true"
-        />
-
-        <div className="relative flex min-h-[360px] items-center justify-center p-4 sm:min-h-[500px] sm:p-8 lg:min-h-[560px] lg:p-10">
+  const frontPage: NotebookFlipPage = {
+    id: "front",
+    label: "Front",
+    content: (
+        <div className="relative flex h-full w-full items-center justify-center bg-white">
           <Image
-            src={activeImage}
-            alt={name}
-            width={700}
-            height={900}
+            src={image}
+            alt={`${name} front cover`}
+            fill
             priority
-            className="relative z-10 h-auto max-h-[400px] w-auto max-w-[88%] object-contain drop-shadow-[var(--mn-shadow-gallery)] transition-transform duration-500 group-hover:scale-[1.02] sm:max-h-[480px] sm:max-w-full lg:max-h-[520px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mn-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--mn-bg)]"
+            sizes="(max-width: 768px) 92vw, 680px"
+            className="object-contain"
+            draggable={false}
           />
         </div>
+      ),
+  };
 
-        <div
-          className="pointer-events-none absolute inset-x-6 bottom-5 h-px bg-gradient-to-r from-transparent via-[var(--mn-accent)]/20 to-transparent"
-          aria-hidden="true"
+  const previewPages: NotebookFlipPage[] = [
+    frontPage,
+    ...pages.filter((page) => page.id !== "front"),
+  ].slice(0, 4);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-[2rem] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-[var(--mn-shadow-lg)] sm:p-5">
+        <div className="mb-4 flex items-center justify-between px-1 sm:px-2">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--mn-accent)]">
+              📖 Notebook Preview
+            </p>
+            <p className="mt-1 text-xs text-[var(--mn-text-muted)]">
+              Flip through all four sides before ordering.
+            </p>
+          </div>
+
+          <span className="hidden rounded-full border border-[var(--mn-border)] bg-[var(--mn-bg)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--mn-text-muted)] sm:inline-flex">
+            4 sides
+          </span>
+        </div>
+
+        <NotebookPageFlip
+          pages={previewPages}
+          initialIndex={0}
+          pageClassName="rounded-xl border border-[var(--mn-border)] shadow-[var(--mn-shadow-sm)]"
         />
       </div>
-
-      {/* Gallery thumbnails */}
-      {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-1">
-          {images.map((img) => {
-            const isActive = activeImage === img;
-
-            return (
-              <button
-                key={img}
-                type="button"
-                onClick={() => setActiveImage(img)}
-                aria-label={`View ${name}`}
-                aria-pressed={isActive}
-                className={`shrink-0 overflow-hidden rounded-2xl border transition-all duration-300 ${
-                  isActive
-                    ? "border-[var(--mn-accent)] shadow-[var(--mn-shadow-sm)]"
-                    : "border-[var(--mn-border)] opacity-60 hover:border-[var(--mn-accent)] hover:opacity-100"
-                }`}
-              >
-                <Image
-                  src={img}
-                  alt=""
-                  width={100}
-                  height={120}
-                  className="h-20 w-16 object-cover sm:h-24 sm:w-20"
-                />
-              </button>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

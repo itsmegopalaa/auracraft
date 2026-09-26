@@ -101,6 +101,33 @@ export async function PATCH(
         order.quality_checked &&
         order.packed;
 
+      if (
+        order.payment_status !== "paid"
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "A parcel cannot be handed over because the order payment is not marked as paid.",
+          },
+          { status: 409 }
+        );
+      }
+
+      if (
+        order.order_status !== "confirmed" &&
+        order.order_status !== "processing"
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              `A parcel cannot be handed over while the order status is "${order.order_status}".`,
+          },
+          { status: 409 }
+        );
+      }
+
       if (!productionComplete) {
         return NextResponse.json(
           {

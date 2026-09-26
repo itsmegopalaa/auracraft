@@ -38,9 +38,22 @@ async function refreshWishlistPrices(
     return items;
   }
 
+  const isUuid = (value: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value
+    );
+
   const productIds = [
-    ...new Set(items.map((item) => String(item.id))),
+    ...new Set(
+      items
+        .map((item) => String(item.id))
+        .filter(isUuid)
+    ),
   ];
+
+  if (productIds.length === 0) {
+    return items;
+  }
 
   const supabase = createClient();
 

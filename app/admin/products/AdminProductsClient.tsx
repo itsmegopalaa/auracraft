@@ -1,19 +1,41 @@
 "use client";
 
 import Image from "next/image";
+import MineNoteProductionTemplateManager from "./MineNoteProductionTemplateManager";
+import NotebookPageFlip from "@/app/components/notebook/NotebookPageFlip";
 
 import { useState } from "react";
 import type { Product } from "@/app/types/products";
 import { useSearchParams } from "next/navigation";
+import {
+  getProductProductionAsset,
+  normalizeProductProductionAssets,
+  PRODUCT_PRODUCTION_SIDES,
+} from "@/app/lib/product-production-assets";
+import {
+  getNotebookSheetForSide,
+  getNotebookSheetSide,
+} from "@/app/lib/notebook-physical-model";
+
+type ProductPagePrice = {
+  product_id: string;
+  pages: 100 | 150 | 200;
+  price: number;
+};
 
 type Props = {
   products: Product[];
+  pagePrices: ProductPagePrice[];
 };
 
-export default function AdminProductsClient({ products: initialProducts }: Props) {
+export default function AdminProductsClient({
+  products: initialProducts,
+  pagePrices: initialPagePrices,
+}: Props) {
   const searchParams = useSearchParams();
 
   const [products, setProducts] = useState(initialProducts);
+  const [pagePrices, setPagePrices] = useState(initialPagePrices);
   const [editingId, setEditingId] = useState<string | null>(() => {
     const editId = searchParams.get("edit");
 
@@ -34,7 +56,6 @@ export default function AdminProductsClient({ products: initialProducts }: Props
 
   const [newProduct, setNewProduct] = useState({
     name: "",
-    price: 0,
     description: "",
     category: "",
     image: "",
@@ -47,6 +68,227 @@ export default function AdminProductsClient({ products: initialProducts }: Props
 
   const editingProduct =
     products.find((product) => product.id === editingId) ?? null;
+
+  const editingProductionAssets = editingProduct
+    ? normalizeProductProductionAssets(editingProduct.production_assets)
+    : [];
+
+  const [productionDraft, setProductionDraft] = useState<
+    Record<
+      string,
+      {
+        url: string;
+        storagePath: string | null;
+        mimeType: string | null;
+      }
+    >
+  >({});
+
+  const [productionSaving, setProductionSaving] = useState(false);
+  const [productionUploading, setProductionUploading] =
+    useState<string | null>(null);
+
+  const productionPreviewPages = PRODUCT_PRODUCTION_SIDES.map((side) => {
+    const asset =
+      editingProductionAssets.find((item) => item.side === side);
+
+    const label =
+      side === "insideFront"
+        ? "Inside Front"
+        : side === "insideBack"
+          ? "Inside Back"
+          : side === "front"
+            ? "Front Cover"
+            : "Back Cover";
+
+    return {
+      id: side,
+      label,
+      imageUrl:
+        productionDraft[side]?.url ??
+        asset?.url ??
+        "",
+    };
+  });
+
+  function updateProductionDraft(
+    side: string,
+    value: string,
+  ) {
+    setProductionDraft((current) => ({
+      ...current,
+      [side]: {
+        url: value,
+        storagePath: current[side]?.storagePath ?? null,
+        mimeType: current[side]?.mimeType ?? null,
+      },
+    }));
+  }
+
+  async function uploadProductionArtwork(
+    side: (typeof PRODUCT_PRODUCTION_SIDES)[number],
+    file: File,
+  ) {
+    if (!editingProduct) return;
+
+    setProductionUploading(side);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("side", side);
+      formData.append("file", file);
+
+      const response = await fetch(
+        `/api/admin/products/${editingProduct.id}/production/assets/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result?.error ||
+            "Unable to upload production artwork.",
+        );
+      }
+
+      setProductionDraft((current) => ({
+        ...current,
+        [side]: {
+          url: result.url,
+          storagePath: result.storagePath ?? null,
+          mimeType: result.mimeType ?? null,
+        },
+      }));
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload production artwork.",
+      );
+    } finally {
+      setProductionUploading(null);
+    }
+  }
+
+  async function saveProductionAssets() {
+    if (!editingProduct) return;
+
+    const assets = PRODUCT_PRODUCTION_SIDES.map((side) => {
+      const existing = editingProductionAssets.find(
+        (asset) => asset.side === side,
+      );
+
+      const url =
+        productionDraft[side]?.url ??
+        existing?.url ??
+        "";
+
+      const storagePath =
+        productionDraft[side]?.storagePath ??
+        existing?.storagePath ??
+        null;
+
+      const mimeType =
+        productionDraft[side]?.mimeType ??
+        existing?.mimeType ??
+        null;
+
+      const sheet =
+        getNotebookSheetForSide(side);
+
+      const sheetSide =
+        getNotebookSheetSide(side);
+
+      return {
+        side,
+        sheetId: sheet.id,
+        sheetSide,
+        url: url.trim(),
+        storagePath,
+        width: existing?.width ?? null,
+        height: existing?.height ?? null,
+        mimeType,
+
+        source: existing?.source ?? "product_artwork",
+        templateVersion:
+          existing?.templateVersion ?? "minenote-v1",
+      };
+    });
+
+    if (assets.some((asset) => !asset.url)) {
+      setError(
+        "Add artwork for all four production sides before saving.",
+      );
+      return;
+    }
+
+    setProductionSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${editingProduct.id}/production/assets`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ assets }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result?.error ||
+            "Unable to save production assets.",
+        );
+      }
+
+      setProducts((current) =>
+        current.map((product) =>
+          product.id === editingProduct.id
+            ? {
+                ...product,
+                production_assets:
+                  result.production.assets,
+                production_template_version:
+                  result.production.templateVersion,
+              }
+            : product,
+        ),
+      );
+
+      setProductionDraft({});
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save production assets.",
+      );
+    } finally {
+      setProductionSaving(false);
+    }
+  }
+
+  function getProductPagePrices(productId: string) {
+    const prices = pagePrices.filter(
+      (item) => item.product_id === productId
+    );
+
+    return [100, 150, 200].map((pages) => ({
+      pages: pages as 100 | 150 | 200,
+      price:
+        prices.find((item) => item.pages === pages)?.price ??
+        null,
+    }));
+  }
 
   function updateEditing(field: keyof Product, value: string | number | boolean) {
     if (!editingId) return;
@@ -159,7 +401,6 @@ export default function AdminProductsClient({ products: initialProducts }: Props
         body: JSON.stringify({
           id: editingProduct.id,
           name: editingProduct.name,
-          price: editingProduct.price,
           description: editingProduct.description,
           category: editingProduct.category,
           image: editingProduct.image,
@@ -212,7 +453,6 @@ export default function AdminProductsClient({ products: initialProducts }: Props
             setError("");
             setNewProduct({
               name: "",
-              price: 0,
               description: "",
               category: "",
               image: "",
@@ -455,8 +695,26 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                     )}
                   </td>
 
-                  <td className="px-5 py-4 font-semibold text-zinc-900 dark:text-zinc-100">
-                    ₹{product.price.toLocaleString("en-IN")}
+                  <td className="px-5 py-4">
+                    <div className="space-y-1.5 text-sm">
+                      {getProductPagePrices(product.id).map(
+                        ({ pages, price }) => (
+                          <div
+                            key={pages}
+                            className="flex items-center justify-between gap-4"
+                          >
+                            <span className="text-zinc-500 dark:text-zinc-400">
+                              {pages}p
+                            </span>
+                            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                              {price === null
+                                ? "—"
+                                : `₹${price.toLocaleString("en-IN")}`}
+                            </span>
+                          </div>
+                        )
+                      )}
+                    </div>
                   </td>
 
                   <td className="px-4 py-3.5 sm:px-5 sm:py-4">
@@ -549,25 +807,6 @@ export default function AdminProductsClient({ products: initialProducts }: Props
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Price
-                </label>
-
-                <input
-                  type="number"
-                  min="0"
-                  value={newProduct.price}
-                  onChange={(event) =>
-                    setNewProduct({
-                      ...newProduct,
-                      price: Number(event.target.value),
-                    })
-                  }
-                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Stock
                 </label>
 
@@ -602,6 +841,195 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                   className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
+
+              <MineNoteProductionTemplateManager />
+
+              <section className="md:col-span-2 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      Production Studio
+                    </h3>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+                      Store the permanent four-side production artwork for this
+                      catalog product. Customer preview order is Front → Inside
+                      Front → Inside Back → Back.
+                    </p>
+                  </div>
+
+                  <span
+                    className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                      PRODUCT_PRODUCTION_SIDES.every((side) =>
+                        Boolean(
+                          productionDraft[side]?.url ||
+                            editingProductionAssets.find(
+                              (asset) => asset.side === side,
+                            )?.url,
+                        ),
+                      )
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                    }`}
+                  >
+                    {
+                      PRODUCT_PRODUCTION_SIDES.filter((side) =>
+                        Boolean(
+                          productionDraft[side]?.url ||
+                            editingProductionAssets.find(
+                              (asset) => asset.side === side,
+                            )?.url,
+                        ),
+                      ).length
+                    } / 4 ready
+                  </span>
+                </div>
+
+                <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+                  <div className="space-y-3">
+                    {PRODUCT_PRODUCTION_SIDES.map((side) => {
+                      const asset =
+                        editingProductionAssets.find(
+                          (item) => item.side === side,
+                        );
+
+                      const label =
+                        side === "insideFront"
+                          ? "Inside Front"
+                          : side === "insideBack"
+                            ? "Inside Back"
+                            : side === "front"
+                              ? "Front Cover"
+                              : "Back Cover";
+
+                      const value =
+                        productionDraft[side] ??
+                        asset?.url ??
+                        "";
+
+                      return (
+                        <div
+                          key={side}
+                          className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                                {label}
+                              </div>
+                              <div className="mt-0.5 text-[10px] text-zinc-400">
+                                {side}
+                              </div>
+                            </div>
+
+                            <span className="text-[10px] text-zinc-400">
+                              {asset ? "Saved" : "New"}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <label className="inline-flex min-h-10 cursor-pointer items-center rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 transition hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+                              {productionUploading === side
+                                ? "Uploading…"
+                                : value
+                                  ? "Replace Artwork"
+                                  : "Choose Artwork"}
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                className="sr-only"
+                                disabled={
+                                  productionUploading !== null
+                                }
+                                onChange={(event) => {
+                                  const file =
+                                    event.target.files?.[0];
+
+                                  event.currentTarget.value = "";
+
+                                  if (file) {
+                                    void uploadProductionArtwork(
+                                      side,
+                                      file,
+                                    );
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            {value && (
+                              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                Artwork uploaded
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={saveProductionAssets}
+                      disabled={
+                        productionSaving ||
+                        !editingProduct
+                      }
+                      className="min-h-11 w-full rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                    >
+                      {productionSaving
+                        ? "Saving Production Assets…"
+                        : "Save 4 Production Sides"}
+                    </button>
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
+                    <div className="mb-3 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                          Production Preview
+                        </div>
+                        <div className="text-[10px] text-zinc-400">
+                          4-page physical sequence
+                        </div>
+                      </div>
+                    </div>
+
+                    {productionPreviewPages.some(
+                      (page) => page.imageUrl,
+                    ) ? (
+                      <NotebookPageFlip
+                        pages={productionPreviewPages.map(
+                          (page) => ({
+                            id: page.id,
+                            label: page.label,
+                            imageUrl:
+                              page.imageUrl || undefined,
+                            content: page.imageUrl ? (
+                              <div className="relative h-full w-full overflow-hidden rounded-lg bg-white">
+                                <Image
+                                  src={page.imageUrl}
+                                  alt={page.label}
+                                  fill
+                                  sizes="(max-width: 1024px) 100vw, 50vw"
+                                  className="object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex h-full items-center justify-center text-xs text-zinc-400">
+                                No artwork
+                              </div>
+                            ),
+                          }),
+                        )}
+                      />
+                    ) : (
+                      <div className="flex min-h-64 items-center justify-center rounded-xl border border-dashed border-zinc-300 text-center text-xs text-zinc-400 dark:border-zinc-700">
+                        Add production artwork to preview the
+                        notebook.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -764,6 +1192,15 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                       ...current,
                     ]);
 
+                    if (Array.isArray(data.pagePrices)) {
+                      setPagePrices((current) => [
+                        ...current.filter(
+                          (item) => item.product_id !== data.product.id
+                        ),
+                        ...data.pagePrices,
+                      ]);
+                    }
+
                     setAdding(false);
                   } catch (err) {
                     setError(
@@ -822,20 +1259,42 @@ export default function AdminProductsClient({ products: initialProducts }: Props
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Price
-                </label>
+              <div className="md:col-span-2">
+                <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-950/20">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        Canonical Catalog Pricing
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                        Fixed MineNote page-count pricing. Customer pricing uses these values.
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-yellow-200 px-2.5 py-1 text-[11px] font-semibold text-yellow-900 dark:bg-yellow-900/50 dark:text-yellow-200">
+                      Locked
+                    </span>
+                  </div>
 
-                <input
-                  type="number"
-                  min="0"
-                  value={editingProduct.price}
-                  onChange={(event) =>
-                    updateEditing("price", Number(event.target.value))
-                  }
-                  className="min-h-12 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-yellow-400 dark:border-zinc-700 dark:bg-zinc-950"
-                />
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    {getProductPagePrices(editingProduct.id).map(
+                      ({ pages, price }) => (
+                        <div
+                          key={pages}
+                          className="rounded-xl border border-yellow-200 bg-white px-3 py-2.5 dark:border-yellow-900/40 dark:bg-zinc-900"
+                        >
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            {pages} pages
+                          </p>
+                          <p className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">
+                            {price === null
+                              ? "Not configured"
+                              : `₹${price.toLocaleString("en-IN")}`}
+                          </p>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div>

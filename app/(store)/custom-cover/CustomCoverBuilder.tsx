@@ -3,6 +3,12 @@
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Footer from "@/app/components/Footer";
+import {
+  OrientationIcon,
+  PaperIcon,
+  PagesIcon,
+  SizeIcon,
+} from "@/app/components/PhysicalConfigVisuals";
 
 type StartOption = "blank" | "existing";
 type Size = "A4" | "A5";
@@ -64,7 +70,7 @@ const ORIENTATIONS = [
   },
 ];
 
-const PAGES = [100, 150, 200];
+const PAGES = [100, 150, 200] as const;
 
 const PAPERS = [
   {
@@ -411,11 +417,15 @@ export default function CustomCoverBuilder({
                     ].join(" ")}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{item.title}</p>
-                        <p className="mt-0.5 text-[11px] text-[var(--mn-text-secondary)]">
-                          {item.meta}
-                        </p>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <SizeIcon value={item.id} size="md" />
+
+                        <div>
+                          <p className="font-semibold">{item.title}</p>
+                          <p className="mt-0.5 text-[11px] text-[var(--mn-text-secondary)]">
+                            {item.meta}
+                          </p>
+                        </div>
                       </div>
 
                       {item.badge && (
@@ -450,13 +460,19 @@ export default function CustomCoverBuilder({
                         : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
                     ].join(" ")}
                   >
-                    <p className="text-sm font-semibold">
-                      {item.title}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <OrientationIcon value={item.id} size="md" />
 
-                    <p className="mt-1 text-xs leading-5 text-[var(--mn-text-secondary)]">
-                      {item.description}
-                    </p>
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {item.title}
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-[var(--mn-text-secondary)]">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
                   </button>
                 );
               })}
@@ -483,7 +499,10 @@ export default function CustomCoverBuilder({
                         : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
                     ].join(" ")}
                   >
-                    {pages}
+                    <span className="flex items-center justify-center gap-2">
+                      <PagesIcon pages={pages} size="sm" />
+                      <span>{pages}</span>
+                    </span>
                   </button>
                 );
               })}
@@ -510,11 +529,17 @@ export default function CustomCoverBuilder({
                         : "border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]",
                     ].join(" ")}
                   >
-                    <p className="text-sm font-semibold">{item.title}</p>
+                    <div className="flex items-center gap-3">
+                      <PaperIcon value={item.id} size="md" />
 
-                    <p className="mt-1 text-xs leading-5 text-[var(--mn-text-secondary)]">
-                      {item.description}
-                    </p>
+                      <div>
+                        <p className="text-sm font-semibold">{item.title}</p>
+
+                        <p className="mt-1 text-xs leading-5 text-[var(--mn-text-secondary)]">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
                   </button>
                 );
               })}
@@ -622,20 +647,38 @@ export default function CustomCoverBuilder({
             <div>
               <p className="font-semibold">{productName}</p>
 
-              <p className="mt-1 text-sm text-[var(--mn-text-secondary)]">
-                {size} ·{" "}
-                {orientation === "portrait" ? "Portrait" : "Landscape"} ·{" "}
-                {pageCount} pages ·{" "}
-                {PAPERS.find((item) => item.id === paper)?.title} ·{" "}
-                {bulkOrder ? Math.max(2, Number(bulkQuantity) || 2) : quantity}{" "}
-                {bulkOrder
-                  ? Math.max(2, Number(bulkQuantity) || 2) === 1
-                    ? "copy"
-                    : "copies"
-                  : quantity === 1
-                    ? "copy"
-                    : "copies"}
-              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-2.5 py-1.5 text-xs font-semibold">
+                  <SizeIcon value={size} size="sm" />
+                  {size}
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-2.5 py-1.5 text-xs font-semibold">
+                  <OrientationIcon value={orientation} size="sm" />
+                  {orientation === "portrait" ? "Portrait" : "Landscape"}
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-2.5 py-1.5 text-xs font-semibold">
+                  <PagesIcon pages={pageCount as 100 | 150 | 200} size="sm" />
+                  {pageCount} pages
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-control-bg)] px-2.5 py-1.5 text-xs font-semibold">
+                  <PaperIcon value={paper} size="sm" />
+                  {PAPERS.find((item) => item.id === paper)?.title} · 80 GSM
+                </span>
+
+                <span className="text-xs text-[var(--mn-text-muted)]">
+                  · {bulkOrder ? Math.max(2, Number(bulkQuantity) || 2) : quantity}{" "}
+                  {bulkOrder
+                    ? Math.max(2, Number(bulkQuantity) || 2) === 1
+                      ? "copy"
+                      : "copies"
+                    : quantity === 1
+                      ? "copy"
+                      : "copies"}
+                </span>
+              </div>
             </div>
 
             <button

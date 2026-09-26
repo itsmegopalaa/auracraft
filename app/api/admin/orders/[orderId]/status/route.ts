@@ -2,6 +2,7 @@ import { getServerEnv } from "@/app/config";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { requireAdminApi } from "@/app/lib/admin-auth";
+import { logAdminAction } from "@/app/lib/admin-audit";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
 import {
   isValidOrderStatus,
@@ -181,6 +182,27 @@ export async function PATCH(
         { status: 500 }
       );
     }
+
+    await logAdminAction({
+      adminUserId: adminAuth.user?.id ?? null,
+      source: "admin",
+      action: "order.status_changed",
+      entityType: "order",
+      entityId: existingOrder.order_id,
+      beforeData: {
+        order_status: existingOrder.order_status,
+        shipped_at: existingOrder.shipped_at,
+        delivered_at: existingOrder.delivered_at,
+      },
+      afterData: {
+        order_status: verifiedOrder.order_status,
+        shipped_at: verifiedOrder.shipped_at,
+        delivered_at: verifiedOrder.delivered_at,
+      },
+      metadata: {
+        transition: `${existingOrder.order_status}->${verifiedOrder.order_status}`,
+      },
+    });
 
     let emailSent = false;
 

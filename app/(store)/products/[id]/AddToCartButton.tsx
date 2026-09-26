@@ -1,5 +1,8 @@
 "use client";
 
+import ProductPhysicalOptions from "./ProductPhysicalOptions";
+
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
@@ -16,6 +19,9 @@ type Props = {
     name: string;
     price: number;
     image: string;
+    paper?: string | null;
+    size?: "A4" | "A5" | null;
+    orientation?: "portrait" | "landscape" | null;
   };
   pagePrices: PagePrice[];
 };
@@ -26,6 +32,27 @@ export default function AddToCartButton({
 }: Props) {
   const { addToCart } = useCart();
   const router = useRouter();
+
+  const [selectedSize, setSelectedSize] = useState<"A4" | "A5">(
+    product.size === "A5" ? "A5" : "A4",
+  );
+
+  const [selectedOrientation, setSelectedOrientation] =
+    useState<"portrait" | "landscape">(
+      product.orientation === "landscape"
+        ? "landscape"
+        : "portrait",
+    );
+
+  const [selectedPaper, setSelectedPaper] =
+    useState<"plain" | "ruled" | "dotGrid">(
+      product.paper === "ruled"
+        ? "ruled"
+        : product.paper === "dotGrid"
+          ? "dotGrid"
+          : "plain",
+    );
+
 
   const availablePages = pagePrices.filter(
     (item) =>
@@ -46,13 +73,25 @@ export default function AddToCartButton({
     availablePages.find((item) => item.pages === selectedPages) ??
     defaultPage;
 
-  const selectedPrice = selectedVariant?.price ?? product.price;
+  if (!selectedVariant) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        Pricing is temporarily unavailable for this notebook.
+      </div>
+    );
+  }
+
+  const selectedPrice = selectedVariant.price;
 
   const cartProduct = {
     ...product,
     id: String(product.id),
     price: selectedPrice,
-    pages: selectedVariant?.pages ?? selectedPages,
+    pages: selectedVariant.pages,
+    paper: selectedPaper,
+    paperGsm: 80,
+    size: selectedSize,
+    orientation: selectedOrientation,
   };
 
   const handleAddToCart = () => {
@@ -63,13 +102,11 @@ export default function AddToCartButton({
 
   const handleBuyNow = () => {
     localStorage.setItem(
-      "cart",
-      JSON.stringify([
-        {
-          ...cartProduct,
-          quantity: 1,
-        },
-      ]),
+      "minenote_buy_now",
+      JSON.stringify({
+        ...cartProduct,
+        quantity: 1,
+      }),
     );
 
     router.push("/checkout");
@@ -77,6 +114,16 @@ export default function AddToCartButton({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Physical configuration */}
+      <ProductPhysicalOptions
+        size={selectedSize}
+        setSize={setSelectedSize}
+        orientation={selectedOrientation}
+        setOrientation={setSelectedOrientation}
+        paper={selectedPaper}
+        setPaper={setSelectedPaper}
+      />
+
       {/* Page selector */}
       <div>
         <div className="mb-3 flex items-center justify-between">

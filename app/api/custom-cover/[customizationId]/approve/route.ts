@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { createServerSupabaseClient } from "@/app/lib/supabase";
 import { createSupabaseAdminClient } from "@/app/lib/supabase";
+import {
+  normalizePhysicalConfig,
+} from "@/app/lib/order-pricing-core";
 
 type RouteContext = {
   params: Promise<{
@@ -82,7 +85,30 @@ export async function POST(
       );
     }
 
-    const quantity = (physicalConfig as Record<string, unknown>).quantity;
+    const physicalConfigRecord =
+      physicalConfig as Record<string, unknown>;
+
+    let normalizedPhysicalConfig;
+
+    try {
+      normalizedPhysicalConfig = normalizePhysicalConfig({
+        pages: physicalConfigRecord.pages,
+        paper: physicalConfigRecord.paper,
+        paperGsm: physicalConfigRecord.paperGsm,
+        size: physicalConfigRecord.size,
+        orientation: physicalConfigRecord.orientation,
+      });
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "Custom cover notebook physical configuration is invalid.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const quantity = physicalConfigRecord.quantity;
 
     if (
       typeof quantity !== "number" ||
@@ -111,19 +137,7 @@ export async function POST(
       );
     }
 
-    const selectedPages =
-      (physicalConfig as Record<string, unknown>).pages;
-
-    if (
-      selectedPages !== 100 &&
-      selectedPages !== 150 &&
-      selectedPages !== 200
-    ) {
-      return NextResponse.json(
-        { error: "Notebook page selection is invalid." },
-        { status: 400 }
-      );
-    }
+    const selectedPages = normalizedPhysicalConfig.pages;
 
     const { data: pagePrice, error: pagePriceError } =
       await supabase
